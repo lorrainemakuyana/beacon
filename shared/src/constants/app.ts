@@ -7,18 +7,6 @@ export const APP_CONFIG = {
   websiteUrl: 'https://beacon.app',
 } as const;
 
-// Firebase collection names
-export const COLLECTIONS = {
-  USERS: 'users',
-  ORGANIZATIONS: 'organizations',
-  EVENTS: 'events',
-  SHIFTS: 'shifts',
-  ATTENDANCE: 'attendance',
-  INCIDENTS: 'incidents',
-  NOTIFICATIONS: 'notifications',
-  PAYMENTS: 'payments',
-} as const;
-
 // API endpoints and limits
 export const API_LIMITS = {
   MAX_EVENTS_PER_PAGE: 20,

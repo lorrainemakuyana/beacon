@@ -6,17 +6,22 @@
   "workspaces": [
     "mobile",
     "web",
-    "api",
     "shared"
   ],
   "scripts": {
     "dev:mobile": "npm run dev --workspace=mobile",
     "dev:web": "npm run dev --workspace=web",
-    "dev:api": "npm run dev --workspace=api",
     "build": "npm run build --workspaces",
+    "build:web": "npm run build --workspace=web",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
-    "clean": "npm run clean --workspaces"
+    "lint:fix": "npm run lint:fix --workspaces",
+    "clean": "npm run clean --workspaces",
+    "firebase:emulators": "cd firebase && firebase emulators:start",
+    "firebase:emulators:kill": "cd firebase && firebase emulators:exec --only firestore 'echo done'",
+    "firebase:deploy": "cd firebase && firebase deploy --only firestore,storage",
+    "health-check": "node health-check.js",
+    "setup": "./setup.sh"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

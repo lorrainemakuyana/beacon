@@ -1,1 +1,11 @@
 node_modules
+
+shared/.env
+mobile/.env
+web/.env
+
+shared/node_modules
+mobile/node_modules
+web/node_modules
+shared/src/firebase/.DS_Store
+shared/src/.DS_Store
