@@ -39,3 +39,15 @@ export interface FirebaseError {
   code: string;
   message: string;
 }
+
+// Firebase collection names
+export const COLLECTIONS = {
+  USERS: 'users',
+  ORGANIZATIONS: 'organizations',
+  EVENTS: 'events',
+  SHIFTS: 'shifts',
+  ATTENDANCE: 'attendance',
+  INCIDENTS: 'incidents',
+  NOTIFICATIONS: 'notifications',
+  PAYMENTS: 'payments',
+} as const;

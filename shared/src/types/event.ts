@@ -1,4 +1,4 @@
-import { Timestamp, GeoPoint } from 'firebase/firestore';
+import { Timestamp, GeoPoint, FieldValue } from 'firebase/firestore';
 
 export type EventStatus = 'draft' | 'published' | 'active' | 'completed' | 'cancelled';
 
@@ -32,8 +32,8 @@ export interface Event {
   collaborators: string[]; // User UIDs
   status: EventStatus;
   pricing: EventPricing;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface CreateEventData {

@@ -15,7 +15,8 @@ import {
   serverTimestamp,
   writeBatch,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  GeoPoint
 } from 'firebase/firestore';
 import { getFirebaseServices } from '../firebase/config';
 import { 
@@ -25,7 +26,7 @@ import {
   Incident, 
   Notification,
   COLLECTIONS 
-} from '../firebase/types';
+} from '../types';
 
 const { firestore, auth } = getFirebaseServices();
 
@@ -100,7 +101,7 @@ export const processCheckIn = async (
     checkIn: {
       timestamp: serverTimestamp(),
       method: 'manual',
-      ...(location && { location: { latitude: location.latitude, longitude: location.longitude } })
+      location: location ? new GeoPoint(location.latitude, location.longitude) : undefined,
     },
     status: 'checked-in',
   };
