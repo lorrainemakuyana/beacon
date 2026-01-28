@@ -1,0 +1,29 @@
+{
+  "name": "beacon-core-platform",
+  "version": "1.0.0",
+  "description": "Beacon volunteer operations platform - monorepo",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "web",
+    "api",
+    "shared"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run dev --workspace=mobile",
+    "dev:web": "npm run dev --workspace=web",
+    "dev:api": "npm run dev --workspace=api",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
