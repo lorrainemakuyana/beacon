@@ -8,7 +8,7 @@ export default function IndexScreen() {
     // TODO: Check if user is authenticated
     // For now, always redirect to welcome screen
     const timer = setTimeout(() => {
-      router.replace("/auth/welcome");
+      router.replace("/auth");
     }, 100);
 
     return () => clearTimeout(timer);

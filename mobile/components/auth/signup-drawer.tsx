@@ -1,17 +1,19 @@
-import { useState } from "react";
 import {
-  StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Text,
   TextInput,
+  StyleSheet,
   Alert,
+  TouchableOpacity,
 } from "react-native";
+import { useState } from "react";
 import { Link, router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import Button from "../button";
 
-export default function RegisterScreen() {
+export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,6 +21,7 @@ export default function RegisterScreen() {
     password: "",
     confirmPassword: "",
   });
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
@@ -62,13 +65,14 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 40 }}
+      style={styles.container}
+    >
       <ThemedView style={styles.header}>
-        <ThemedView style={styles.logoContainer}>
-          <IconSymbol size={60} name="heart.fill" color="#10B981" />
-        </ThemedView>
-        <ThemedText type="title">Join Beacon</ThemedText>
-        <ThemedText type="subtitle">Create your volunteer account</ThemedText>
+        <ThemedText type="subtitle">Create your account</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.form}>
@@ -97,7 +101,7 @@ export default function RegisterScreen() {
         </ThemedView>
 
         <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.label}>Email</ThemedText>
+          <ThemedText style={styles.label}>Email address</ThemedText>
           <TextInput
             style={styles.input}
             value={formData.email}
@@ -135,18 +139,13 @@ export default function RegisterScreen() {
           />
         </ThemedView>
 
-        <TouchableOpacity
-          style={[
-            styles.registerButton,
-            isLoading && styles.registerButtonDisabled,
-          ]}
+        <Button
+          text="Register"
+          variant="primary"
           onPress={handleRegister}
+          loading={isLoading}
           disabled={isLoading}
-        >
-          <ThemedText style={styles.registerButtonText}>
-            {isLoading ? "Creating Account..." : "Create Account"}
-          </ThemedText>
-        </TouchableOpacity>
+        />
 
         <ThemedView style={styles.divider}>
           <ThemedView style={styles.dividerLine} />
@@ -155,7 +154,7 @@ export default function RegisterScreen() {
         </ThemedView>
 
         <TouchableOpacity style={styles.socialButton}>
-          <IconSymbol size={20} name="globe" color="#4285F4" />
+          <IconSymbol size={20} name="globe" color="#059669" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Google
           </ThemedText>
@@ -170,11 +169,10 @@ export default function RegisterScreen() {
 
         <ThemedView style={styles.loginPrompt}>
           <ThemedText>Already have an account? </ThemedText>
-          <Link href="/auth/login" asChild>
-            <TouchableOpacity>
-              <ThemedText style={styles.loginLink}>Sign In</ThemedText>
-            </TouchableOpacity>
-          </Link>
+
+          <TouchableOpacity onPress={onLogin}>
+            <ThemedText style={styles.loginLink}>Sign In</ThemedText>
+          </TouchableOpacity>
         </ThemedView>
 
         <ThemedView style={styles.terms}>
@@ -195,10 +193,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
-    padding: 40,
-    paddingTop: 80,
     alignItems: "center",
     gap: 15,
+    marginBottom: 10,
   },
   logoContainer: {
     width: 100,
@@ -209,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   form: {
-    padding: 30,
+    paddingTop: 20,
     gap: 20,
   },
   nameRow: {
@@ -221,17 +218,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputGroup: {
-    gap: 8,
+    gap: 4,
   },
   label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#374151",
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#475569",
   },
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 16,
     fontSize: 16,
     backgroundColor: "#FFFFFF",
@@ -255,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
-    marginVertical: 10,
+    marginVertical: 5,
   },
   dividerLine: {
     flex: 1,

@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import AuthHeader from "@/components/auth-header";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -19,23 +20,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="auth/welcome" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="auth/login"
-          options={{
-            headerShown: true,
-            title: "Sign In",
-            headerBackTitle: "Back",
-          }}
-        />
-        <Stack.Screen
-          name="auth/register"
-          options={{
-            headerShown: true,
-            title: "Create Account",
-            headerBackTitle: "Back",
-          }}
-        />
+        <Stack.Screen name="auth/index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"

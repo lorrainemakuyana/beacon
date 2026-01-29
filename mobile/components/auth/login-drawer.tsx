@@ -10,8 +10,13 @@ import { Link, router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import Button from "../button";
 
-export default function LoginScreen() {
+export default function LoginDrawer({
+  onRegister,
+}: {
+  onRegister: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,20 +47,19 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 40 }}
+      style={styles.container}
+    >
       <ThemedView style={styles.header}>
-        <ThemedView style={styles.logoContainer}>
-          <IconSymbol size={60} name="heart.fill" color="#10B981" />
-        </ThemedView>
-        <ThemedText type="title">Welcome to Beacon</ThemedText>
-        <ThemedText type="subtitle">
-          Sign in to your volunteer account
-        </ThemedText>
+        <ThemedText type="subtitle">Sign in to your account</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.form}>
         <ThemedView style={styles.inputGroup}>
-          <ThemedText style={styles.label}>Email</ThemedText>
+          <ThemedText style={styles.label}>Email address</ThemedText>
           <TextInput
             style={styles.input}
             value={email}
@@ -79,21 +83,18 @@ export default function LoginScreen() {
           />
         </ThemedView>
 
-        <TouchableOpacity style={styles.forgotPassword}>
+        {/* <TouchableOpacity style={styles.forgotPassword}>
           <ThemedText style={styles.forgotPasswordText}>
             Forgot Password?
           </ThemedText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <TouchableOpacity
-          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+        <Button
+          text="Sign In"
+          variant="primary"
           onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.loginButtonText}>
-            {isLoading ? "Signing In..." : "Sign In"}
-          </ThemedText>
-        </TouchableOpacity>
+          loading={isLoading}
+        />
 
         <ThemedView style={styles.divider}>
           <ThemedView style={styles.dividerLine} />
@@ -102,7 +103,7 @@ export default function LoginScreen() {
         </ThemedView>
 
         <TouchableOpacity style={styles.socialButton}>
-          <IconSymbol size={20} name="globe" color="#4285F4" />
+          <IconSymbol size={20} name="globe" color="#059669" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Google
           </ThemedText>
@@ -117,11 +118,10 @@ export default function LoginScreen() {
 
         <ThemedView style={styles.signupPrompt}>
           <ThemedText>Don't have an account? </ThemedText>
-          <Link href="/auth/register" asChild>
-            <TouchableOpacity>
-              <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
-            </TouchableOpacity>
-          </Link>
+
+          <TouchableOpacity onPress={onRegister}>
+            <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
+          </TouchableOpacity>
         </ThemedView>
       </ThemedView>
     </ScrollView>
@@ -134,35 +134,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   header: {
-    padding: 40,
-    paddingTop: 80,
     alignItems: "center",
-    gap: 15,
-  },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F0FDF4",
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: 10,
   },
   form: {
-    padding: 30,
+    paddingTop: 20,
     gap: 20,
   },
   inputGroup: {
-    gap: 8,
+    gap: 4,
   },
   label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#374151",
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#475569",
   },
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 16,
     fontSize: 16,
     backgroundColor: "#FFFFFF",
@@ -194,7 +184,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
-    marginVertical: 10,
+    marginVertical: 5,
   },
   dividerLine: {
     flex: 1,
@@ -209,7 +199,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
     borderColor: "#D1D5DB",
     borderRadius: 12,

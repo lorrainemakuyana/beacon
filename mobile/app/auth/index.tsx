@@ -1,25 +1,28 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { Link } from "expo-router";
+import { StyleSheet, View, TouchableOpacity, Image } from "react-native";
+import { useState } from "react";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { BottomDrawer } from "@/components/auth/bottom-drawer";
+import LoginDrawer from "@/components/auth/login-drawer";
+import SignupDrawer from "@/components/auth/signup-drawer";
+import Logo from "@/assets/images/logo.png";
+import Button from "@/components/button";
 
 export default function WelcomeScreen() {
+  const [drawer, setDrawer] = useState<"login" | "signup" | null>(null);
+
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <ThemedView style={styles.content}>
         <ThemedView style={styles.header}>
           <ThemedView style={styles.logoContainer}>
-            <IconSymbol size={80} name="heart.fill" color="#10B981" />
+            <Image source={Logo} style={styles.logo} />
           </ThemedView>
           <ThemedText type="title" style={styles.title}>
-            Welcome to Beacon
-          </ThemedText>
-          <ThemedText type="subtitle" style={styles.subtitle}>
-            Your volunteer operations platform
+            Beacon
           </ThemedText>
         </ThemedView>
-
         <ThemedView style={styles.features}>
           <ThemedView style={styles.feature}>
             <IconSymbol size={40} name="calendar.badge.plus" color="#10B981" />
@@ -60,31 +63,36 @@ export default function WelcomeScreen() {
                 Stay Connected
               </ThemedText>
               <ThemedText style={styles.featureDescription}>
-                Get notifications about upcoming shifts and important updates
+                Get notifications about new events, upcoming shifts and
+                important updates
               </ThemedText>
             </ThemedView>
           </ThemedView>
         </ThemedView>
-
         <ThemedView style={styles.actions}>
-          <Link href="/auth/register" asChild>
-            <TouchableOpacity style={styles.primaryButton}>
-              <ThemedText style={styles.primaryButtonText}>
-                Get Started
-              </ThemedText>
-            </TouchableOpacity>
-          </Link>
-
-          <Link href="/auth/login" asChild>
-            <TouchableOpacity style={styles.secondaryButton}>
-              <ThemedText style={styles.secondaryButtonText}>
-                I Already Have an Account
-              </ThemedText>
-            </TouchableOpacity>
-          </Link>
+          <Button
+            asChild
+            onPress={() => setDrawer("signup")}
+            variant="primary"
+            text="Get Started"
+          />
+          <Button
+            onPress={() => setDrawer("login")}
+            variant="secondary"
+            text="I already have an account"
+          />
         </ThemedView>
+        <BottomDrawer visible={drawer !== null} onClose={() => setDrawer(null)}>
+          {drawer === "signup" && (
+            <SignupDrawer onLogin={() => setDrawer("login")} />
+          )}
+
+          {drawer === "login" && (
+            <LoginDrawer onRegister={() => setDrawer("signup")} />
+          )}
+        </BottomDrawer>
       </ThemedView>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -92,24 +100,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    display: "flex",
+    justifyContent: "center",
+    flexDirection: "column",
   },
   content: {
     flex: 1,
-    padding: 30,
-    paddingTop: 80,
+    justifyContent: "center",
+    paddingHorizontal: 30,
+    paddingVertical: 80,
     gap: 40,
   },
   header: {
     alignItems: "center",
-    gap: 20,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#F0FDF4",
+    width: 100,
+    height: 100,
     justifyContent: "center",
     alignItems: "center",
+  },
+  logo: {
+    width: "100%",
+    height: "100%",
   },
   title: {
     fontSize: 32,
@@ -122,7 +135,7 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   features: {
-    gap: 25,
+    gap: 20,
   },
   feature: {
     flexDirection: "row",
@@ -145,29 +158,5 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 15,
-    marginTop: 20,
-  },
-  primaryButton: {
-    backgroundColor: "#10B981",
-    padding: 18,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    padding: 18,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-  },
-  secondaryButtonText: {
-    color: "#374151",
-    fontSize: 16,
-    fontWeight: "500",
   },
 });
