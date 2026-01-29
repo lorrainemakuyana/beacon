@@ -9,3 +9,4 @@ mobile/node_modules
 web/node_modules
 shared/src/firebase/.DS_Store
 shared/src/.DS_Store
+.DS_Store
