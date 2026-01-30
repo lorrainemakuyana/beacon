@@ -4,16 +4,15 @@ exports.statusColors = exports.colors = void 0;
 exports.colors = {
     // Primary brand colors
     primary: {
-        50: '#eff6ff',
-        100: '#dbeafe',
-        200: '#bfdbfe',
-        300: '#93c5fd',
-        400: '#60a5fa',
-        500: '#3b82f6', // Main primary
-        600: '#2563eb',
-        700: '#1d4ed8',
-        800: '#1e40af',
-        900: '#1e3a8a',
+        100: "#ECFDF5",
+        200: "#D1FAE5",
+        300: "#A7F3D0",
+        400: "#34D399",
+        500: "#059669",
+        600: "#047857",
+        700: "#065F46",
+        800: "#064E3B",
+        900: "#022C22"
     },
     // Secondary colors
     secondary: {
@@ -42,16 +41,15 @@ exports.colors = {
         900: '#14532d',
     },
     warning: {
-        50: '#fffbeb',
-        100: '#fef3c7',
-        200: '#fde68a',
-        300: '#fcd34d',
-        400: '#fbbf24',
-        500: '#f59e0b', // Main warning
-        600: '#d97706',
-        700: '#b45309',
-        800: '#92400e',
-        900: '#78350f',
+        100: "#FFF8E1",
+        200: "#FFF3C4",
+        300: "#FFE8A1",
+        400: "#FFD266",
+        500: "#F3C200",
+        600: "#E17100",
+        700: "#BB4D00",
+        800: "#973C00",
+        900: "#7B3306"
     },
     error: {
         50: '#fef2f2',
@@ -81,6 +79,7 @@ exports.colors = {
     // Special colors
     white: '#ffffff',
     black: '#000000',
+    bgGray: '#F8FAFC',
     transparent: 'transparent',
 };
 // Status-specific color mappings

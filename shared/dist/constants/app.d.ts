@@ -5,16 +5,6 @@ export declare const APP_CONFIG: {
     readonly supportEmail: "support@beacon.app";
     readonly websiteUrl: "https://beacon.app";
 };
-export declare const COLLECTIONS: {
-    readonly USERS: "users";
-    readonly ORGANIZATIONS: "organizations";
-    readonly EVENTS: "events";
-    readonly SHIFTS: "shifts";
-    readonly ATTENDANCE: "attendance";
-    readonly INCIDENTS: "incidents";
-    readonly NOTIFICATIONS: "notifications";
-    readonly PAYMENTS: "payments";
-};
 export declare const API_LIMITS: {
     readonly MAX_EVENTS_PER_PAGE: 20;
     readonly MAX_VOLUNTEERS_PER_EVENT: 300;

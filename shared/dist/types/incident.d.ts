@@ -1,4 +1,4 @@
-import { Timestamp, GeoPoint } from 'firebase/firestore';
+import { Timestamp, GeoPoint, FieldValue } from 'firebase/firestore';
 export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentCategory = 'safety' | 'equipment' | 'volunteer' | 'other';
 export type IncidentStatus = 'open' | 'investigating' | 'resolved' | 'closed';
@@ -16,8 +16,8 @@ export interface Incident {
     status: IncidentStatus;
     assignedTo?: string;
     resolution?: string;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
+    createdAt: Timestamp | FieldValue;
+    updatedAt: Timestamp | FieldValue;
 }
 export interface CreateIncidentData {
     eventId: string;

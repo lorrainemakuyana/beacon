@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VALIDATION = exports.TIME_CONSTANTS = exports.NOTIFICATION_TYPES = exports.PERMISSIONS = exports.API_LIMITS = exports.COLLECTIONS = exports.APP_CONFIG = void 0;
+exports.VALIDATION = exports.TIME_CONSTANTS = exports.NOTIFICATION_TYPES = exports.PERMISSIONS = exports.API_LIMITS = exports.APP_CONFIG = void 0;
 // App configuration constants
 exports.APP_CONFIG = {
     name: 'Beacon',
@@ -8,17 +8,6 @@ exports.APP_CONFIG = {
     description: 'Volunteer operations platform',
     supportEmail: 'support@beacon.app',
     websiteUrl: 'https://beacon.app',
-};
-// Firebase collection names
-exports.COLLECTIONS = {
-    USERS: 'users',
-    ORGANIZATIONS: 'organizations',
-    EVENTS: 'events',
-    SHIFTS: 'shifts',
-    ATTENDANCE: 'attendance',
-    INCIDENTS: 'incidents',
-    NOTIFICATIONS: 'notifications',
-    PAYMENTS: 'payments',
 };
 // API endpoints and limits
 exports.API_LIMITS = {

@@ -1,13 +1,13 @@
-import { Timestamp, GeoPoint } from 'firebase/firestore';
+import { Timestamp, GeoPoint, FieldValue } from 'firebase/firestore';
 export type AttendanceStatus = 'checked-in' | 'checked-out' | 'no-show';
 export type CheckInMethod = 'manual' | 'qr' | 'geofence';
 export interface CheckInData {
-    timestamp: Timestamp;
+    timestamp: Timestamp | FieldValue;
     location?: GeoPoint;
     method: CheckInMethod;
 }
 export interface CheckOutData {
-    timestamp: Timestamp;
+    timestamp: Timestamp | FieldValue;
     location?: GeoPoint;
     method: CheckInMethod;
 }

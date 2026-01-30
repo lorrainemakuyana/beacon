@@ -1,15 +1,14 @@
 export declare const colors: {
     readonly primary: {
-        readonly 50: "#eff6ff";
-        readonly 100: "#dbeafe";
-        readonly 200: "#bfdbfe";
-        readonly 300: "#93c5fd";
-        readonly 400: "#60a5fa";
-        readonly 500: "#3b82f6";
-        readonly 600: "#2563eb";
-        readonly 700: "#1d4ed8";
-        readonly 800: "#1e40af";
-        readonly 900: "#1e3a8a";
+        readonly 100: "#ECFDF5";
+        readonly 200: "#D1FAE5";
+        readonly 300: "#A7F3D0";
+        readonly 400: "#34D399";
+        readonly 500: "#059669";
+        readonly 600: "#047857";
+        readonly 700: "#065F46";
+        readonly 800: "#064E3B";
+        readonly 900: "#022C22";
     };
     readonly secondary: {
         readonly 50: "#f8fafc";
@@ -36,16 +35,15 @@ export declare const colors: {
         readonly 900: "#14532d";
     };
     readonly warning: {
-        readonly 50: "#fffbeb";
-        readonly 100: "#fef3c7";
-        readonly 200: "#fde68a";
-        readonly 300: "#fcd34d";
-        readonly 400: "#fbbf24";
-        readonly 500: "#f59e0b";
-        readonly 600: "#d97706";
-        readonly 700: "#b45309";
-        readonly 800: "#92400e";
-        readonly 900: "#78350f";
+        readonly 100: "#FFF8E1";
+        readonly 200: "#FFF3C4";
+        readonly 300: "#FFE8A1";
+        readonly 400: "#FFD266";
+        readonly 500: "#F3C200";
+        readonly 600: "#E17100";
+        readonly 700: "#BB4D00";
+        readonly 800: "#973C00";
+        readonly 900: "#7B3306";
     };
     readonly error: {
         readonly 50: "#fef2f2";
@@ -73,20 +71,21 @@ export declare const colors: {
     };
     readonly white: "#ffffff";
     readonly black: "#000000";
+    readonly bgGray: "#F8FAFC";
     readonly transparent: "transparent";
 };
 export declare const statusColors: {
     readonly event: {
         readonly draft: "#6b7280";
-        readonly published: "#3b82f6";
+        readonly published: "#059669";
         readonly active: "#22c55e";
         readonly completed: "#4b5563";
         readonly cancelled: "#ef4444";
     };
     readonly shift: {
         readonly open: "#22c55e";
-        readonly full: "#f59e0b";
-        readonly active: "#3b82f6";
+        readonly full: "#F3C200";
+        readonly active: "#059669";
         readonly completed: "#4b5563";
     };
     readonly attendance: {
@@ -96,12 +95,12 @@ export declare const statusColors: {
     };
     readonly incident: {
         readonly low: "#6b7280";
-        readonly medium: "#f59e0b";
-        readonly high: "#d97706";
+        readonly medium: "#F3C200";
+        readonly high: "#E17100";
         readonly critical: "#ef4444";
     };
     readonly role: {
-        readonly volunteer: "#3b82f6";
+        readonly volunteer: "#059669";
         readonly coordinator: "#475569";
         readonly collaborator: "#64748b";
         readonly owner: "#334155";

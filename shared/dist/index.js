@@ -20,3 +20,9 @@ __exportStar(require("./types"), exports);
 __exportStar(require("./constants"), exports);
 // Export all utilities
 __exportStar(require("./utils"), exports);
+// Export Firebase configuration and services
+__exportStar(require("./firebase"), exports);
+// Export client-side services (replaces Cloud Functions for cost optimization)
+__exportStar(require("./services/client-functions"), exports);
+// Export authentication services
+__exportStar(require("./services/auth"), exports);
