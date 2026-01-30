@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   handle: {
-    width: 40,
+    width: 60,
     height: 4,
     borderRadius: 2,
     backgroundColor: "#ccc",
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   handleContainer: {
-    paddingVertical: 12,
+    paddingBottom: 12,
     alignItems: "center",
   },
 });

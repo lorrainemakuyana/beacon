@@ -1,0 +1,287 @@
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { User as FirebaseUser } from "firebase/auth";
+import {
+  loginWithEmail,
+  registerWithEmail,
+  loginWithGoogle,
+  logout,
+  resetPassword,
+  onAuthStateChange,
+  getUserProfile,
+  updateLastActive,
+  AuthState,
+  User,
+} from "@beacon/shared";
+import Logo from "@/assets/images/logo.png";
+import { Image, View } from "react-native";
+import { router } from "expo-router";
+
+interface AuthContextType extends AuthState {
+  // Auth actions
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+
+  // Utility functions
+  refreshUserProfile: () => Promise<void>;
+  clearError: () => void;
+  isAuthenticated: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        if (firebaseUser) {
+          // User is signed in
+          setUser(firebaseUser);
+
+          // Get user profile from Firestore
+          const profile = await getUserProfile(firebaseUser.uid);
+          setUserProfile(profile);
+
+          // Update last active timestamp
+          await updateLastActive(firebaseUser.uid);
+        } else {
+          // User is signed out
+          setUser(null);
+          setUserProfile(null);
+        }
+      } catch (err: any) {
+        console.error("Auth state change error:", err);
+        setError(err.message || "An authentication error occurred");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Login function
+  const login = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { user: firebaseUser, userProfile: profile } = await loginWithEmail(
+        email,
+        password,
+      );
+      setUser(firebaseUser);
+      setUserProfile(profile);
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { user: firebaseUser, userProfile: profile } =
+        await registerWithEmail(email, password, firstName, lastName);
+      setUser(firebaseUser);
+      setUserProfile(profile);
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google login function
+  const googleLogin = async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { user: firebaseUser, userProfile: profile } =
+        await loginWithGoogle();
+      setUser(firebaseUser);
+      setUserProfile(profile);
+    } catch (err: any) {
+      setError(err.message || "Google login failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout function
+  const signOut = async (): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      await logout();
+      setUser(null);
+      setUserProfile(null);
+    } catch (err: any) {
+      setError(err.message || "Logout failed");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset password function
+  const resetUserPassword = async (email: string): Promise<void> => {
+    setError(null);
+
+    try {
+      await resetPassword(email);
+    } catch (err: any) {
+      setError(err.message || "Password reset failed");
+      throw err;
+    }
+  };
+
+  // Refresh user profile
+  const refreshUserProfile = async (): Promise<void> => {
+    if (!user) return;
+
+    try {
+      const profile = await getUserProfile(user.uid);
+      setUserProfile(profile);
+    } catch (err: any) {
+      console.error("Failed to refresh user profile:", err);
+      setError(err.message || "Failed to refresh profile");
+    }
+  };
+
+  // Clear error
+  const clearError = () => setError(null);
+
+  const value: AuthContextType = {
+    // State
+    user,
+    userProfile,
+    loading,
+    error,
+    isAuthenticated: !!user,
+
+    // Actions
+    login,
+    register,
+    loginWithGoogle: googleLogin,
+    logout: signOut,
+    resetPassword: resetUserPassword,
+    refreshUserProfile,
+    clearError,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+// Custom hook to use auth context
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+
+  return context;
+};
+
+export const withAuth = <P extends object>(
+  Component: React.ComponentType<P>,
+): React.FC<P> => {
+  const WrappedComponent: React.FC<P> = (props: P) => {
+    const { isAuthenticated, loading } = useAuth();
+
+    if (loading) {
+      return (
+        <View>
+          <Image
+            source={Logo}
+            style={{ width: 200, height: 200 }}
+            resizeMode="contain"
+          />
+        </View>
+      );
+    }
+
+    if (!isAuthenticated) {
+      router.replace("/auth");
+      return null;
+    }
+
+    return <Component {...props} />;
+  };
+
+  WrappedComponent.displayName = `withAuth(${Component.displayName || Component.name || "Component"})`;
+
+  return WrappedComponent;
+};
+
+// Hook for auth guards
+export const useAuthGuard = () => {
+  const { isAuthenticated, loading, user, userProfile } = useAuth();
+
+  return {
+    isAuthenticated,
+    loading,
+    user,
+    userProfile,
+    canAccess: (requiredRole?: string) => {
+      if (!isAuthenticated || !userProfile) return false;
+      if (!requiredRole) return true;
+
+      // Role hierarchy: owner > coordinator > collaborator > volunteer
+      const roleHierarchy = {
+        volunteer: 0,
+        collaborator: 1,
+        coordinator: 2,
+        owner: 3,
+      };
+
+      const userRoleLevel =
+        roleHierarchy[userProfile.role as keyof typeof roleHierarchy] || 0;
+      const requiredRoleLevel =
+        roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
+
+      return userRoleLevel >= requiredRoleLevel;
+    },
+  };
+};

@@ -1,17 +1,18 @@
 import {
   ScrollView,
-  Text,
   TextInput,
   StyleSheet,
   Alert,
   TouchableOpacity,
 } from "react-native";
 import { useState } from "react";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
+import { useAuth } from "@/context/AuthContext";
+import { validateRegistrationData } from "@beacon/shared";
 
 export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
   const [formData, setFormData] = useState({
@@ -22,45 +23,44 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
     confirmPassword: "",
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { register, loginWithGoogle, loading } = useAuth();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRegister = async () => {
-    const { firstName, lastName, email, password, confirmPassword } = formData;
-
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields");
+    // Validate input
+    const validationError = validateRegistrationData(formData);
+    if (validationError) {
+      Alert.alert("Error", validationError);
       return;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters");
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      // TODO: Implement Firebase Auth registration
-      console.log("Registration attempt:", formData);
+      await register(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName,
+      );
 
-      // Simulate registration for now
-      setTimeout(() => {
-        setIsLoading(false);
-        Alert.alert("Success", "Account created successfully!", [
-          { text: "OK", onPress: () => router.replace("/(tabs)") },
-        ]);
-      }, 1000);
-    } catch (error) {
-      setIsLoading(false);
-      Alert.alert("Registration Failed", "Please try again");
+      Alert.alert(
+        "Success",
+        "Account created successfully! Please check your email to verify your account.",
+        [{ text: "OK", onPress: () => router.replace("/(tabs)") }],
+      );
+    } catch (error: any) {
+      Alert.alert("Registration Failed", error.message);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      await loginWithGoogle();
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      Alert.alert("Google Sign-Up Failed", error.message);
     }
   };
 
@@ -85,6 +85,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
               onChangeText={(value) => handleInputChange("firstName", value)}
               placeholder="First name"
               autoComplete="given-name"
+              editable={!loading}
             />
           </ThemedView>
 
@@ -96,6 +97,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
               onChangeText={(value) => handleInputChange("lastName", value)}
               placeholder="Last name"
               autoComplete="family-name"
+              editable={!loading}
             />
           </ThemedView>
         </ThemedView>
@@ -110,6 +112,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            editable={!loading}
           />
         </ThemedView>
 
@@ -122,6 +125,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
             placeholder="Create a password"
             secureTextEntry
             autoComplete="new-password"
+            editable={!loading}
           />
         </ThemedView>
 
@@ -136,6 +140,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
             placeholder="Confirm your password"
             secureTextEntry
             autoComplete="new-password"
+            editable={!loading}
           />
         </ThemedView>
 
@@ -143,8 +148,8 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
           text="Register"
           variant="primary"
           onPress={handleRegister}
-          loading={isLoading}
-          disabled={isLoading}
+          loading={loading}
+          disabled={loading}
         />
 
         <ThemedView style={styles.divider}>
@@ -153,14 +158,18 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
           <ThemedView style={styles.dividerLine} />
         </ThemedView>
 
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={handleGoogleSignup}
+          disabled={loading}
+        >
           <IconSymbol size={20} name="globe" color="#059669" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Google
           </ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton} disabled={loading}>
           <IconSymbol size={20} name="apple.logo" color="#000000" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Apple
@@ -170,7 +179,7 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
         <ThemedView style={styles.loginPrompt}>
           <ThemedText>Already have an account? </ThemedText>
 
-          <TouchableOpacity onPress={onLogin}>
+          <TouchableOpacity onPress={onLogin} disabled={loading}>
             <ThemedText style={styles.loginLink}>Sign In</ThemedText>
           </TouchableOpacity>
         </ThemedView>

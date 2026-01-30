@@ -6,11 +6,13 @@ import {
   TextInput,
   Alert,
 } from "react-native";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
+import { useAuth } from "@/context/AuthContext";
+import { validateLoginData } from "@beacon/shared";
 
 export default function LoginDrawer({
   onRegister,
@@ -19,31 +21,54 @@ export default function LoginDrawer({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, loginWithGoogle, resetPassword, loading, error } = useAuth();
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    // Validate input
+    const validationError = validateLoginData({ email, password });
+    if (validationError) {
+      Alert.alert("Error", validationError);
       return;
     }
 
-    setIsLoading(true);
     try {
-      // TODO: Implement Firebase Auth login
-      console.log("Login attempt:", { email, password });
-
-      // Simulate login for now
-      setTimeout(() => {
-        setIsLoading(false);
-        router.replace("/(tabs)");
-      }, 1000);
-    } catch (error) {
-      setIsLoading(false);
-      Alert.alert(
-        "Login Failed",
-        "Please check your credentials and try again",
-      );
+      await login(email, password);
+      // Navigation will be handled by auth state change
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      Alert.alert("Login Failed", error.message);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginWithGoogle();
+      router.replace("/(tabs)");
+    } catch (error: any) {
+      Alert.alert("Google Sign-In Failed", error.message);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    if (!email) {
+      Alert.alert("Email Required", "Please enter your email address first");
+      return;
+    }
+
+    Alert.alert("Reset Password", `Send password reset email to ${email}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Send",
+        onPress: async () => {
+          try {
+            await resetPassword(email);
+            Alert.alert("Success", "Password reset email sent!");
+          } catch (error: any) {
+            Alert.alert("Error", error.message);
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -68,6 +93,7 @@ export default function LoginDrawer({
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            editable={!loading}
           />
         </ThemedView>
 
@@ -80,20 +106,26 @@ export default function LoginDrawer({
             placeholder="Enter your password"
             secureTextEntry
             autoComplete="password"
+            editable={!loading}
           />
         </ThemedView>
 
-        {/* <TouchableOpacity style={styles.forgotPassword}>
+        <TouchableOpacity
+          style={styles.forgotPassword}
+          onPress={handleForgotPassword}
+          disabled={loading}
+        >
           <ThemedText style={styles.forgotPasswordText}>
             Forgot Password?
           </ThemedText>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
 
         <Button
           text="Sign In"
           variant="primary"
           onPress={handleLogin}
-          loading={isLoading}
+          loading={loading}
+          disabled={loading}
         />
 
         <ThemedView style={styles.divider}>
@@ -102,14 +134,18 @@ export default function LoginDrawer({
           <ThemedView style={styles.dividerLine} />
         </ThemedView>
 
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={handleGoogleLogin}
+          disabled={loading}
+        >
           <IconSymbol size={20} name="globe" color="#059669" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Google
           </ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.socialButton}>
+        <TouchableOpacity style={styles.socialButton} disabled={loading}>
           <IconSymbol size={20} name="apple.logo" color="#000000" />
           <ThemedText style={styles.socialButtonText}>
             Continue with Apple
@@ -117,9 +153,9 @@ export default function LoginDrawer({
         </TouchableOpacity>
 
         <ThemedView style={styles.signupPrompt}>
-          <ThemedText>Don't have an account? </ThemedText>
+          <ThemedText>Don&apos;t have an account? </ThemedText>
 
-          <TouchableOpacity onPress={onRegister}>
+          <TouchableOpacity onPress={onRegister} disabled={loading}>
             <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
           </TouchableOpacity>
         </ThemedView>

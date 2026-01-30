@@ -59,6 +59,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
   },
   primaryButtonText: {
     color: "#FFFFFF",
@@ -71,6 +75,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#D1D5DB",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
   },
   secondaryButtonText: {
     color: "#374151",
