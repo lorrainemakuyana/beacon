@@ -13,7 +13,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "firebase": "^10.0.0"
+    "firebase": "^12.8.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

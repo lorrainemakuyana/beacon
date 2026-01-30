@@ -12,3 +12,6 @@ export * from './firebase';
 
 // Export client-side services (replaces Cloud Functions for cost optimization)
 export * from './services/client-functions';
+
+// Export authentication services
+export * from './services/auth';
