@@ -85,36 +85,16 @@ install_dependencies() {
     print_success "Dependencies installed"
 }
 
-setup_environment() {
-    print_info "Setting up environment configuration..."
-    
-    if [ ! -f "shared/.env" ]; then
-        cp shared/.env.example shared/.env
-        print_success "Environment file created at shared/.env"
-        print_warning "Please edit shared/.env with your Firebase configuration"
-    else
-        print_info "Environment file already exists"
-    fi
-}
-
-build_shared() {
-    print_info "Building shared package..."
-    npm run build --workspace=shared
-    print_success "Shared package built"
-}
-
 firebase_setup() {
     print_info "Firebase setup instructions:"
     echo ""
     echo "1. Go to https://console.firebase.google.com"
-    echo "2. Create a new project: 'beacon-core-platform-dev'"
+    echo "2. Create a new project or use existing: 'beacon-3b6d6'"
     echo "3. Enable these services:"
     echo "   - Authentication (Email/Password)"
-    echo "   - Firestore Database (Start in test mode)"
-    echo "   - Storage (Start in test mode)"
-    echo "   - DO NOT enable Hosting (you'll host elsewhere)"
-    echo "4. Get your config from Project Settings → General → Your apps"
-    echo "5. Update shared/.env with your Firebase configuration"
+    echo "   - Firestore Database"
+    echo "   - Storage"
+    echo "4. Update mobile/firebase/config.ts with your Firebase configuration"
     echo ""
     
     read -p "Have you completed the Firebase setup? (y/N): " firebase_done
@@ -157,8 +137,6 @@ main() {
     check_prerequisites
     install_firebase_cli
     install_dependencies
-    setup_environment
-    build_shared
     firebase_setup
     show_next_steps
 }

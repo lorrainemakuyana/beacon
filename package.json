@@ -5,8 +5,7 @@
   "private": true,
   "workspaces": [
     "mobile",
-    "web",
-    "shared"
+    "web"
   ],
   "scripts": {
     "dev:mobile": "npm run dev --workspace=mobile",
@@ -20,7 +19,6 @@
     "firebase:emulators": "cd firebase && firebase emulators:start",
     "firebase:emulators:kill": "cd firebase && firebase emulators:exec --only firestore 'echo done'",
     "firebase:deploy": "cd firebase && firebase deploy --only firestore,storage",
-    "health-check": "node health-check.js",
     "setup": "./setup.sh"
   },
   "devDependencies": {
