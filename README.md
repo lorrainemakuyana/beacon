@@ -10,21 +10,18 @@ This is a monorepo containing the following packages:
 
 ```
 /
-├── shared/                 # Shared components and utilities
-│   ├── src/
-│   │   ├── types/         # TypeScript interfaces and data models
-│   │   ├── constants/     # Shared constants, colors, and design tokens
-│   │   ├── utils/         # Common utility functions
-│   │   ├── firebase/      # Firebase configuration and services
-│   │   └── services/      # Client-side business logic (replaces Cloud Functions)
-│   └── package.json
 ├── mobile/                # React Native mobile app
-│   ├── src/
+│   ├── app/              # Expo Router screens
+│   ├── components/       # React components
+│   ├── firebase/         # Firebase config and services
+│   │   ├── types/       # TypeScript interfaces
+│   │   ├── services/    # Auth and data services
+│   │   └── utils.ts     # Firebase utilities
 │   └── package.json
 ├── web/                   # Next.js web dashboard
 │   ├── src/
 │   └── package.json
-├── firebase/              # Firebase backend configuration (Auth, Firestore, Storage)
+├── firebase/              # Firebase backend configuration
 │   ├── firestore.rules
 │   ├── firestore.indexes.json
 │   ├── storage.rules
@@ -61,15 +58,9 @@ npm install
    - **Storage** → Start in test mode
    - **DO NOT enable Hosting** (you'll host the web app elsewhere)
 
-#### Configure Environment
+#### Configure Firebase
 
-```bash
-# Copy environment template
-cp shared/.env.example shared/.env
-
-# Edit shared/.env with your Firebase config
-# Get config from Firebase Console → Project Settings → General → Your apps
-```
+The mobile app uses Firebase configuration in `mobile/firebase/config.ts`. Update this file with your Firebase project credentials from the Firebase Console.
 
 ### 3. Start Development
 
@@ -113,8 +104,7 @@ npm run firebase:emulators
 # Build all packages
 npm run build
 
-# Build specific package
-npm run build --workspace=shared
+# Build web package
 npm run build --workspace=web
 ```
 
@@ -124,8 +114,8 @@ npm run build --workspace=web
 # Run all tests
 npm run test
 
-# Run tests for specific package
-npm run test --workspace=shared
+# Run tests for mobile
+npm run test --workspace=mobile
 ```
 
 ### Linting
@@ -277,21 +267,12 @@ This project is designed to stay within these limits:
 
 ### Key Design Decisions
 
+- **Self-contained platforms**: Mobile and web each have their own Firebase setup
 - **No Cloud Functions**: All business logic runs client-side to avoid costs
 - **No Firebase Hosting**: Host web app on your preferred platform
 - **Security Rules**: Firestore rules handle authorization
 - **Real-time Updates**: Firestore listeners for live data
 - **Offline Support**: Built-in Firestore offline capabilities
-
-## 📦 Shared Package
-
-The `@beacon/shared` package contains:
-
-- **Types**: TypeScript interfaces for all data models
-- **Constants**: App configuration, validation rules, limits
-- **Utils**: Date formatting, validation, array operations
-- **Firebase**: Configuration, services, and utilities
-- **Services**: Client-side business logic (replaces Cloud Functions)
 
 ## 🔒 Security
 
