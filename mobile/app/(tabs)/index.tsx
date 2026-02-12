@@ -2,13 +2,20 @@ import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { withAuth, useAuth } from "@/context/AuthContext";
 
-export default function HomeScreen() {
+function HomeScreen() {
+  const { userProfile } = useAuth();
+
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
         <ThemedText type="title">Welcome to Beacon</ThemedText>
-        <ThemedText type="subtitle">Your volunteer hub</ThemedText>
+        <ThemedText type="subtitle">
+          {userProfile?.displayName
+            ? `Hi, ${userProfile.displayName.split(" ")[0]}!`
+            : "Your volunteer hub"}
+        </ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.content}>

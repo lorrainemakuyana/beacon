@@ -1,17 +1,16 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 // Custom tab button for the Check-In tab
 const CheckInTabButton = ({ children, onPress }: any) => (
-  <View style={styles.checkInButtonContainer}>
+  <TouchableOpacity style={styles.checkInButtonContainer} onPress={onPress}>
     <View style={styles.checkInButton}>{children}</View>
-  </View>
+  </TouchableOpacity>
 );
 
 export default function TabLayout() {
@@ -20,7 +19,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#10B981", // Green color for active tabs
+        tabBarActiveTintColor: "#059669", // Green color for active tabs
         tabBarInactiveTintColor: "#6B7280", // Gray color for inactive tabs
         headerShown: false,
         tabBarButton: HapticTab,
@@ -46,7 +45,7 @@ export default function TabLayout() {
             <IconSymbol
               size={24}
               name="house.fill"
-              color={focused ? "#10B981" : color}
+              color={focused ? "#059669" : color}
             />
           ),
         }}
@@ -59,7 +58,7 @@ export default function TabLayout() {
             <IconSymbol
               size={24}
               name="calendar"
-              color={focused ? "#10B981" : color}
+              color={focused ? "#059669" : color}
             />
           ),
         }}
@@ -70,7 +69,7 @@ export default function TabLayout() {
           title: "Check-In",
           tabBarButton: (props) => (
             <CheckInTabButton {...props}>
-              <IconSymbol size={32} name="qrcode" color="#FFFFFF" />
+              <IconSymbol size={35} name="qrcode" color="#FFFFFF" />
             </CheckInTabButton>
           ),
           tabBarIcon: ({ color }) => (
@@ -86,7 +85,7 @@ export default function TabLayout() {
             <IconSymbol
               size={24}
               name="bell.fill"
-              color={focused ? "#10B981" : color}
+              color={focused ? "#059669" : color}
             />
           ),
         }}
@@ -99,7 +98,7 @@ export default function TabLayout() {
             <IconSymbol
               size={24}
               name="person.fill"
-              color={focused ? "#10B981" : color}
+              color={focused ? "#059669" : color}
             />
           ),
         }}
@@ -115,18 +114,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkInButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#10B981",
+    width: 65,
+    height: 65,
+    borderRadius: 40,
+    borderWidth: 5,
+    borderColor: "#FFFFFF",
+    backgroundColor: "#059669",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#059669",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 5,
     },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.7,
     shadowRadius: 4.65,
     elevation: 8,
   },

@@ -12,7 +12,7 @@ import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
 import { useAuth } from "@/context/AuthContext";
-import { validateRegistrationData } from "@beacon/shared";
+import { validateRegistrationData } from "@/firebase/services/auth";
 
 export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
   const [formData, setFormData] = useState({

@@ -12,7 +12,7 @@ import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
 import { useAuth } from "@/context/AuthContext";
-import { validateLoginData } from "@beacon/shared";
+import { validateLoginData } from "@/firebase/services/auth";
 
 export default function LoginDrawer({
   onRegister,
@@ -21,7 +21,7 @@ export default function LoginDrawer({
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, loginWithGoogle, resetPassword, loading, error } = useAuth();
+  const { login, loginWithGoogle, resetPassword, loading } = useAuth();
 
   const handleLogin = async () => {
     // Validate input

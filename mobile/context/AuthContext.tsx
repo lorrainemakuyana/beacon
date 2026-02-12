@@ -9,15 +9,14 @@ import { User as FirebaseUser } from "firebase/auth";
 import {
   loginWithEmail,
   registerWithEmail,
-  loginWithGoogle,
   logout,
   resetPassword,
-  onAuthStateChange,
+  onChangeAuth,
   getUserProfile,
   updateLastActive,
   AuthState,
-  User,
-} from "@beacon/shared";
+} from "@/firebase/services/auth";
+import { User } from "@/firebase/types";
 import Logo from "@/assets/images/logo.png";
 import { Image, View } from "react-native";
 import { router } from "expo-router";
@@ -55,21 +54,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+    const unsubscribe = onChangeAuth(async (firebaseUser) => {
       setLoading(true);
       setError(null);
+
+      console.log({ firebaseUser });
 
       try {
         if (firebaseUser) {
           // User is signed in
           setUser(firebaseUser);
 
+          console.log("User set");
+
           // Get user profile from Firestore
           const profile = await getUserProfile(firebaseUser.uid);
+
+          console.log({ profile });
           setUserProfile(profile);
 
           // Update last active timestamp
           await updateLastActive(firebaseUser.uid);
+
+          console.log("done");
         } else {
           // User is signed out
           setUser(null);
@@ -129,16 +136,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Google login function
+  // Google login function (placeholder - needs implementation)
   const googleLogin = async (): Promise<void> => {
     setLoading(true);
     setError(null);
 
     try {
-      const { user: firebaseUser, userProfile: profile } =
-        await loginWithGoogle();
-      setUser(firebaseUser);
-      setUserProfile(profile);
+      // TODO: Implement Google Sign-In for React Native
+      // This requires additional setup with @react-native-google-signin/google-signin
+      throw new Error("Google Sign-In not yet implemented");
     } catch (err: any) {
       setError(err.message || "Google login failed");
       throw err;
