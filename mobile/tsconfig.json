@@ -13,7 +13,4 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],
-  "paths": {
-    "firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
-  }
 }
