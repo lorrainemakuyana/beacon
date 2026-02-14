@@ -11,43 +11,40 @@ import {
   CollectionReference,
   QueryConstraint,
 } from 'firebase/firestore';
-import { getFirebaseServices } from './config';
+import { firestore } from './config';
 import { COLLECTIONS } from './types';
-
-// Lazy-load firestore to avoid initialization before Firebase modules are registered
-const getFirestore = () => getFirebaseServices().firestore;
 
 // Collection references
 export const getUsersCollection = () =>
-  collection(getFirestore(), COLLECTIONS.USERS);
+  collection(firestore, COLLECTIONS.USERS);
 export const getOrganizationsCollection = () =>
-  collection(getFirestore(), COLLECTIONS.ORGANIZATIONS);
+  collection(firestore, COLLECTIONS.ORGANIZATIONS);
 export const getEventsCollection = () =>
-  collection(getFirestore(), COLLECTIONS.EVENTS);
+  collection(firestore, COLLECTIONS.EVENTS);
 export const getAttendanceCollection = () =>
-  collection(getFirestore(), COLLECTIONS.ATTENDANCE);
+  collection(firestore, COLLECTIONS.ATTENDANCE);
 export const getIncidentsCollection = () =>
-  collection(getFirestore(), COLLECTIONS.INCIDENTS);
+  collection(firestore, COLLECTIONS.INCIDENTS);
 export const getNotificationsCollection = () =>
-  collection(getFirestore(), COLLECTIONS.NOTIFICATIONS);
+  collection(firestore, COLLECTIONS.NOTIFICATIONS);
 export const getPaymentsCollection = () =>
-  collection(getFirestore(), COLLECTIONS.PAYMENTS);
+  collection(firestore, COLLECTIONS.PAYMENTS);
 
 // Document references
 export const getUserDoc = (userId: string) =>
-  doc(getFirestore(), COLLECTIONS.USERS, userId);
+  doc(firestore, COLLECTIONS.USERS, userId);
 export const getOrganizationDoc = (orgId: string) =>
-  doc(getFirestore(), COLLECTIONS.ORGANIZATIONS, orgId);
+  doc(firestore, COLLECTIONS.ORGANIZATIONS, orgId);
 export const getEventDoc = (eventId: string) =>
-  doc(getFirestore(), COLLECTIONS.EVENTS, eventId);
+  doc(firestore, COLLECTIONS.EVENTS, eventId);
 export const getAttendanceDoc = (recordId: string) =>
-  doc(getFirestore(), COLLECTIONS.ATTENDANCE, recordId);
+  doc(firestore, COLLECTIONS.ATTENDANCE, recordId);
 export const getIncidentDoc = (incidentId: string) =>
-  doc(getFirestore(), COLLECTIONS.INCIDENTS, incidentId);
+  doc(firestore, COLLECTIONS.INCIDENTS, incidentId);
 export const getNotificationDoc = (notificationId: string) =>
-  doc(getFirestore(), COLLECTIONS.NOTIFICATIONS, notificationId);
+  doc(firestore, COLLECTIONS.NOTIFICATIONS, notificationId);
 export const getPaymentDoc = (paymentId: string) =>
-  doc(getFirestore(), COLLECTIONS.PAYMENTS, paymentId);
+  doc(firestore, COLLECTIONS.PAYMENTS, paymentId);
 
 // Utility functions
 const createTimestamp = (date?: Date) => {

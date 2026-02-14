@@ -23,10 +23,7 @@ import {
   Notification,
   COLLECTIONS,
 } from "../types";
-import { getFirebaseServices } from "../config";
-
-
-const { firestore, auth } = getFirebaseServices();
+import { auth, firestore  } from "../config";
 
 // User Management (replaces auth Cloud Functions)
 export const createUserDocument = async (user: Partial<User>) => {

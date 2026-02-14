@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { withAuth, useAuth } from "@/context/AuthContext";
 
-function HomeScreen() {
+export default function HomeScreen() {
   const { userProfile } = useAuth();
 
   return (

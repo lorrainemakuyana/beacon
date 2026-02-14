@@ -15,6 +15,7 @@ import {
   getUserProfile,
   updateLastActive,
   AuthState,
+  restoreLoginFromStorage,
 } from "@/firebase/services/auth";
 import { User } from "@/firebase/types";
 import Logo from "@/assets/images/logo.png";
@@ -54,43 +55,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state
   useEffect(() => {
-    const unsubscribe = onChangeAuth(async (firebaseUser) => {
+    let unsubscribe = () => {};
+
+    (async () => {
       setLoading(true);
       setError(null);
 
-      console.log({ firebaseUser });
-
       try {
-        if (firebaseUser) {
-          // User is signed in
-          setUser(firebaseUser);
+        const restored = await restoreLoginFromStorage();
 
-          console.log("User set");
-
-          // Get user profile from Firestore
-          const profile = await getUserProfile(firebaseUser.uid);
-
-          console.log({ profile });
-          setUserProfile(profile);
-
-          // Update last active timestamp
-          await updateLastActive(firebaseUser.uid);
-
-          console.log("done");
-        } else {
-          // User is signed out
-          setUser(null);
-          setUserProfile(null);
+        if (restored) {
+          setUser(restored.user);
+          setUserProfile(restored.userProfile);
+          setLoading(false);
+          // still attach listener to keep in sync
         }
       } catch (err: any) {
-        console.error("Auth state change error:", err);
-        setError(err.message || "An authentication error occurred");
-      } finally {
-        setLoading(false);
+        console.warn('restoreLoginFromStorage failed:', err);
       }
-    });
 
-    return unsubscribe;
+      // Attach auth state change listener
+      unsubscribe = onChangeAuth(async (firebaseUser) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+          if (firebaseUser) {
+            setUser(firebaseUser);
+            const profile = await getUserProfile(firebaseUser.uid);
+            setUserProfile(profile);
+            await updateLastActive(firebaseUser.uid);
+          } else {
+            setUser(null);
+            setUserProfile(null);
+          }
+        } catch (err: any) {
+          console.error('Auth state change error:', err);
+          setError(err.message || 'An authentication error occurred');
+        } finally {
+          setLoading(false);
+        }
+      });
+    })();
+
+    return () => unsubscribe();
   }, []);
 
   // Login function

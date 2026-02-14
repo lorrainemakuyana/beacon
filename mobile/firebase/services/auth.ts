@@ -14,7 +14,8 @@ import {
   User as FirebaseUser,
   UserCredential,
   AuthError,
-} from 'firebase/auth';
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   doc,
   setDoc,
@@ -22,16 +23,11 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
-} from 'firebase/firestore';
-import { getFirebaseServices } from '../config';
-import { User, COLLECTIONS } from '../types';
-import {
-  handleFirebaseError,
-  validateEmail,
-  sanitizeUserData,
-} from '../utils';
+} from "firebase/firestore";
+import { User, COLLECTIONS } from "../types";
+import { validateEmail, sanitizeUserData } from "../utils";
 
-const { auth, firestore } = getFirebaseServices();
+import { auth, firestore } from "../config";
 
 // Auth state management
 export interface AuthState {
@@ -48,11 +44,11 @@ export const loginWithEmail = async (
 ): Promise<{ user: FirebaseUser; userProfile: User }> => {
   try {
     if (!validateEmail(email)) {
-      throw new Error('Please enter a valid email address');
+      throw new Error("Please enter a valid email address");
     }
 
     if (!password || password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
+      throw new Error("Password must be at least 6 characters long");
     }
 
     // Sign in with Firebase Auth
@@ -66,7 +62,21 @@ export const loginWithEmail = async (
     const userProfile = await getUserProfile(userCredential.user.uid);
 
     if (!userProfile) {
-      throw new Error('User profile not found');
+      throw new Error("User profile not found");
+    }
+
+    // Persist credentials for auto-login fallback on React Native where
+    // firebase JS SDK persistence may not be available. WARNING: storing
+    // raw passwords in AsyncStorage is insecure. Prefer SecureStore/Keychain
+    // in production (expo-secure-store or react-native-keychain).
+    try {
+      await AsyncStorage.setItem(
+        "@beacon:auth_credentials_v1",
+        JSON.stringify({ email: email.toLowerCase().trim(), password }),
+      );
+    } catch (err) {
+      // non-fatal
+      console.warn("Failed to persist auth credentials:", err);
     }
 
     // Update last active timestamp
@@ -77,7 +87,7 @@ export const loginWithEmail = async (
       userProfile,
     };
   } catch (error: any) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
 };
@@ -88,19 +98,19 @@ export const registerWithEmail = async (
   password: string,
   firstName: string,
   lastName: string,
-  role: 'volunteer' | 'coordinator' | 'collaborator' | 'owner' = 'volunteer',
+  role: "volunteer" | "coordinator" | "collaborator" | "owner" = "volunteer",
 ): Promise<{ user: FirebaseUser; userProfile: User }> => {
   try {
     if (!validateEmail(email)) {
-      throw new Error('Please enter a valid email address');
+      throw new Error("Please enter a valid email address");
     }
 
     if (!password || password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
+      throw new Error("Password must be at least 6 characters long");
     }
 
     if (!firstName.trim() || !lastName.trim()) {
-      throw new Error('First name and last name are required');
+      throw new Error("First name and last name are required");
     }
 
     // Create user with Firebase Auth
@@ -124,8 +134,8 @@ export const registerWithEmail = async (
       displayName,
       role,
       profile: {
-        phone: '',
-        emergencyContact: '',
+        phone: "",
+        emergencyContact: "",
         skills: [],
         availability: [],
       },
@@ -146,7 +156,7 @@ export const registerWithEmail = async (
       userProfile,
     };
   } catch (error: any) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
 };
@@ -155,9 +165,42 @@ export const registerWithEmail = async (
 export const logout = async (): Promise<void> => {
   try {
     await signOut(auth);
+
+    await AsyncStorage.removeItem("@beacon:auth_credentials_v1");
   } catch (error: any) {
-    console.error('Logout error:', error);
-    throw new Error('Failed to sign out. Please try again.');
+    console.error("Logout error:", error);
+    throw new Error("Failed to sign out. Please try again.");
+  }
+};
+
+// Attempt to restore login from stored credentials. Returns the user/profile
+// pair on success or null on failure. Call this early (e.g., in AuthContext
+// initialization) to auto-sign-in the user.
+export const restoreLoginFromStorage = async (): Promise<{
+  user: FirebaseUser;
+  userProfile: User;
+} | null> => {
+  try {
+    const raw = await AsyncStorage.getItem("@beacon:auth_credentials_v1");
+    if (!raw) return null;
+    const { email, password } = JSON.parse(raw);
+    if (!email || !password) return null;
+
+    const userCredential: UserCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
+
+    const userProfile = await getUserProfile(userCredential.user.uid);
+    if (!userProfile) return null;
+
+    await updateLastActive(userCredential.user.uid);
+
+    return { user: userCredential.user, userProfile };
+  } catch (error: any) {
+    console.warn("Auto-restore login failed:", error);
+    return null;
   }
 };
 
@@ -165,12 +208,12 @@ export const logout = async (): Promise<void> => {
 export const resetPassword = async (email: string): Promise<void> => {
   try {
     if (!validateEmail(email)) {
-      throw new Error('Please enter a valid email address');
+      throw new Error("Please enter a valid email address");
     }
 
     await sendPasswordResetEmail(auth, email.toLowerCase().trim());
   } catch (error: any) {
-    console.error('Password reset error:', error);
+    console.error("Password reset error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
 };
@@ -186,7 +229,7 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 
     return null;
   } catch (error: any) {
-    console.error('Get user profile error:', error);
+    console.error("Get user profile error:", error);
     return null;
   }
 };
@@ -203,8 +246,8 @@ export const updateUserProfile = async (
       lastActive: serverTimestamp(),
     });
   } catch (error: any) {
-    console.error('Update user profile error:', error);
-    throw new Error('Failed to update profile. Please try again.');
+    console.error("Update user profile error:", error);
+    throw new Error("Failed to update profile. Please try again.");
   }
 };
 
@@ -216,7 +259,7 @@ export const updateLastActive = async (uid: string): Promise<void> => {
       lastActive: serverTimestamp(),
     });
   } catch (error: any) {
-    console.error('Update last active error:', error);
+    console.error("Update last active error:", error);
     // Don't throw error for this non-critical operation
   }
 };
@@ -227,9 +270,7 @@ export const getCurrentUser = (): FirebaseUser | null => {
 };
 
 // Auth state listener
-export const onChangeAuth = (
-  callback: (user: FirebaseUser | null) => void,
-) => {
+export const onChangeAuth = (callback: (user: FirebaseUser | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
@@ -238,16 +279,16 @@ export const resendEmailVerification = async (): Promise<void> => {
   try {
     const user = getCurrentUser();
     if (!user) {
-      throw new Error('No user is currently signed in');
+      throw new Error("No user is currently signed in");
     }
 
     if (user.emailVerified) {
-      throw new Error('Email is already verified');
+      throw new Error("Email is already verified");
     }
 
     await sendEmailVerification(user);
   } catch (error: any) {
-    console.error('Resend verification error:', error);
+    console.error("Resend verification error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
 };
@@ -257,7 +298,7 @@ export const deleteUserAccount = async (): Promise<void> => {
   try {
     const user = getCurrentUser();
     if (!user) {
-      throw new Error('No user is currently signed in');
+      throw new Error("No user is currently signed in");
     }
 
     // Delete user profile from Firestore
@@ -266,41 +307,41 @@ export const deleteUserAccount = async (): Promise<void> => {
     // Delete Firebase Auth account
     await user.delete();
   } catch (error: any) {
-    console.error('Delete account error:', error);
+    console.error("Delete account error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
 };
 
 // Helper function to convert Firebase Auth errors to user-friendly messages
 const getAuthErrorMessage = (error: AuthError | Error): string => {
-  if ('code' in error) {
+  if ("code" in error) {
     switch (error.code) {
-      case 'auth/user-not-found':
-        return 'No account found with this email address.';
-      case 'auth/wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'auth/email-already-in-use':
-        return 'An account with this email address already exists.';
-      case 'auth/weak-password':
-        return 'Password is too weak. Please choose a stronger password.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled. Please contact support.';
-      case 'auth/too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection and try again.';
-      case 'auth/requires-recent-login':
-        return 'This operation requires recent authentication. Please sign in again.';
+      case "auth/user-not-found":
+        return "No account found with this email address.";
+      case "auth/wrong-password":
+        return "Incorrect password. Please try again.";
+      case "auth/email-already-in-use":
+        return "An account with this email address already exists.";
+      case "auth/weak-password":
+        return "Password is too weak. Please choose a stronger password.";
+      case "auth/invalid-email":
+        return "Please enter a valid email address.";
+      case "auth/user-disabled":
+        return "This account has been disabled. Please contact support.";
+      case "auth/too-many-requests":
+        return "Too many failed attempts. Please try again later.";
+      case "auth/network-request-failed":
+        return "Network error. Please check your connection and try again.";
+      case "auth/requires-recent-login":
+        return "This operation requires recent authentication. Please sign in again.";
       default:
         return (
-          error.message || 'An authentication error occurred. Please try again.'
+          error.message || "An authentication error occurred. Please try again."
         );
     }
   }
 
-  return error.message || 'An unexpected error occurred. Please try again.';
+  return error.message || "An unexpected error occurred. Please try again.";
 };
 
 // Validation helpers
@@ -314,23 +355,23 @@ export const validateRegistrationData = (data: {
   const { email, password, confirmPassword, firstName, lastName } = data;
 
   if (!firstName.trim()) {
-    return 'First name is required';
+    return "First name is required";
   }
 
   if (!lastName.trim()) {
-    return 'Last name is required';
+    return "Last name is required";
   }
 
   if (!validateEmail(email)) {
-    return 'Please enter a valid email address';
+    return "Please enter a valid email address";
   }
 
   if (!password || password.length < 6) {
-    return 'Password must be at least 6 characters long';
+    return "Password must be at least 6 characters long";
   }
 
   if (password !== confirmPassword) {
-    return 'Passwords do not match';
+    return "Passwords do not match";
   }
 
   return null;
@@ -343,11 +384,11 @@ export const validateLoginData = (data: {
   const { email, password } = data;
 
   if (!validateEmail(email)) {
-    return 'Please enter a valid email address';
+    return "Please enter a valid email address";
   }
 
   if (!password) {
-    return 'Password is required';
+    return "Password is required";
   }
 
   return null;
