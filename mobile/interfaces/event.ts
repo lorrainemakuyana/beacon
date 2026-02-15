@@ -1,11 +1,11 @@
-import { Timestamp, GeoPoint, FieldValue } from 'firebase/firestore';
+import { Timestamp, FieldValue } from "firebase/firestore";
 
-export type EventStatus = 'draft' | 'published' | 'active' | 'completed' | 'cancelled';
-
-export interface EventLocation {
-  address: string;
-  coordinates: GeoPoint;
-}
+export type EventStatus =
+  | "draft"
+  | "published"
+  | "active"
+  | "completed"
+  | "cancelled";
 
 export interface EventDateRange {
   start: Timestamp;
@@ -14,10 +14,10 @@ export interface EventDateRange {
 
 export interface EventPricing {
   basePrice: number;
-  volunteerTiers: Array<{
+  volunteerTiers: {
     count: number;
     price: number;
-  }>;
+  }[];
 }
 
 export interface Event {
@@ -25,7 +25,7 @@ export interface Event {
   organizationId: string;
   title: string;
   description: string;
-  location: EventLocation;
+  location: string;
   dateRange: EventDateRange;
   shifts: string[]; // Shift IDs
   coordinators: string[]; // User UIDs
@@ -39,7 +39,7 @@ export interface Event {
 export interface CreateEventData {
   title: string;
   description: string;
-  location: EventLocation;
+  location: string;
   dateRange: EventDateRange;
   coordinators?: string[];
   collaborators?: string[];
@@ -49,7 +49,7 @@ export interface CreateEventData {
 export interface UpdateEventData {
   title?: string;
   description?: string;
-  location?: EventLocation;
+  location?: string;
   dateRange?: EventDateRange;
   coordinators?: string[];
   collaborators?: string[];

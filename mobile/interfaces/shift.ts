@@ -11,7 +11,7 @@ export interface ShiftRole {
   title: string;
   description: string;
   count: number;
-  assignedTo: string[]; // User UIDs
+  assignedTo?: string[]; // User UIDs
 }
 
 export interface Shift {
@@ -22,7 +22,7 @@ export interface Shift {
   timeSlot: ShiftTimeSlot;
   requiredVolunteers: number;
   assignedVolunteers: string[]; // User UIDs
-  roles: ShiftRole[];
+  role: ShiftRole;
   status: ShiftStatus;
 }
 
@@ -32,7 +32,7 @@ export interface CreateShiftData {
   description: string;
   timeSlot: ShiftTimeSlot;
   requiredVolunteers: number;
-  roles?: ShiftRole[];
+  role?: ShiftRole;
 }
 
 export interface UpdateShiftData {
@@ -41,6 +41,6 @@ export interface UpdateShiftData {
   timeSlot?: ShiftTimeSlot;
   requiredVolunteers?: number;
   assignedVolunteers?: string[];
-  roles?: ShiftRole[];
+  role?: ShiftRole;
   status?: ShiftStatus;
 }

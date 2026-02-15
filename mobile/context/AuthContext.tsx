@@ -17,7 +17,7 @@ import {
   AuthState,
   restoreLoginFromStorage,
 } from "@/firebase/services/auth";
-import { User } from "@/firebase/types";
+import { User } from "@/interfaces";
 import Logo from "@/assets/images/logo.png";
 import { Image, View } from "react-native";
 import { router } from "expo-router";
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // still attach listener to keep in sync
         }
       } catch (err: any) {
-        console.warn('restoreLoginFromStorage failed:', err);
+        console.warn("restoreLoginFromStorage failed:", err);
       }
 
       // Attach auth state change listener
@@ -90,8 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUserProfile(null);
           }
         } catch (err: any) {
-          console.error('Auth state change error:', err);
-          setError(err.message || 'An authentication error occurred');
+          console.error("Auth state change error:", err);
+          setError(err.message || "An authentication error occurred");
         } finally {
           setLoading(false);
         }

@@ -22,8 +22,8 @@ import {
   Incident,
   Notification,
   COLLECTIONS,
-} from "../types";
-import { auth, firestore  } from "../config";
+} from "../../interfaces";
+import { auth, firestore } from "../config";
 
 // User Management (replaces auth Cloud Functions)
 export const createUserDocument = async (user: Partial<User>) => {

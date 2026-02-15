@@ -24,7 +24,7 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { User, COLLECTIONS } from "../types";
+import { User, COLLECTIONS } from "../../interfaces";
 import { validateEmail, sanitizeUserData } from "../utils";
 
 import { auth, firestore } from "../config";

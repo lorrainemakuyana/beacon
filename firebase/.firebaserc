@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "default": "beacon-core-platform-dev",
-    "staging": "beacon-core-platform-staging",
-    "production": "beacon-core-platform-prod"
-  }
-}

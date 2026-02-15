@@ -10,9 +10,9 @@ import {
   DocumentReference,
   CollectionReference,
   QueryConstraint,
-} from 'firebase/firestore';
-import { firestore } from './config';
-import { COLLECTIONS } from './types';
+} from "firebase/firestore";
+import { firestore } from "./config";
+import { COLLECTIONS } from "../interfaces";
 
 // Collection references
 export const getUsersCollection = () =>
@@ -66,61 +66,61 @@ export const buildQuery = (
 // Common query patterns
 export const getEventsByOrganization = (organizationId: string) => {
   return buildQuery(getEventsCollection(), [
-    where('organizationId', '==', organizationId),
-    orderBy('dateRange.start', 'desc'),
+    where("organizationId", "==", organizationId),
+    orderBy("dateRange.start", "desc"),
   ]);
 };
 
 export const getUpcomingEvents = () => {
   return buildQuery(getEventsCollection(), [
-    where('status', '==', 'published'),
-    where('dateRange.start', '>', createTimestamp()),
-    orderBy('dateRange.start', 'asc'),
+    where("status", "==", "published"),
+    where("dateRange.start", ">", createTimestamp()),
+    orderBy("dateRange.start", "asc"),
   ]);
 };
 
 export const getUserAttendance = (userId: string) => {
   return buildQuery(getAttendanceCollection(), [
-    where('volunteerId', '==', userId),
-    orderBy('checkIn.timestamp', 'desc'),
+    where("volunteerId", "==", userId),
+    orderBy("checkIn.timestamp", "desc"),
   ]);
 };
 
 export const getEventIncidents = (eventId: string) => {
   return buildQuery(getIncidentsCollection(), [
-    where('eventId', '==', eventId),
-    orderBy('createdAt', 'desc'),
+    where("eventId", "==", eventId),
+    orderBy("createdAt", "desc"),
   ]);
 };
 
 export const getUserNotifications = (userId: string, limitCount = 50) => {
   return buildQuery(getNotificationsCollection(), [
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc"),
     limit(limitCount),
   ]);
 };
 
 // Error handling utilities
 export const handleFirebaseError = (error: any) => {
-  console.error('Firebase error:', error);
+  console.error("Firebase error:", error);
 
   // Map Firebase error codes to user-friendly messages
   const errorMessages: Record<string, string> = {
-    'permission-denied': 'You do not have permission to perform this action.',
-    'not-found': 'The requested resource was not found.',
-    'already-exists': 'This resource already exists.',
-    'failed-precondition': 'The operation failed due to a precondition.',
-    'aborted': 'The operation was aborted.',
-    'out-of-range': 'The operation was attempted past the valid range.',
-    'unimplemented': 'This operation is not implemented.',
-    'internal': 'An internal error occurred.',
-    'unavailable': 'The service is currently unavailable.',
-    'data-loss': 'Unrecoverable data loss or corruption.',
-    'unauthenticated': 'You must be authenticated to perform this action.',
+    "permission-denied": "You do not have permission to perform this action.",
+    "not-found": "The requested resource was not found.",
+    "already-exists": "This resource already exists.",
+    "failed-precondition": "The operation failed due to a precondition.",
+    aborted: "The operation was aborted.",
+    "out-of-range": "The operation was attempted past the valid range.",
+    unimplemented: "This operation is not implemented.",
+    internal: "An internal error occurred.",
+    unavailable: "The service is currently unavailable.",
+    "data-loss": "Unrecoverable data loss or corruption.",
+    unauthenticated: "You must be authenticated to perform this action.",
   };
 
-  return errorMessages[error.code] || 'An unexpected error occurred.';
+  return errorMessages[error.code] || "An unexpected error occurred.";
 };
 
 // Validation utilities
@@ -131,7 +131,7 @@ export const validateEmail = (email: string): boolean => {
 
 export const validatePhoneNumber = (phone: string): boolean => {
   const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
-  return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+  return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 10;
 };
 
 // Data transformation utilities
@@ -166,8 +166,8 @@ export const optimizeForFreeTier = {
   // Use efficient queries to minimize reads
   getRecentEvents: (limitN: number = 10) => {
     return buildQuery(getEventsCollection(), [
-      where('status', '==', 'published'),
-      orderBy('createdAt', 'desc'),
+      where("status", "==", "published"),
+      orderBy("createdAt", "desc"),
       limit(limitN),
     ]);
   },
