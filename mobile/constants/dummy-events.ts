@@ -1,0 +1,206 @@
+import { Event } from "@/interfaces";
+import { Timestamp } from "firebase/firestore";
+
+function toTimestamp(value: {
+  seconds: number;
+  nanoseconds: number;
+}): Timestamp {
+  return new Timestamp(value.seconds, value.nanoseconds);
+}
+
+function hydrateEvent(raw: any): Event {
+  return {
+    ...raw,
+    dateRange: {
+      start: toTimestamp(raw.dateRange.start),
+      end: toTimestamp(raw.dateRange.end),
+    },
+    createdAt: toTimestamp(raw.createdAt),
+    updatedAt: toTimestamp(raw.updatedAt),
+  };
+}
+
+const events: any[] = [
+  {
+    id: "evt_001",
+    organizationId: "org_greenearth",
+    title: "City Park Cleanup",
+    description: "Community effort to clean litter and restore the park.",
+    location: "Central City Park, North Gate",
+    dateRange: {
+      start: { seconds: 1760505600, nanoseconds: 0 },
+      end: { seconds: 1760592000, nanoseconds: 0 },
+    },
+    shifts: ["shf_001"],
+    coordinators: ["user_001"],
+    collaborators: ["user_002", "user_003"],
+    status: "published",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759000000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759100000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_002",
+    organizationId: "org_greenearth",
+    title: "Beach Plastic Sweep",
+    description: "Remove plastic waste from the shoreline.",
+    location: "Sunset Beach",
+    dateRange: {
+      start: { seconds: 1761200000, nanoseconds: 0 },
+      end: { seconds: 1761286400, nanoseconds: 0 },
+    },
+    shifts: ["shf_002"],
+    coordinators: ["user_004"],
+    collaborators: [],
+    status: "draft",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759200000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759205000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_003",
+    organizationId: "org_foodbank",
+    title: "Food Bank Sorting Day",
+    description: "Sort and package donated food items.",
+    location: "Metro Food Bank Warehouse",
+    dateRange: {
+      start: { seconds: 1759000000, nanoseconds: 0 },
+      end: { seconds: 1759086400, nanoseconds: 0 },
+    },
+    shifts: ["shf_003"],
+    coordinators: ["user_005"],
+    collaborators: ["user_006"],
+    status: "active",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1757000000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759050000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_004",
+    organizationId: "org_animalaid",
+    title: "Animal Shelter Support",
+    description: "Help feed and care for shelter animals.",
+    location: "Happy Paws Shelter",
+    dateRange: {
+      start: { seconds: 1756000000, nanoseconds: 0 },
+      end: { seconds: 1756086400, nanoseconds: 0 },
+    },
+    shifts: ["shf_004"],
+    coordinators: ["user_007"],
+    collaborators: [],
+    status: "completed",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1755000000, nanoseconds: 0 },
+    updatedAt: { seconds: 1756100000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_005",
+    organizationId: "org_citycare",
+    title: "Neighborhood Tree Planting",
+    description: "Plant new trees across the neighborhood.",
+    location: "Maple Street District",
+    dateRange: {
+      start: { seconds: 1762000000, nanoseconds: 0 },
+      end: { seconds: 1762086400, nanoseconds: 0 },
+    },
+    shifts: ["shf_005"],
+    coordinators: ["user_008"],
+    collaborators: ["user_009"],
+    status: "cancelled",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759300000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759400000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_006",
+    organizationId: "org_greenearth",
+    title: "River Restoration Day",
+    description: "Remove debris and restore riverbanks.",
+    location: "Bluewater River",
+    dateRange: {
+      start: { seconds: 1762600000, nanoseconds: 0 },
+      end: { seconds: 1762686400, nanoseconds: 0 },
+    },
+    shifts: ["shf_006"],
+    coordinators: ["user_010"],
+    collaborators: [],
+    status: "published",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759500000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759550000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_007",
+    organizationId: "org_eduhelp",
+    title: "After School Tutoring",
+    description: "Provide tutoring support for students.",
+    location: "Lincoln Community Center",
+    dateRange: {
+      start: { seconds: 1763000000, nanoseconds: 0 },
+      end: { seconds: 1763086400, nanoseconds: 0 },
+    },
+    shifts: ["shf_007"],
+    coordinators: ["user_011"],
+    collaborators: ["user_012"],
+    status: "active",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759600000, nanoseconds: 0 },
+    updatedAt: { seconds: 1760000000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_008",
+    organizationId: "org_healthfirst",
+    title: "Community Health Fair",
+    description: "Assist with booths and registration.",
+    location: "Downtown Civic Plaza",
+    dateRange: {
+      start: { seconds: 1763400000, nanoseconds: 0 },
+      end: { seconds: 1763486400, nanoseconds: 0 },
+    },
+    shifts: ["shf_008"],
+    coordinators: ["user_013"],
+    collaborators: [],
+    status: "published",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759700000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759750000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_009",
+    organizationId: "org_citycare",
+    title: "Winter Coat Drive",
+    description: "Collect and sort donated winter coats.",
+    location: "City Hall Lobby",
+    dateRange: {
+      start: { seconds: 1763800000, nanoseconds: 0 },
+      end: { seconds: 1763886400, nanoseconds: 0 },
+    },
+    shifts: ["shf_009"],
+    coordinators: ["user_014"],
+    collaborators: [],
+    status: "draft",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1759800000, nanoseconds: 0 },
+    updatedAt: { seconds: 1759850000, nanoseconds: 0 },
+  },
+  {
+    id: "evt_010",
+    organizationId: "org_greenearth",
+    title: "Urban Garden Build",
+    description: "Build raised beds for community garden.",
+    location: "Eastside Community Garden",
+    dateRange: {
+      start: { seconds: 1754000000, nanoseconds: 0 },
+      end: { seconds: 1754086400, nanoseconds: 0 },
+    },
+    shifts: ["shf_010"],
+    coordinators: ["user_015"],
+    collaborators: [],
+    status: "completed",
+    pricing: { basePrice: 0, volunteerTiers: [] },
+    createdAt: { seconds: 1753000000, nanoseconds: 0 },
+    updatedAt: { seconds: 1754100000, nanoseconds: 0 },
+  },
+];
+
+export const dummyEvents: Event[] = events.map(hydrateEvent);
