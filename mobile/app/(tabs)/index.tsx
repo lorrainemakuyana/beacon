@@ -12,41 +12,27 @@ import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
 import { calculateDayStreak, getGreeting } from "@/utils/date";
-import { dummyShifts } from "@/constants/dummy_shifts";
-import { dummyEvents } from "@/constants/dummy_events";
 import { ShiftCard } from "@/components/shift/shift-card";
+import { useUserShifts } from "@/hooks/useUserShifts";
 
 export default function HomeScreen() {
   const { user } = useAuth();
-
-  const sortedShifts = useMemo(() => {
-    return [...dummyShifts].sort(
-      (a, b) => a.timeSlot.start.toMillis() - b.timeSlot.start.toMillis(),
-    );
-  }, []);
+  const { shifts, eventsMap } = useUserShifts(user?.uid);
 
   const { upcomingShifts, pastShifts } = useMemo(() => {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const todayMs = startOfToday.getTime();
 
-    const upcoming: typeof sortedShifts = [];
-    const past: typeof sortedShifts = [];
-
-    for (const shift of sortedShifts) {
-      if (shift.timeSlot.start.toMillis() >= todayMs) {
-        upcoming.push(shift);
-      } else {
-        past.push(shift);
-      }
-    }
-
-    past.sort(
-      (a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis(),
+    const upcoming = shifts.filter(
+      (s) => s.timeSlot.start.toMillis() >= todayMs,
     );
+    const past = shifts
+      .filter((s) => s.timeSlot.start.toMillis() < todayMs)
+      .sort((a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis());
 
     return { upcomingShifts: upcoming, pastShifts: past };
-  }, [sortedShifts]);
+  }, [shifts]);
 
   const greeting = useMemo(() => getGreeting(new Date()), []);
 
@@ -98,7 +84,7 @@ export default function HomeScreen() {
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle">Upcoming Shifts</ThemedText>
         {upcomingShifts.map((shift) => {
-          const event = dummyEvents.find((e) => e.id === shift.eventId);
+          const event = eventsMap[shift.eventId];
           if (!event) return null;
           return (
             <ShiftCard
@@ -115,7 +101,7 @@ export default function HomeScreen() {
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Past Shifts</ThemedText>
           {pastShifts.map((shift) => {
-            const event = dummyEvents.find((e) => e.id === shift.eventId);
+            const event = eventsMap[shift.eventId];
             if (!event) return null;
             return (
               <ShiftCard

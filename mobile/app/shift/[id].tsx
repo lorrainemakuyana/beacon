@@ -10,14 +10,11 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMemo } from "react";
 import { Timestamp } from "firebase/firestore";
 
-import { dummyShifts } from "@/constants/dummy_shifts";
-import { dummyEvents } from "@/constants/dummy_events";
-import { dummyUsers } from "@/constants/dummy_users";
 import { Shift } from "@/interfaces";
 import { ThemedText } from "@/components/themed-text";
+import { useShiftDetail } from "@/hooks/useShiftDetail";
 
 const STATUS_CONFIG: Record<
   Shift["status"],
@@ -79,11 +76,7 @@ export default function ShiftDetailsScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const shift = useMemo(() => dummyShifts.find((s) => s.id === id), [id]);
-  const event = useMemo(
-    () => (shift ? dummyEvents.find((e) => e.id === shift.eventId) : null),
-    [shift],
-  );
+  const { shift, event, teamUsers } = useShiftDetail(id ?? "");
 
   if (!shift || !event) {
     return (
@@ -104,11 +97,14 @@ export default function ShiftDetailsScreen() {
   const tasks = shift.tasks ?? [];
   const isToday =
     shift.timeSlot.start.toDate().toDateString() === new Date().toDateString();
-  const teamMembers = shift.assignedVolunteers.map((uid) => {
-    const user = dummyUsers.find((u) => u.uid === uid);
-    const name = user?.displayName ?? uid;
+  const teamMembers = teamUsers.map((user) => {
     const palette = randomPalette();
-    return { uid, name, initial: name.charAt(0).toUpperCase(), ...palette };
+    return {
+      uid: user.uid,
+      name: user.displayName,
+      initial: user.displayName.charAt(0).toUpperCase(),
+      ...palette,
+    };
   });
   const teamCount = teamMembers.length;
 
