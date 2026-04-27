@@ -1,6 +1,6 @@
-import { StyleSheet, Image } from "react-native";
+import { StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSegments } from "expo-router";
+import { useSegments, router } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -8,7 +8,8 @@ import Logo from "@/assets/images/logo.png";
 
 const SUBTITLES: Record<string, string> = {
   index: "Your volunteer hub",
-  schedule: "Your upcoming shifts",
+  events: "Events",
+  schedule: "My schedule",
   "check-in": "Check in",
   alerts: "Updates",
   profile: "Your account",
@@ -18,7 +19,6 @@ export function AppHeader() {
   const insets = useSafeAreaInsets();
   const segments = useSegments();
 
-  // Last segment is the screen name, e.g. "index", "schedule", etc.
   const screen = segments[segments.length - 1] ?? "index";
   const subtitle = SUBTITLES[screen] ?? "Your volunteer hub";
 
@@ -26,12 +26,12 @@ export function AppHeader() {
     <ThemedView style={[styles.header, { paddingTop: insets.top + 5 }]}>
       <Image source={Logo} style={styles.logo} />
       <ThemedText type="subtitle">{subtitle}</ThemedText>
-      <FontAwesome
-        name="user-circle-o"
-        size={30}
+      <TouchableOpacity
         style={styles.profileIcon}
-        color="#10B981"
-      />
+        onPress={() => router.push("/(tabs)/profile")}
+      >
+        <FontAwesome name="user-circle-o" size={30} color="#10B981" />
+      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -72,4 +72,5 @@ const styles = StyleSheet.create({
   profileIcon: {
     marginLeft: "auto",
   },
+
 });

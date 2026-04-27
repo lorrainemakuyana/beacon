@@ -13,7 +13,7 @@ import { router } from "expo-router";
 import { Shift, Event } from "@/interfaces";
 
 type Props = {
-  shift: Shift;
+  shift?: Shift;
   event: Event;
   userId?: string;
   isPast?: boolean;
@@ -31,33 +31,37 @@ const STATUS_CONFIG: Record<
   attended: { label: "Attended", bg: "#F0FDF4", text: "#166534" },
 };
 
-function formatTimeRange(start: Timestamp, end: Timestamp) {
-  const s = start.toDate();
-  const e = end.toDate();
+const EVENT_STATUS_MAP: Record<string, Shift["status"]> = {
+  draft: "closed",
+  published: "open",
+  active: "active",
+  completed: "completed",
+  cancelled: "closed",
+};
 
-  const opts: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-  };
+const TIME_OPTS: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
 
-  return `${s.toLocaleTimeString([], opts)} - ${e.toLocaleTimeString(
-    [],
-    opts,
-  )}`;
+function formatTimestampRange(start: Timestamp, end: Timestamp) {
+  return `${start.toDate().toLocaleTimeString([], TIME_OPTS)} - ${end.toDate().toLocaleTimeString([], TIME_OPTS)}`;
 }
 
-function getRelativeDateLabel(date: Date) {
+function formatStringTimeRange(startTime: string, endTime: string) {
+  const fmt = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d.toLocaleTimeString([], TIME_OPTS);
+  };
+  return `${fmt(startTime)} - ${fmt(endTime)}`;
+}
+
+function relativeDateLabel(date: Date) {
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
-
   if (date.toDateString() === today.toDateString()) return "Today";
   if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export const ShiftCard = memo(function ShiftCard({
@@ -67,35 +71,45 @@ export const ShiftCard = memo(function ShiftCard({
   isPast,
 }: Props) {
   const effectiveStatus = useMemo((): Shift["status"] => {
+    if (!shift) return EVENT_STATUS_MAP[event.status] ?? "open";
     if (!isPast) return shift.status;
-    // Past shift: show attended if user was assigned, otherwise closed
     if (userId && shift.assignedVolunteers?.includes(userId)) return "attended";
     return "closed";
-  }, [isPast, shift.status, shift.assignedVolunteers, userId]);
+  }, [shift, event.status, isPast, userId]);
 
   const statusCfg = STATUS_CONFIG[effectiveStatus];
 
   const timeRange = useMemo(
-    () => formatTimeRange(shift.timeSlot.start, shift.timeSlot.end),
-    [shift.timeSlot],
+    () =>
+      shift
+        ? formatTimestampRange(shift.timeSlot.start, shift.timeSlot.end)
+        : formatStringTimeRange(event.startTime, event.endTime),
+    [shift, event.startTime, event.endTime],
   );
 
   const computedDateLabel = useMemo(() => {
-    return getRelativeDateLabel(shift.timeSlot.start.toDate());
-  }, [shift.timeSlot.start]);
+    const date = shift
+      ? shift.timeSlot.start.toDate()
+      : new Date(event.date + "T00:00:00");
+    return relativeDateLabel(date);
+  }, [shift, event.date]);
 
   const isToday = useMemo(() => {
-    const shiftDate = shift.timeSlot.start.toDate();
-    const today = new Date();
-    return shiftDate.toDateString() === today.toDateString();
-  }, [shift.timeSlot.start]);
+    const date = shift
+      ? shift.timeSlot.start.toDate()
+      : new Date(event.date + "T00:00:00");
+    return date.toDateString() === new Date().toDateString();
+  }, [shift, event.date]);
 
-  const roleText = shift.role?.title || "Volunteer";
+  const title = shift?.title ?? event.title;
+  const roleText = shift?.role?.title ?? null;
 
   return (
     <Pressable
       style={styles.card}
-      onPress={() => router.push(`/shift/${shift.id}`)}
+      onPress={() =>
+        shift ? router.push(`/shift/${shift.id}`) : router.push(`/event/${event.id}`)
+      }
     >
       {/* Top row */}
       <View style={styles.headerRow}>
@@ -114,7 +128,7 @@ export const ShiftCard = memo(function ShiftCard({
       </View>
 
       {/* Title */}
-      <Text style={styles.title}>{shift.title}</Text>
+      <Text style={styles.title}>{title}</Text>
 
       {/* Time */}
       <View style={styles.row}>
@@ -129,12 +143,14 @@ export const ShiftCard = memo(function ShiftCard({
       </View>
 
       {/* Role */}
-      <View style={styles.row}>
-        <Ionicons name="person-outline" size={18} color="#64748B" />
-        <Text style={styles.secondaryText}>
-          Role: <Text style={styles.roleStrong}>{roleText}</Text>
-        </Text>
-      </View>
+      {roleText && (
+        <View style={styles.row}>
+          <Ionicons name="person-outline" size={18} color="#64748B" />
+          <Text style={styles.secondaryText}>
+            Role: <Text style={styles.roleStrong}>{roleText}</Text>
+          </Text>
+        </View>
+      )}
 
       {/* Check-In button only for today's shifts */}
       {isToday && (
