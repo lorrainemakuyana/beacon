@@ -12,7 +12,6 @@ import {
   logout,
   resetPassword,
   onChangeAuth,
-  getUser,
   AuthState,
   restoreLoginFromStorage,
 } from "@/firebase/services/auth";
@@ -20,6 +19,7 @@ import { User } from "@/interfaces";
 import Logo from "@/assets/images/logo.png";
 import { Image, View } from "react-native";
 import { router } from "expo-router";
+import { getUser } from "@/firebase/services/users";
 
 interface AuthContextType {
   user: User | null;
