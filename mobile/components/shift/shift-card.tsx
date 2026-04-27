@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { Timestamp } from "firebase/firestore";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 import { Shift, Event } from "@/interfaces";
 
@@ -92,7 +93,10 @@ export const ShiftCard = memo(function ShiftCard({
   const roleText = shift.role?.title || "Volunteer";
 
   return (
-    <Pressable style={styles.card} onPress={() => {}}>
+    <Pressable
+      style={styles.card}
+      onPress={() => router.push(`/shift/${shift.id}`)}
+    >
       {/* Top row */}
       <View style={styles.headerRow}>
         <View style={[styles.badge, { backgroundColor: statusCfg.bg }]}>

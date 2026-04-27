@@ -35,6 +35,8 @@ export interface Shift {
   requiredVolunteers: number;
   assignedVolunteers: string[]; // User UIDs
   status: ShiftStatus;
+  role?: { title: string };
+  tasks?: string[];
 }
 
 export type EventStatus =
@@ -44,18 +46,27 @@ export type EventStatus =
   | "completed"
   | "cancelled";
 
+export interface EventOrganizer {
+  name: string;
+  title: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface Event {
   id: string;
   organizationId: string;
   title: string;
   description: string;
   location: string;
+  address?: string;
   date: string;
-  startTime: string; 
+  startTime: string;
   endTime: string;
   shifts: string[]; // Shift IDs
   coordinators: string[]; // User UIDs
   collaborators: string[]; // User UIDs
+  organizer?: EventOrganizer;
   status: EventStatus;
   createdAt: number;
   updatedAt: number;
@@ -113,12 +124,12 @@ export interface Notification {
 
 // Firebase collection names
 export const COLLECTIONS = {
-  USERS: 'users',
-  ORGANIZATIONS: 'organizations',
-  EVENTS: 'events',
-  SHIFTS: 'shifts',
-  ATTENDANCE: 'attendance',
-  INCIDENTS: 'incidents',
-  NOTIFICATIONS: 'notifications',
-  PAYMENTS: 'payments',
+  USERS: "users",
+  ORGANIZATIONS: "organizations",
+  EVENTS: "events",
+  SHIFTS: "shifts",
+  ATTENDANCE: "attendance",
+  INCIDENTS: "incidents",
+  NOTIFICATIONS: "notifications",
+  PAYMENTS: "payments",
 } as const;
