@@ -12,8 +12,7 @@ import {
   logout,
   resetPassword,
   onChangeAuth,
-  getUserProfile,
-  updateLastActive,
+  getUser,
   AuthState,
   restoreLoginFromStorage,
 } from "@/firebase/services/auth";
@@ -22,7 +21,8 @@ import Logo from "@/assets/images/logo.png";
 import { Image, View } from "react-native";
 import { router } from "expo-router";
 
-interface AuthContextType extends AuthState {
+interface AuthContextType {
+  user: User | null;
   // Auth actions
   login: (email: string, password: string) => Promise<void>;
   register: (
@@ -39,6 +39,10 @@ interface AuthContextType extends AuthState {
   refreshUserProfile: () => Promise<void>;
   clearError: () => void;
   isAuthenticated: boolean;
+
+  // State
+  loading: boolean;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,8 +52,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,11 +65,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setError(null);
 
       try {
-        const restored = await restoreLoginFromStorage();
+        const restoredUser = await restoreLoginFromStorage();
 
-        if (restored) {
-          setUser(restored.user);
-          setUserProfile(restored.userProfile);
+        if (restoredUser) {
+          setUser(restoredUser);
           setLoading(false);
           // still attach listener to keep in sync
         }
@@ -81,13 +83,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         try {
           if (firebaseUser) {
-            setUser(firebaseUser);
-            const profile = await getUserProfile(firebaseUser.uid);
-            setUserProfile(profile);
-            await updateLastActive(firebaseUser.uid);
+            const user = await getUser(firebaseUser.uid); 
+            setUser(user);
           } else {
             setUser(null);
-            setUserProfile(null);
           }
         } catch (err: any) {
           console.error("Auth state change error:", err);
@@ -107,12 +106,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
 
     try {
-      const { user: firebaseUser, userProfile: profile } = await loginWithEmail(
+      const user = await loginWithEmail(
         email,
         password,
       );
-      setUser(firebaseUser);
-      setUserProfile(profile);
+      setUser(user);
     } catch (err: any) {
       setError(err.message || "Login failed");
       throw err;
@@ -132,10 +130,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
 
     try {
-      const { user: firebaseUser, userProfile: profile } =
-        await registerWithEmail(email, password, firstName, lastName);
-      setUser(firebaseUser);
-      setUserProfile(profile);
+      const user = await registerWithEmail(email, password, firstName, lastName);
+      setUser(user);
     } catch (err: any) {
       setError(err.message || "Registration failed");
       throw err;
@@ -169,7 +165,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await logout();
       setUser(null);
-      setUserProfile(null);
     } catch (err: any) {
       setError(err.message || "Logout failed");
       throw err;
@@ -195,8 +190,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return;
 
     try {
-      const profile = await getUserProfile(user.uid);
-      setUserProfile(profile);
+      const _user = await getUser(user.uid);
+      setUser(_user);
     } catch (err: any) {
       console.error("Failed to refresh user profile:", err);
       setError(err.message || "Failed to refresh profile");
@@ -209,7 +204,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     // State
     user,
-    userProfile,
     loading,
     error,
     isAuthenticated: !!user,
@@ -271,15 +265,14 @@ export const withAuth = <P extends object>(
 
 // Hook for auth guards
 export const useAuthGuard = () => {
-  const { isAuthenticated, loading, user, userProfile } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   return {
     isAuthenticated,
     loading,
     user,
-    userProfile,
     canAccess: (requiredRole?: string) => {
-      if (!isAuthenticated || !userProfile) return false;
+      if (!isAuthenticated || !user) return false;
       if (!requiredRole) return true;
 
       // Role hierarchy: owner > coordinator > collaborator > volunteer
@@ -291,7 +284,7 @@ export const useAuthGuard = () => {
       };
 
       const userRoleLevel =
-        roleHierarchy[userProfile.role as keyof typeof roleHierarchy] || 0;
+        roleHierarchy[user.role as keyof typeof roleHierarchy] || 0;
       const requiredRoleLevel =
         roleHierarchy[requiredRole as keyof typeof roleHierarchy] || 0;
 
