@@ -9,47 +9,60 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/context/AuthContext";
-import { Image } from "react-native";
-import Logo from "@/assets/images/logo.png";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
 import { calculateDayStreak, getGreeting } from "@/utils/date";
+import { dummyShifts } from "@/constants/dummy_shifts";
+import { dummyEvents } from "@/constants/dummy_events";
+import { ShiftCard } from "@/components/shift/shift-card";
 
 export default function HomeScreen() {
-  const { userProfile } = useAuth();
+  const { user } = useAuth();
+
+  const sortedShifts = useMemo(() => {
+    return [...dummyShifts].sort(
+      (a, b) => a.timeSlot.start.toMillis() - b.timeSlot.start.toMillis(),
+    );
+  }, []);
+
+  const { upcomingShifts, pastShifts } = useMemo(() => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayMs = startOfToday.getTime();
+
+    const upcoming: typeof sortedShifts = [];
+    const past: typeof sortedShifts = [];
+
+    for (const shift of sortedShifts) {
+      if (shift.timeSlot.start.toMillis() >= todayMs) {
+        upcoming.push(shift);
+      } else {
+        past.push(shift);
+      }
+    }
+
+    past.sort(
+      (a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis(),
+    );
+
+    return { upcomingShifts: upcoming, pastShifts: past };
+  }, [sortedShifts]);
 
   const greeting = useMemo(() => getGreeting(new Date()), []);
 
   return (
     <ScrollView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <Image source={Logo} style={styles.logo} />
-        <ThemedText type="subtitle">Your volunteer hub</ThemedText>
-        {/* profile icon aligned to the right */}
-        <FontAwesome
-          name="user-circle-o"
-          size={30}
-          style={{
-            marginLeft: "auto",
-          }}
-          color="#10B981"
-        />
-      </ThemedView>
-
       {/* Greeting and streak */}
       <ThemedView style={styles.streakContainer}>
-        {/* Left side */}
         <View style={styles.textBlock}>
           <Text style={styles.greeting}>{greeting},</Text>
-          <Text style={styles.name}>{userProfile?.displayName}!</Text>
+          <Text style={styles.name}>{user?.displayName}!</Text>
         </View>
 
-        {/* Right streak pill */}
         <View style={styles.streakPill}>
           <Ionicons name="flame" size={18} color="#EA580C" />
           <Text style={styles.streakText}>
-            {calculateDayStreak(userProfile?.lastActive)} Day Streak
+            {calculateDayStreak(user?.lastActive || 0)} Day Streak
           </Text>
         </View>
       </ThemedView>
@@ -84,21 +97,38 @@ export default function HomeScreen() {
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle">Upcoming Shifts</ThemedText>
-        <ThemedView style={styles.shiftCard}>
-          <ThemedView style={styles.shiftHeader}>
-            <ThemedText style={styles.shiftTitle}>
-              Community Food Bank
-            </ThemedText>
-            <ThemedText style={styles.shiftTime}>Tomorrow, 9:00 AM</ThemedText>
-          </ThemedView>
-          <ThemedText style={styles.shiftLocation}>
-            📍 Downtown Community Center
-          </ThemedText>
-          <TouchableOpacity style={styles.shiftButton}>
-            <ThemedText style={styles.shiftButtonText}>View Details</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
+        {upcomingShifts.map((shift) => {
+          const event = dummyEvents.find((e) => e.id === shift.eventId);
+          if (!event) return null;
+          return (
+            <ShiftCard
+              event={event}
+              shift={shift}
+              key={shift.id}
+              userId={user?.uid}
+            />
+          );
+        })}
       </ThemedView>
+
+      {pastShifts.length > 0 && (
+        <ThemedView style={styles.section}>
+          <ThemedText type="subtitle">Past Shifts</ThemedText>
+          {pastShifts.map((shift) => {
+            const event = dummyEvents.find((e) => e.id === shift.eventId);
+            if (!event) return null;
+            return (
+              <ShiftCard
+                event={event}
+                shift={shift}
+                key={shift.id}
+                userId={user?.uid}
+                isPast
+              />
+            );
+          })}
+        </ThemedView>
+      )}
 
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle">Recent Activity</ThemedText>
@@ -135,30 +165,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9FAFB",
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-    borderBottomColor: "#E5E7EB",
-    borderBottomWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
   },
   streakContainer: {
     flexDirection: "row",
@@ -217,10 +223,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
@@ -231,48 +234,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   section: {
-    gap: 15,
-  },
-  shiftCard: {
+    gap: 20,
     padding: 20,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    gap: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  shiftHeader: {
-    gap: 5,
-  },
-  shiftTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  shiftTime: {
-    fontSize: 14,
-    color: "#10B981",
-    fontWeight: "500",
-  },
-  shiftLocation: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  shiftButton: {
-    backgroundColor: "#F0FDF4",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 5,
-  },
-  shiftButtonText: {
-    color: "#10B981",
-    fontWeight: "600",
   },
   activityList: {
     gap: 12,
