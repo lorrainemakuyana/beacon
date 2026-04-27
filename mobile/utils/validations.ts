@@ -80,6 +80,6 @@ export const sanitizeEventData = (eventData: any) => {
 };
 
 // Utility functions
-const createTimestamp = (date?: Date) => {
+const createTimestamp = () => {
   return Date.now();
 };
