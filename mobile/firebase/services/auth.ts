@@ -27,6 +27,7 @@ import {
 import { User, COLLECTIONS } from "../../interfaces";
 import { auth, firestore } from "../config";
 import { validateEmail, sanitizeUserData } from "@/utils/validations";
+import { getUser, updateUser, getCurrentUser } from "./users";
 
 // Auth state management
 export interface AuthState {
@@ -201,44 +202,6 @@ export const resetPassword = async (email: string): Promise<void> => {
     console.error("Password reset error:", error);
     throw new Error(getAuthErrorMessage(error));
   }
-};
-
-// Get user profile from Firestore
-export const getUser = async (uid: string): Promise<User | null> => {
-  try {
-    const userDoc = await getDoc(doc(firestore, COLLECTIONS.USERS, uid));
-
-    if (userDoc.exists()) {
-      return userDoc.data() as User;
-    }
-
-    return null;
-  } catch (error: any) {
-    console.error("Get user profile error:", error);
-    return null;
-  }
-};
-
-// Update user profile
-export const updateUser = async (
-  uid: string,
-  updates: Partial<User>,
-): Promise<void> => {
-  try {
-    const userRef = doc(firestore, COLLECTIONS.USERS, uid);
-    await updateDoc(userRef, {
-      ...updates,
-      lastActive: Date.now(),
-    });
-  } catch (error: any) {
-    console.error("Update user profile error:", error);
-    throw new Error("Failed to update profile. Please try again.");
-  }
-};
-
-// Check if user is authenticated
-export const getCurrentUser = (): FirebaseUser | null => {
-  return auth.currentUser;
 };
 
 // Auth state listener
