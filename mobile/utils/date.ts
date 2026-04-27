@@ -7,14 +7,25 @@ export function getGreeting(date: Date) {
   if (hour < 18) return "Good Afternoon";
   return "Good Evening";
 }
+export function formatDate(date: Date | Timestamp) {
+  if (date instanceof Timestamp) {
+    date = date.toDate();
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
 
 export function calculateDayStreak(
-  lastActive: Timestamp | null | undefined,
+  lastActive: number,
   existingStreak?: number,
 ): number {
   if (!lastActive) return 0;
 
-  const last = lastActive.toDate();
+  const last = new Date(lastActive);
   const now = new Date();
 
   // Normalize to local midnight

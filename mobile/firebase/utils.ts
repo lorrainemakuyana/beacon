@@ -46,11 +46,6 @@ export const getNotificationDoc = (notificationId: string) =>
 export const getPaymentDoc = (paymentId: string) =>
   doc(firestore, COLLECTIONS.PAYMENTS, paymentId);
 
-// Utility functions
-const createTimestamp = (date?: Date) => {
-  return Timestamp.fromDate(date || new Date());
-};
-
 export const timestampToDate = (timestamp: Timestamp) => {
   return timestamp.toDate();
 };
@@ -74,7 +69,7 @@ export const getEventsByOrganization = (organizationId: string) => {
 export const getUpcomingEvents = () => {
   return buildQuery(getEventsCollection(), [
     where("status", "==", "published"),
-    where("dateRange.start", ">", createTimestamp()),
+    where("dateRange.start", ">", Date.now()),
     orderBy("dateRange.start", "asc"),
   ]);
 };
@@ -121,38 +116,6 @@ export const handleFirebaseError = (error: any) => {
   };
 
   return errorMessages[error.code] || "An unexpected error occurred.";
-};
-
-// Validation utilities
-export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-export const validatePhoneNumber = (phone: string): boolean => {
-  const phoneRegex = /^\+?[\d\s\-\(\)]+$/;
-  return phoneRegex.test(phone) && phone.replace(/\D/g, "").length >= 10;
-};
-
-// Data transformation utilities
-export const sanitizeUserData = (userData: any) => {
-  return {
-    ...userData,
-    email: userData.email?.toLowerCase().trim(),
-    displayName: userData.displayName?.trim(),
-    createdAt: createTimestamp(),
-    lastActive: createTimestamp(),
-  };
-};
-
-export const sanitizeEventData = (eventData: any) => {
-  return {
-    ...eventData,
-    title: eventData.title?.trim(),
-    description: eventData.description?.trim(),
-    createdAt: createTimestamp(),
-    updatedAt: createTimestamp(),
-  };
 };
 
 // Free tier optimization utilities

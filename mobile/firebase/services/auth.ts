@@ -25,13 +25,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { User, COLLECTIONS } from "../../interfaces";
-import { validateEmail, sanitizeUserData } from "../utils";
-
 import { auth, firestore } from "../config";
+import { validateEmail, sanitizeUserData } from "@/utils/validations";
 
 // Auth state management
 export interface AuthState {
-  user: FirebaseUser | null;
+  firebaseUser: FirebaseUser | null;
   userProfile: User | null;
   loading: boolean;
   error: string | null;
@@ -41,7 +40,7 @@ export interface AuthState {
 export const loginWithEmail = async (
   email: string,
   password: string,
-): Promise<{ user: FirebaseUser; userProfile: User }> => {
+): Promise<User | null> => {
   try {
     if (!validateEmail(email)) {
       throw new Error("Please enter a valid email address");
@@ -59,9 +58,9 @@ export const loginWithEmail = async (
     );
 
     // Get user profile from Firestore
-    const userProfile = await getUserProfile(userCredential.user.uid);
+    const user = await getUser(userCredential.user.uid);
 
-    if (!userProfile) {
+    if (!user) {
       throw new Error("User profile not found");
     }
 
@@ -80,15 +79,12 @@ export const loginWithEmail = async (
     }
 
     // Update last active timestamp
-    await updateLastActive(userCredential.user.uid);
+    await updateUser(userCredential.user.uid, { lastActive: Date.now() });
 
-    return {
-      user: userCredential.user,
-      userProfile,
-    };
+    return user;
   } catch (error: any) {
     console.error("Login error:", error);
-    throw new Error(getAuthErrorMessage(error));
+    return null;
   }
 };
 
@@ -99,7 +95,7 @@ export const registerWithEmail = async (
   firstName: string,
   lastName: string,
   role: "volunteer" | "coordinator" | "collaborator" | "owner" = "volunteer",
-): Promise<{ user: FirebaseUser; userProfile: User }> => {
+): Promise<User | null> => {
   try {
     if (!validateEmail(email)) {
       throw new Error("Please enter a valid email address");
@@ -128,36 +124,28 @@ export const registerWithEmail = async (
     });
 
     // Create user profile in Firestore
-    const userProfile: User = {
+    const user: User = {
       uid: userCredential.user.uid,
       email: userCredential.user.email!,
       displayName,
       role,
-      profile: {
-        phone: "",
-        emergencyContact: "",
-        skills: [],
-        availability: [],
-      },
-      createdAt: serverTimestamp() as any,
-      lastActive: serverTimestamp() as any,
+      createdAt: Date.now(),
+      lastActive: Date.now(),
+      skills: [],
     };
 
     await setDoc(
       doc(firestore, COLLECTIONS.USERS, userCredential.user.uid),
-      sanitizeUserData(userProfile),
+      sanitizeUserData(user),
     );
 
     // Send email verification
     await sendEmailVerification(userCredential.user);
 
-    return {
-      user: userCredential.user,
-      userProfile,
-    };
+    return user;
   } catch (error: any) {
     console.error("Registration error:", error);
-    throw new Error(getAuthErrorMessage(error));
+    return null;
   }
 };
 
@@ -176,10 +164,7 @@ export const logout = async (): Promise<void> => {
 // Attempt to restore login from stored credentials. Returns the user/profile
 // pair on success or null on failure. Call this early (e.g., in AuthContext
 // initialization) to auto-sign-in the user.
-export const restoreLoginFromStorage = async (): Promise<{
-  user: FirebaseUser;
-  userProfile: User;
-} | null> => {
+export const restoreLoginFromStorage = async (): Promise<User | null> => {
   try {
     const raw = await AsyncStorage.getItem("@beacon:auth_credentials_v1");
     if (!raw) return null;
@@ -192,12 +177,12 @@ export const restoreLoginFromStorage = async (): Promise<{
       password,
     );
 
-    const userProfile = await getUserProfile(userCredential.user.uid);
-    if (!userProfile) return null;
+    const user = await getUser(userCredential.user.uid);
+    if (!user) return null;
 
-    await updateLastActive(userCredential.user.uid);
+    await updateUser(userCredential.user.uid, { lastActive: Date.now() });
 
-    return { user: userCredential.user, userProfile };
+    return user;
   } catch (error: any) {
     console.warn("Auto-restore login failed:", error);
     return null;
@@ -219,7 +204,7 @@ export const resetPassword = async (email: string): Promise<void> => {
 };
 
 // Get user profile from Firestore
-export const getUserProfile = async (uid: string): Promise<User | null> => {
+export const getUser = async (uid: string): Promise<User | null> => {
   try {
     const userDoc = await getDoc(doc(firestore, COLLECTIONS.USERS, uid));
 
@@ -235,7 +220,7 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 };
 
 // Update user profile
-export const updateUserProfile = async (
+export const updateUser = async (
   uid: string,
   updates: Partial<User>,
 ): Promise<void> => {
@@ -243,24 +228,11 @@ export const updateUserProfile = async (
     const userRef = doc(firestore, COLLECTIONS.USERS, uid);
     await updateDoc(userRef, {
       ...updates,
-      lastActive: serverTimestamp(),
+      lastActive: Date.now(),
     });
   } catch (error: any) {
     console.error("Update user profile error:", error);
     throw new Error("Failed to update profile. Please try again.");
-  }
-};
-
-// Update last active timestamp
-export const updateLastActive = async (uid: string): Promise<void> => {
-  try {
-    const userRef = doc(firestore, COLLECTIONS.USERS, uid);
-    await updateDoc(userRef, {
-      lastActive: serverTimestamp(),
-    });
-  } catch (error: any) {
-    console.error("Update last active error:", error);
-    // Don't throw error for this non-critical operation
   }
 };
 
@@ -344,52 +316,3 @@ const getAuthErrorMessage = (error: AuthError | Error): string => {
   return error.message || "An unexpected error occurred. Please try again.";
 };
 
-// Validation helpers
-export const validateRegistrationData = (data: {
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-}): string | null => {
-  const { email, password, confirmPassword, firstName, lastName } = data;
-
-  if (!firstName.trim()) {
-    return "First name is required";
-  }
-
-  if (!lastName.trim()) {
-    return "Last name is required";
-  }
-
-  if (!validateEmail(email)) {
-    return "Please enter a valid email address";
-  }
-
-  if (!password || password.length < 6) {
-    return "Password must be at least 6 characters long";
-  }
-
-  if (password !== confirmPassword) {
-    return "Passwords do not match";
-  }
-
-  return null;
-};
-
-export const validateLoginData = (data: {
-  email: string;
-  password: string;
-}): string | null => {
-  const { email, password } = data;
-
-  if (!validateEmail(email)) {
-    return "Please enter a valid email address";
-  }
-
-  if (!password) {
-    return "Password is required";
-  }
-
-  return null;
-};
