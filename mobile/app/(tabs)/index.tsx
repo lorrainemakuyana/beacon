@@ -19,19 +19,11 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { shifts, eventsMap } = useUserShifts(user?.uid);
 
-  const { upcomingShifts, pastShifts } = useMemo(() => {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    const todayMs = startOfToday.getTime();
-
-    const upcoming = shifts.filter(
-      (s) => s.timeSlot.start.toMillis() >= todayMs,
-    );
-    const past = shifts
+  const pastShifts = useMemo(() => {
+    const todayMs = new Date().setHours(0, 0, 0, 0);
+    return shifts
       .filter((s) => s.timeSlot.start.toMillis() < todayMs)
       .sort((a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis());
-
-    return { upcomingShifts: upcoming, pastShifts: past };
   }, [shifts]);
 
   const greeting = useMemo(() => getGreeting(new Date()), []);
@@ -79,22 +71,6 @@ export default function HomeScreen() {
             <ThemedText style={styles.actionText}>My Hours</ThemedText>
           </TouchableOpacity>
         </ThemedView>
-      </ThemedView>
-
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle">Upcoming Shifts</ThemedText>
-        {upcomingShifts.map((shift) => {
-          const event = eventsMap[shift.eventId];
-          if (!event) return null;
-          return (
-            <ShiftCard
-              event={event}
-              shift={shift}
-              key={shift.id}
-              userId={user?.uid}
-            />
-          );
-        })}
       </ThemedView>
 
       {pastShifts.length > 0 && (

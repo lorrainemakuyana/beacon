@@ -1,37 +1,94 @@
-import { StyleSheet, ScrollView } from "react-native";
+import { useMemo } from "react";
+import { StyleSheet, ScrollView, View, Text } from "react-native";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { ShiftCard } from "@/components/shift/shift-card";
+import { useUserShifts } from "@/hooks/useUserShifts";
+import { useAuth } from "@/context/AuthContext";
+
+function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+  const weekEnd = new Date(todayEnd);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+
+  const today: typeof shifts = [];
+  const thisWeek: typeof shifts = [];
+  const later: typeof shifts = [];
+
+  for (const s of shifts) {
+    const d = s.timeSlot.start.toDate();
+    if (d < todayStart) continue; // skip past shifts
+    if (d <= todayEnd) today.push(s);
+    else if (d <= weekEnd) thisWeek.push(s);
+    else later.push(s);
+  }
+  return { today, thisWeek, later };
+}
+
+function EmptySlot({ label }: { label: string }) {
+  return (
+    <View style={styles.empty}>
+      <Text style={styles.emptyText}>No shifts {label}</Text>
+    </View>
+  );
+}
 
 export default function ScheduleScreen() {
+  const { user } = useAuth();
+  const { shifts, eventsMap } = useUserShifts(user?.uid);
+
+  const { today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
+
   return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <ThemedText type="title">My Schedule</ThemedText>
-        <ThemedText type="subtitle">Upcoming volunteer shifts</ThemedText>
-      </ThemedView>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
 
-      <ThemedView style={styles.content}>
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Today</ThemedText>
-          <ThemedView style={styles.placeholder}>
-            <ThemedText>No shifts scheduled for today</ThemedText>
-          </ThemedView>
-        </ThemedView>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Today</Text>
+        {today.length === 0 ? (
+          <EmptySlot label="scheduled for today" />
+        ) : (
+          today.map((shift) => {
+            const event = eventsMap[shift.eventId];
+            if (!event) return null;
+            return (
+              <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />
+            );
+          })
+        )}
+      </View>
 
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">This Week</ThemedText>
-          <ThemedView style={styles.placeholder}>
-            <ThemedText>No upcoming shifts this week</ThemedText>
-          </ThemedView>
-        </ThemedView>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>This Week</Text>
+        {thisWeek.length === 0 ? (
+          <EmptySlot label="this week" />
+        ) : (
+          thisWeek.map((shift) => {
+            const event = eventsMap[shift.eventId];
+            if (!event) return null;
+            return (
+              <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />
+            );
+          })
+        )}
+      </View>
 
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Browse Events</ThemedText>
-          <ThemedView style={styles.placeholder}>
-            <ThemedText>Find volunteer opportunities near you</ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Later</Text>
+        {later.length === 0 ? (
+          <EmptySlot label="further ahead" />
+        ) : (
+          later.map((shift) => {
+            const event = eventsMap[shift.eventId];
+            if (!event) return null;
+            return (
+              <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />
+            );
+          })
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -39,22 +96,35 @@ export default function ScheduleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 20,
+    backgroundColor: "#F9FAFB",
   },
   content: {
     padding: 20,
-    gap: 20,
+    paddingBottom: 40,
+    gap: 24,
+  },
+  title: {
+    marginBottom: 4,
   },
   section: {
-    gap: 10,
+    gap: 12,
   },
-  placeholder: {
-    padding: 20,
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  empty: {
+    paddingVertical: 18,
+    paddingHorizontal: 16,
     backgroundColor: "#F3F4F6",
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#9CA3AF",
   },
 });

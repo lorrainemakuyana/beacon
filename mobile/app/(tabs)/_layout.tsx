@@ -7,7 +7,6 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AppHeader } from "@/components/app-header";
 
-// Custom tab button for the Check-In tab
 const CheckInTabButton = ({ children, onPress }: any) => (
   <TouchableOpacity style={styles.checkInButtonContainer} onPress={onPress}>
     <View style={styles.checkInButton}>{children}</View>
@@ -22,8 +21,8 @@ export default function TabLayout() {
       <AppHeader />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#059669", // Green color for active tabs
-          tabBarInactiveTintColor: "#6B7280", // Gray color for inactive tabs
+          tabBarActiveTintColor: "#059669",
+          tabBarInactiveTintColor: "#6B7280",
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarStyle: {
@@ -54,13 +53,13 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="schedule"
+          name="events"
           options={{
-            title: "Schedule",
+            title: "Events",
             tabBarIcon: ({ color, focused }) => (
               <IconSymbol
                 size={24}
-                name="calendar"
+                name="calendar.badge.plus"
                 color={focused ? "#059669" : color}
               />
             ),
@@ -75,8 +74,21 @@ export default function TabLayout() {
                 <IconSymbol size={35} name="qrcode" color="#FFFFFF" />
               </CheckInTabButton>
             ),
-            tabBarIcon: ({ color }) => (
+            tabBarIcon: () => (
               <IconSymbol size={32} name="qrcode" color="#FFFFFF" />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="schedule"
+          options={{
+            title: "Schedule",
+            tabBarIcon: ({ color, focused }) => (
+              <IconSymbol
+                size={24}
+                name="calendar"
+                color={focused ? "#059669" : color}
+              />
             ),
           }}
         />
@@ -96,14 +108,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            title: "Profile",
-            tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={24}
-                name="person.fill"
-                color={focused ? "#059669" : color}
-              />
-            ),
+            href: null,
           }}
         />
       </Tabs>
