@@ -7,20 +7,20 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider } from "@/context/AuthContext";
 import { LoadingProvider } from "@/context/LoadingContext";
+import { ThemePreferenceProvider, useTheme } from "@/context/ThemeContext";
 import { GlobalLoader } from "@/components/global-loader";
 
 export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function RootLayoutInner() {
+  const { effectiveColorScheme } = useTheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={effectiveColorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <LoadingProvider>
         <AuthProvider>
           <Stack
@@ -38,9 +38,17 @@ export default function RootLayout() {
             />
           </Stack>
           <GlobalLoader />
-          <StatusBar style="auto" />
+          <StatusBar style={effectiveColorScheme === "dark" ? "light" : "dark"} />
         </AuthProvider>
       </LoadingProvider>
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemePreferenceProvider>
+      <RootLayoutInner />
+    </ThemePreferenceProvider>
   );
 }

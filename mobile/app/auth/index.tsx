@@ -8,12 +8,14 @@ import LoginDrawer from "@/components/auth/login-drawer";
 import SignupDrawer from "@/components/auth/signup-drawer";
 import Logo from "@/assets/images/logo.png";
 import Button from "@/components/button";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function WelcomeScreen() {
   const [drawer, setDrawer] = useState<"login" | "signup" | null>(null);
+  const { colors } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ThemedView style={styles.content}>
         <ThemedView style={styles.header}>
           <ThemedView style={styles.logoContainer}>
@@ -25,29 +27,27 @@ export default function WelcomeScreen() {
         </ThemedView>
         <ThemedView style={styles.features}>
           <ThemedView style={styles.feature}>
-            <IconSymbol size={40} name="calendar.badge.plus" color="#10B981" />
+            <IconSymbol size={40} name="calendar.badge.plus" color={colors.tint} />
             <ThemedView style={styles.featureText}>
               <ThemedText style={styles.featureTitle}>Find Events</ThemedText>
               <ThemedText style={styles.featureDescription}>
-                Discover volunteer opportunities that match your interests and
-                schedule
+                Discover volunteer opportunities that match your interests and schedule
               </ThemedText>
             </ThemedView>
           </ThemedView>
 
           <ThemedView style={styles.feature}>
-            <IconSymbol size={40} name="qrcode" color="#10B981" />
+            <IconSymbol size={40} name="qrcode" color={colors.tint} />
             <ThemedView style={styles.featureText}>
               <ThemedText style={styles.featureTitle}>Easy Check-In</ThemedText>
               <ThemedText style={styles.featureDescription}>
-                Quick QR code scanning or manual check-in for your volunteer
-                shifts
+                Quick QR code scanning or manual check-in for your volunteer shifts
               </ThemedText>
             </ThemedView>
           </ThemedView>
 
           <ThemedView style={styles.feature}>
-            <IconSymbol size={40} name="clock" color="#10B981" />
+            <IconSymbol size={40} name="clock" color={colors.tint} />
             <ThemedView style={styles.featureText}>
               <ThemedText style={styles.featureTitle}>Track Hours</ThemedText>
               <ThemedText style={styles.featureDescription}>
@@ -57,14 +57,11 @@ export default function WelcomeScreen() {
           </ThemedView>
 
           <ThemedView style={styles.feature}>
-            <IconSymbol size={40} name="bell.fill" color="#10B981" />
+            <IconSymbol size={40} name="bell.fill" color={colors.tint} />
             <ThemedView style={styles.featureText}>
-              <ThemedText style={styles.featureTitle}>
-                Stay Connected
-              </ThemedText>
+              <ThemedText style={styles.featureTitle}>Stay Connected</ThemedText>
               <ThemedText style={styles.featureDescription}>
-                Get notifications about new events, upcoming shifts and
-                important updates
+                Get notifications about new events, upcoming shifts and important updates
               </ThemedText>
             </ThemedView>
           </ThemedView>
@@ -99,7 +96,6 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     display: "flex",
     justifyContent: "center",
     flexDirection: "column",
@@ -129,11 +125,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  subtitle: {
-    fontSize: 18,
-    textAlign: "center",
-    color: "#6B7280",
-  },
   features: {
     gap: 20,
   },
@@ -149,11 +140,9 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
   },
   featureDescription: {
     fontSize: 14,
-    color: "#6B7280",
     lineHeight: 20,
   },
   actions: {

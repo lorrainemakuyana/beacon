@@ -5,14 +5,16 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  View,
 } from "react-native";
 import { router } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
 import { useAuth } from "@/context/AuthContext";
 import { validateLoginData } from "@/firebase/services/auth";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
 
 export default function LoginDrawer({
   onRegister,
@@ -22,9 +24,9 @@ export default function LoginDrawer({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, loginWithGoogle, resetPassword, loading } = useAuth();
+  const { colors } = useTheme();
 
   const handleLogin = async () => {
-    // Validate input
     const validationError = validateLoginData({ email, password });
     if (validationError) {
       Alert.alert("Error", validationError);
@@ -33,7 +35,6 @@ export default function LoginDrawer({
 
     try {
       await login(email, password);
-      // Navigation will be handled by auth state change
       router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert("Login Failed", error.message);
@@ -71,6 +72,8 @@ export default function LoginDrawer({
     ]);
   };
 
+  const styles = getStyles(colors);
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -78,37 +81,39 @@ export default function LoginDrawer({
       contentContainerStyle={{ paddingBottom: 40 }}
       style={styles.container}
     >
-      <ThemedView style={styles.header}>
+      <View style={styles.header}>
         <ThemedText type="subtitle">Sign in to your account</ThemedText>
-      </ThemedView>
+      </View>
 
-      <ThemedView style={styles.form}>
-        <ThemedView style={styles.inputGroup}>
+      <View style={styles.form}>
+        <View style={styles.inputGroup}>
           <ThemedText style={styles.label}>Email address</ThemedText>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
+            placeholderTextColor={colors.textTertiary}
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
             editable={!loading}
           />
-        </ThemedView>
+        </View>
 
-        <ThemedView style={styles.inputGroup}>
+        <View style={styles.inputGroup}>
           <ThemedText style={styles.label}>Password</ThemedText>
           <TextInput
             style={styles.input}
             value={password}
             onChangeText={setPassword}
             placeholder="Enter your password"
+            placeholderTextColor={colors.textTertiary}
             secureTextEntry
             autoComplete="password"
             editable={!loading}
           />
-        </ThemedView>
+        </View>
 
         <TouchableOpacity
           style={styles.forgotPassword}
@@ -128,131 +133,119 @@ export default function LoginDrawer({
           disabled={loading}
         />
 
-        <ThemedView style={styles.divider}>
-          <ThemedView style={styles.dividerLine} />
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
           <ThemedText style={styles.dividerText}>OR</ThemedText>
-          <ThemedView style={styles.dividerLine} />
-        </ThemedView>
+          <View style={styles.dividerLine} />
+        </View>
 
         <TouchableOpacity
           style={styles.socialButton}
           onPress={handleGoogleLogin}
           disabled={loading}
         >
-          <IconSymbol size={20} name="globe" color="#059669" />
+          <IconSymbol size={20} name="globe" color={colors.tint} />
           <ThemedText style={styles.socialButtonText}>
             Continue with Google
           </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.socialButton} disabled={loading}>
-          <IconSymbol size={20} name="apple.logo" color="#000000" />
+          <IconSymbol size={20} name="apple.logo" color={colors.textPrimary} />
           <ThemedText style={styles.socialButtonText}>
             Continue with Apple
           </ThemedText>
         </TouchableOpacity>
 
-        <ThemedView style={styles.signupPrompt}>
+        <View style={styles.signupPrompt}>
           <ThemedText>Don&apos;t have an account? </ThemedText>
 
           <TouchableOpacity onPress={onRegister} disabled={loading}>
             <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
           </TouchableOpacity>
-        </ThemedView>
-      </ThemedView>
+        </View>
+      </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  form: {
-    paddingTop: 20,
-    gap: 20,
-  },
-  inputGroup: {
-    gap: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "#475569",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 10,
-    padding: 16,
-    fontSize: 16,
-    backgroundColor: "#FFFFFF",
-  },
-  forgotPassword: {
-    alignSelf: "flex-end",
-  },
-  forgotPasswordText: {
-    color: "#10B981",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  loginButton: {
-    backgroundColor: "#10B981",
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  loginButtonDisabled: {
-    backgroundColor: "#9CA3AF",
-  },
-  loginButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-    marginVertical: 5,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#E5E7EB",
-  },
-  dividerText: {
-    color: "#6B7280",
-    fontSize: 14,
-  },
-  socialButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 12,
-    gap: 10,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  signupPrompt: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  signupLink: {
-    color: "#10B981",
-    fontWeight: "600",
-  },
-});
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.drawerBackground,
+    },
+    header: {
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    form: {
+      paddingTop: 20,
+      gap: 20,
+    },
+    inputGroup: {
+      gap: 4,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: "400",
+      color: colors.textSecondary,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 10,
+      padding: 16,
+      fontSize: 16,
+      backgroundColor: colors.inputBackground,
+      color: colors.textPrimary,
+    },
+    forgotPassword: {
+      alignSelf: "flex-end",
+    },
+    forgotPasswordText: {
+      color: colors.tint,
+      fontSize: 14,
+      fontWeight: "500",
+    },
+    divider: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 15,
+      marginVertical: 5,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+    dividerText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    socialButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 12,
+      gap: 10,
+    },
+    socialButtonText: {
+      fontSize: 16,
+      fontWeight: "500",
+    },
+    signupPrompt: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 20,
+    },
+    signupLink: {
+      color: colors.tint,
+      fontWeight: "600",
+    },
+  });
+}

@@ -1,9 +1,14 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
 
 export default function AlertsScreen() {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
@@ -16,48 +21,44 @@ export default function AlertsScreen() {
           <ThemedText type="subtitle">Recent Notifications</ThemedText>
           <ThemedView style={styles.alertsList}>
             <ThemedView style={styles.alertItem}>
-              <IconSymbol size={20} name="bell.fill" color="#10B981" />
-              <ThemedView style={styles.alertContent}>
-                <ThemedText style={styles.alertTitle}>
-                  Shift Reminder
-                </ThemedText>
+              <IconSymbol size={20} name="bell.fill" color={colors.tint} />
+              <View style={styles.alertContent}>
+                <ThemedText style={styles.alertTitle}>Shift Reminder</ThemedText>
                 <ThemedText style={styles.alertText}>
                   Your shift starts in 1 hour
                 </ThemedText>
                 <ThemedText style={styles.alertTime}>2 hours ago</ThemedText>
-              </ThemedView>
+              </View>
             </ThemedView>
 
             <ThemedView style={styles.alertItem}>
               <IconSymbol
                 size={20}
                 name="exclamationmark.triangle.fill"
-                color="#F59E0B"
+                color={colors.warning}
               />
-              <ThemedView style={styles.alertContent}>
+              <View style={styles.alertContent}>
                 <ThemedText style={styles.alertTitle}>Event Update</ThemedText>
                 <ThemedText style={styles.alertText}>
                   Location changed for Community Cleanup
                 </ThemedText>
                 <ThemedText style={styles.alertTime}>1 day ago</ThemedText>
-              </ThemedView>
+              </View>
             </ThemedView>
 
             <ThemedView style={styles.alertItem}>
               <IconSymbol
                 size={20}
                 name="checkmark.circle.fill"
-                color="#10B981"
+                color={colors.tint}
               />
-              <ThemedView style={styles.alertContent}>
-                <ThemedText style={styles.alertTitle}>
-                  Shift Confirmed
-                </ThemedText>
+              <View style={styles.alertContent}>
+                <ThemedText style={styles.alertTitle}>Shift Confirmed</ThemedText>
                 <ThemedText style={styles.alertText}>
                   You're confirmed for Food Bank volunteer shift
                 </ThemedText>
                 <ThemedText style={styles.alertTime}>3 days ago</ThemedText>
-              </ThemedView>
+              </View>
             </ThemedView>
           </ThemedView>
         </ThemedView>
@@ -68,7 +69,7 @@ export default function AlertsScreen() {
             <IconSymbol
               size={24}
               name="exclamationmark.triangle"
-              color="#EF4444"
+              color={colors.danger}
             />
             <ThemedText style={styles.actionButtonText}>
               Report Incident
@@ -87,75 +88,76 @@ export default function AlertsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 20,
-  },
-  content: {
-    padding: 20,
-    gap: 25,
-  },
-  section: {
-    gap: 15,
-  },
-  alertsList: {
-    gap: 12,
-  },
-  alertItem: {
-    flexDirection: "row",
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    gap: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  alertContent: {
-    flex: 1,
-    gap: 4,
-  },
-  alertTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  alertText: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  alertTime: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  actionButton: {
-    backgroundColor: "#FEF2F2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    borderRadius: 12,
-    gap: 10,
-  },
-  actionButtonText: {
-    color: "#EF4444",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  settingsCard: {
-    padding: 20,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-});
+    header: {
+      padding: 20,
+      paddingTop: 20,
+    },
+    content: {
+      padding: 20,
+      gap: 25,
+    },
+    section: {
+      gap: 15,
+    },
+    alertsList: {
+      gap: 12,
+    },
+    alertItem: {
+      flexDirection: "row",
+      padding: 16,
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      gap: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    alertContent: {
+      flex: 1,
+      gap: 4,
+    },
+    alertTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    alertText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    alertTime: {
+      fontSize: 12,
+      color: colors.textTertiary,
+    },
+    actionButton: {
+      backgroundColor: colors.dangerSubtle,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+      borderRadius: 12,
+      gap: 10,
+    },
+    actionButtonText: {
+      color: colors.danger,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    settingsCard: {
+      padding: 20,
+      backgroundColor: colors.emptyStateBg,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+  });
+}

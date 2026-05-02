@@ -1,41 +1,143 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export type ThemeColors = {
+  // Brand
+  primary: string;
+  primaryLight: string;
+  tint: string;
+  primarySubtle: string;
+  primarySubtleBorder: string;
+  // Backgrounds
+  background: string;
+  surfaceBackground: string;
+  cardBackground: string;
+  drawerBackground: string;
+  mapPlaceholder: string;
+  emptyStateBg: string;
+  // Borders
+  cardBorder: string;
+  inputBorder: string;
+  border: string;
+  borderSubtle: string;
+  headerBorder: string;
+  drawerHandle: string;
+  // Inputs
+  inputBackground: string;
+  // Tab bar
+  tabBarBackground: string;
+  tabIconDefault: string;
+  tabIconSelected: string;
+  // Text — `text` kept for ThemedText backward compat
+  text: string;
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  textLabel: string;
+  // Icons — `icon` kept for ThemedView/ThemedText compat
+  icon: string;
+  // Profile
+  profileAvatar: string;
+  // Streak pill
+  streakPillBg: string;
+  streakPillBorder: string;
+  // Semantic states
+  danger: string;
+  dangerSubtle: string;
+  dangerBorder: string;
+  warning: string;
+  warningSubtle: string;
+  info: string;
+  infoSubtle: string;
+};
 
-export const Colors = {
+export const Colors: { light: ThemeColors; dark: ThemeColors } = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
+    primary: '#059669',
+    primaryLight: '#10B981',
+    tint: '#059669',
+    primarySubtle: '#ECFDF5',
+    primarySubtleBorder: '#A7F3D0',
+    background: '#FFFFFF',
+    surfaceBackground: '#F9FAFB',
+    cardBackground: '#FFFFFF',
+    drawerBackground: '#FFFFFF',
+    mapPlaceholder: '#F1F5F9',
+    emptyStateBg: '#F3F4F6',
+    cardBorder: '#E2E8F0',
+    inputBorder: '#D1D5DB',
+    border: '#E5E7EB',
+    borderSubtle: '#F3F4F6',
+    headerBorder: '#E5E7EB',
+    drawerHandle: '#CBD5E1',
+    inputBackground: '#FFFFFF',
+    tabBarBackground: '#FFFFFF',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: '#059669',
+    text: '#11181C',
+    textPrimary: '#0F172A',
+    textSecondary: '#6B7280',
+    textTertiary: '#9CA3AF',
+    textLabel: '#374151',
+    icon: '#64748B',
+    profileAvatar: '#10B981',
+    streakPillBg: '#F5E9DA',
+    streakPillBorder: '#FCD9BD',
+    danger: '#EF4444',
+    dangerSubtle: '#FEF2F2',
+    dangerBorder: '#FECACA',
+    warning: '#F59E0B',
+    warningSubtle: '#FEF3C7',
+    info: '#3B82F6',
+    infoSubtle: '#E8F0FE',
   },
   dark: {
+    // primary stays #059669 — white text on it passes AA in both modes
+    primary: '#059669',
+    primaryLight: '#10B981',
+    // tint is green used AS a text/icon color — lighter for dark backgrounds
+    tint: '#34D399',
+    primarySubtle: '#064E3B',
+    primarySubtleBorder: '#065F46',
+    background: '#0F172A',
+    surfaceBackground: '#1E293B',
+    cardBackground: '#1E293B',
+    drawerBackground: '#1E293B',
+    mapPlaceholder: '#1E293B',
+    emptyStateBg: '#1E293B',
+    cardBorder: '#334155',
+    inputBorder: '#475569',
+    border: '#334155',
+    borderSubtle: '#1E293B',
+    headerBorder: '#334155',
+    drawerHandle: '#475569',
+    inputBackground: '#1E293B',
+    tabBarBackground: '#1E293B',
+    tabIconDefault: '#94A3B8',
+    tabIconSelected: '#34D399',
     text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    textPrimary: '#F1F5F9',
+    textSecondary: '#94A3B8',
+    textTertiary: '#64748B',
+    textLabel: '#CBD5E1',
+    icon: '#94A3B8',
+    profileAvatar: '#059669',
+    streakPillBg: '#431407',
+    streakPillBorder: '#7C2D12',
+    danger: '#F87171',
+    dangerSubtle: '#450A0A',
+    dangerBorder: '#7F1D1D',
+    warning: '#FCD34D',
+    warningSubtle: '#422006',
+    info: '#60A5FA',
+    infoSubtle: '#1E3A5F',
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {

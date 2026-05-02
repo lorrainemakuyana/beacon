@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { StyleSheet, ScrollView, View, Text } from "react-native";
-import { ThemedText } from "@/components/themed-text";
 import { ShiftCard } from "@/components/shift/shift-card";
 import { useUserShifts } from "@/hooks/useUserShifts";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
 
 function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
   const now = new Date();
@@ -20,7 +21,7 @@ function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
 
   for (const s of shifts) {
     const d = s.timeSlot.start.toDate();
-    if (d < todayStart) continue; // skip past shifts
+    if (d < todayStart) continue;
     if (d <= todayEnd) today.push(s);
     else if (d <= weekEnd) thisWeek.push(s);
     else later.push(s);
@@ -28,7 +29,7 @@ function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
   return { today, thisWeek, later };
 }
 
-function EmptySlot({ label }: { label: string }) {
+function EmptySlot({ label, styles }: { label: string; styles: ReturnType<typeof getStyles> }) {
   return (
     <View style={styles.empty}>
       <Text style={styles.emptyText}>No shifts {label}</Text>
@@ -39,16 +40,17 @@ function EmptySlot({ label }: { label: string }) {
 export default function ScheduleScreen() {
   const { user } = useAuth();
   const { shifts, eventsMap } = useUserShifts(user?.uid);
+  const { colors } = useTheme();
 
   const { today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
+  const styles = getStyles(colors);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Today</Text>
         {today.length === 0 ? (
-          <EmptySlot label="scheduled for today" />
+          <EmptySlot label="scheduled for today" styles={styles} />
         ) : (
           today.map((shift) => {
             const event = eventsMap[shift.eventId];
@@ -63,7 +65,7 @@ export default function ScheduleScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>This Week</Text>
         {thisWeek.length === 0 ? (
-          <EmptySlot label="this week" />
+          <EmptySlot label="this week" styles={styles} />
         ) : (
           thisWeek.map((shift) => {
             const event = eventsMap[shift.eventId];
@@ -78,7 +80,7 @@ export default function ScheduleScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Later</Text>
         {later.length === 0 ? (
-          <EmptySlot label="further ahead" />
+          <EmptySlot label="further ahead" styles={styles} />
         ) : (
           later.map((shift) => {
             const event = eventsMap[shift.eventId];
@@ -93,38 +95,37 @@ export default function ScheduleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB",
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  title: {
-    marginBottom: 4,
-  },
-  section: {
-    gap: 12,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#9CA3AF",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-  },
-  empty: {
-    paddingVertical: 18,
-    paddingHorizontal: 16,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-});
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.surfaceBackground,
+    },
+    content: {
+      padding: 20,
+      paddingBottom: 40,
+      gap: 24,
+    },
+    section: {
+      gap: 12,
+    },
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: colors.textTertiary,
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+    empty: {
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      backgroundColor: colors.emptyStateBg,
+      borderRadius: 12,
+      alignItems: "center",
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textTertiary,
+    },
+  });
+}

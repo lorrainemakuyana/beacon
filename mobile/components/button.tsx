@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
+import { useTheme } from "@/context/ThemeContext";
 
 type ButtonVariant = "primary" | "secondary";
 
@@ -28,24 +29,28 @@ export default function Button({
   loading,
   disabled,
 }: ButtonProps) {
+  const { colors } = useTheme();
   const isPrimary = variant === "primary";
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[isPrimary ? styles.primaryButton : styles.secondaryButton, style]}
+      style={[
+        isPrimary
+          ? [styles.primaryButton, { backgroundColor: colors.primary }]
+          : [styles.secondaryButton, { borderColor: colors.inputBorder }],
+        style,
+      ]}
       activeOpacity={0.8}
     >
       {loading && (
         <ActivityIndicator
           animating={true}
-          color={isPrimary ? "#fff" : "#475569"}
+          color={isPrimary ? "#fff" : colors.textLabel}
         />
       )}
       <ThemedText
-        style={
-          isPrimary ? styles.primaryButtonText : styles.secondaryButtonText
-        }
+        style={isPrimary ? styles.primaryButtonText : [styles.secondaryButtonText, { color: colors.textLabel }]}
       >
         {text}
       </ThemedText>
@@ -55,7 +60,6 @@ export default function Button({
 
 const styles = StyleSheet.create({
   primaryButton: {
-    backgroundColor: "#059669",
     padding: 15,
     borderRadius: 12,
     alignItems: "center",
@@ -74,14 +78,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#D1D5DB",
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     gap: 8,
   },
   secondaryButtonText: {
-    color: "#374151",
     fontSize: 16,
     fontWeight: "500",
   },

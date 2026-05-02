@@ -1,84 +1,117 @@
-import { StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useTheme, ThemePreference } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+
+const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
+  { label: "System", value: "system" },
+  { label: "Light", value: "light" },
+  { label: "Dark", value: "dark" },
+];
 
 export default function ProfileScreen() {
+  const { colors, themePreference, setThemePreference } = useTheme();
+  const { logout } = useAuth();
+  const styles = getStyles(colors);
+
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedView style={styles.profileImageContainer}>
+        <View style={styles.profileImageContainer}>
           <IconSymbol size={60} name="person.fill" color="#FFFFFF" />
-        </ThemedView>
+        </View>
         <ThemedText type="title">John Volunteer</ThemedText>
         <ThemedText type="subtitle">Volunteer since 2024</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.content}>
         <ThemedView style={styles.statsSection}>
-          <ThemedView style={styles.statCard}>
+          <View style={styles.statCard}>
             <ThemedText style={styles.statNumber}>12</ThemedText>
             <ThemedText style={styles.statLabel}>Events</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.statCard}>
+          </View>
+          <View style={styles.statCard}>
             <ThemedText style={styles.statNumber}>48</ThemedText>
             <ThemedText style={styles.statLabel}>Hours</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.statCard}>
+          </View>
+          <View style={styles.statCard}>
             <ThemedText style={styles.statNumber}>5</ThemedText>
-            <ThemedText style={styles.statLabel}>Organizations</ThemedText>
-          </ThemedView>
+            <ThemedText style={styles.statLabel}>Orgs</ThemedText>
+          </View>
+        </ThemedView>
+
+        {/* Theme selector */}
+        <ThemedView style={styles.section}>
+          <ThemedText type="subtitle">Appearance</ThemedText>
+          <View style={styles.themeSelector}>
+            {THEME_OPTIONS.map((opt) => {
+              const active = themePreference === opt.value;
+              return (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.themeOption, active && styles.themeOptionActive]}
+                  onPress={() => setThemePreference(opt.value)}
+                >
+                  <ThemedText
+                    style={[
+                      styles.themeOptionText,
+                      active && styles.themeOptionTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </ThemedText>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </ThemedView>
 
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Account</ThemedText>
-          <ThemedView style={styles.menuList}>
+          <View style={styles.menuList}>
             <TouchableOpacity style={styles.menuItem}>
-              <IconSymbol size={20} name="person.circle" color="#6B7280" />
+              <IconSymbol size={20} name="person.circle" color={colors.icon} />
               <ThemedText style={styles.menuText}>Edit Profile</ThemedText>
-              <IconSymbol size={16} name="chevron.right" color="#9CA3AF" />
+              <IconSymbol size={16} name="chevron.right" color={colors.textTertiary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.menuItem}>
-              <IconSymbol size={20} name="bell" color="#6B7280" />
+              <IconSymbol size={20} name="bell" color={colors.icon} />
               <ThemedText style={styles.menuText}>Notifications</ThemedText>
-              <IconSymbol size={16} name="chevron.right" color="#9CA3AF" />
+              <IconSymbol size={16} name="chevron.right" color={colors.textTertiary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <IconSymbol size={20} name="shield" color="#6B7280" />
-              <ThemedText style={styles.menuText}>
-                Privacy & Security
-              </ThemedText>
-              <IconSymbol size={16} name="chevron.right" color="#9CA3AF" />
+            <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]}>
+              <IconSymbol size={20} name="shield" color={colors.icon} />
+              <ThemedText style={styles.menuText}>Privacy & Security</ThemedText>
+              <IconSymbol size={16} name="chevron.right" color={colors.textTertiary} />
             </TouchableOpacity>
-          </ThemedView>
+          </View>
         </ThemedView>
 
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Support</ThemedText>
-          <ThemedView style={styles.menuList}>
+          <View style={styles.menuList}>
             <TouchableOpacity style={styles.menuItem}>
-              <IconSymbol
-                size={20}
-                name="questionmark.circle"
-                color="#6B7280"
-              />
+              <IconSymbol size={20} name="questionmark.circle" color={colors.icon} />
               <ThemedText style={styles.menuText}>Help Center</ThemedText>
-              <IconSymbol size={16} name="chevron.right" color="#9CA3AF" />
+              <IconSymbol size={16} name="chevron.right" color={colors.textTertiary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
-              <IconSymbol size={20} name="envelope" color="#6B7280" />
+            <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]}>
+              <IconSymbol size={20} name="envelope" color={colors.icon} />
               <ThemedText style={styles.menuText}>Contact Us</ThemedText>
-              <IconSymbol size={16} name="chevron.right" color="#9CA3AF" />
+              <IconSymbol size={16} name="chevron.right" color={colors.textTertiary} />
             </TouchableOpacity>
-          </ThemedView>
+          </View>
         </ThemedView>
 
         <ThemedView style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton}>
-            <IconSymbol size={20} name="arrow.right.square" color="#EF4444" />
+          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+            <IconSymbol size={20} name="arrow.right.square" color={colors.danger} />
             <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
           </TouchableOpacity>
         </ThemedView>
@@ -87,98 +120,126 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    padding: 20,
-    paddingTop: 20,
-    alignItems: "center",
-    gap: 10,
-  },
-  profileImageContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#10B981",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  content: {
-    padding: 20,
-    gap: 25,
-  },
-  statsSection: {
-    flexDirection: "row",
-    gap: 15,
-  },
-  statCard: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    alignItems: "center",
-    gap: 5,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#10B981",
-  },
-  statLabel: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  section: {
-    gap: 15,
-  },
-  menuList: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
+    header: {
+      padding: 20,
+      paddingTop: 20,
+      alignItems: "center",
+      gap: 10,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    gap: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  menuText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    gap: 10,
-    backgroundColor: "#FEF2F2",
-    borderWidth: 1,
-    borderColor: "#FECACA",
-    borderRadius: 12,
-  },
-  logoutText: {
-    color: "#EF4444",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
+    profileImageContainer: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: colors.profileAvatar,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    content: {
+      padding: 20,
+      gap: 25,
+    },
+    statsSection: {
+      flexDirection: "row",
+      gap: 15,
+    },
+    statCard: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      alignItems: "center",
+      gap: 5,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    statNumber: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.tint,
+    },
+    statLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    section: {
+      gap: 15,
+    },
+    themeSelector: {
+      flexDirection: "row",
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+      overflow: "hidden",
+    },
+    themeOption: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: "center",
+      backgroundColor: colors.cardBackground,
+    },
+    themeOptionActive: {
+      backgroundColor: colors.primary,
+    },
+    themeOptionText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: colors.textSecondary,
+    },
+    themeOptionTextActive: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+    },
+    menuList: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    menuItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 16,
+      gap: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderSubtle,
+    },
+    menuItemLast: {
+      borderBottomWidth: 0,
+    },
+    menuText: {
+      flex: 1,
+      fontSize: 16,
+    },
+    logoutButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 16,
+      gap: 10,
+      backgroundColor: colors.dangerSubtle,
+      borderWidth: 1,
+      borderColor: colors.dangerBorder,
+      borderRadius: 12,
+    },
+    logoutText: {
+      color: colors.danger,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+  });
+}
