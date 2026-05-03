@@ -73,7 +73,7 @@ export default function ReportIncidentScreen() {
     }
     const remaining = 5 - photos.length;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images" as const,
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       quality: 0.8,
