@@ -74,7 +74,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="alerts"
+          name="incidents"
           options={{
             title: "Incidents",
             tabBarIcon: ({ color, focused }) => (

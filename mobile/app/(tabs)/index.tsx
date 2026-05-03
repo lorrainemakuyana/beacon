@@ -55,7 +55,7 @@ export default function HomeScreen() {
           </View>
           <TouchableOpacity
             style={styles.reportIncidentBtn}
-            onPress={() => router.push("/(tabs)/alerts")}
+            onPress={() => router.push("/(tabs)/incidents")}
           >
             <IconSymbol
               size={14}
@@ -102,7 +102,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => router.push("/(tabs)/alerts")}
+            onPress={() => router.push("/(tabs)/incidents")}
           >
             <IconSymbol
               size={28}
