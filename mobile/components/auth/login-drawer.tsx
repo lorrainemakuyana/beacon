@@ -12,7 +12,7 @@ import { ThemedText } from "@/components/themed-text";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Button from "../button";
 import { useAuth } from "@/context/AuthContext";
-import { validateLoginData } from "@/firebase/services/auth";
+import { validateLoginData } from "@/utils/validations";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 
