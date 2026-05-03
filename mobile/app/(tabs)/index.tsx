@@ -39,10 +39,18 @@ export default function HomeScreen() {
           activeOpacity={0.8}
         >
           <View style={styles.checkedInBannerLeft}>
-            <IconSymbol size={20} name="checkmark.circle.fill" color={colors.tint} />
+            <IconSymbol
+              size={20}
+              name="checkmark.circle.fill"
+              color={colors.tint}
+            />
             <View>
-              <Text style={styles.checkedInBannerLabel}>Currently Checked In</Text>
-              <Text style={styles.checkedInBannerTitle}>{activeEvent.title}</Text>
+              <Text style={styles.checkedInBannerLabel}>
+                Currently Checked In
+              </Text>
+              <Text style={styles.checkedInBannerTitle}>
+                {activeEvent.title}
+              </Text>
             </View>
           </View>
           <TouchableOpacity
@@ -50,11 +58,18 @@ export default function HomeScreen() {
             onPress={() =>
               router.push({
                 pathname: "/report-incident",
-                params: { shiftId: activeCheckIn.shiftId, eventId: activeCheckIn.eventId },
+                params: {
+                  shiftId: activeCheckIn.shiftId,
+                  eventId: activeCheckIn.eventId,
+                },
               })
             }
           >
-            <IconSymbol size={14} name="exclamationmark.triangle.fill" color="#FFFFFF" />
+            <IconSymbol
+              size={14}
+              name="exclamationmark.triangle.fill"
+              color="#FFFFFF"
+            />
             <Text style={styles.reportIncidentBtnText}>Report</Text>
           </TouchableOpacity>
         </TouchableOpacity>
@@ -77,10 +92,21 @@ export default function HomeScreen() {
       {/* Quick actions — 3 items */}
       <View style={styles.quickActions}>
         <View style={styles.actionsRow}>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/events")}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push("/(tabs)/events")}
+          >
             <IconSymbol size={28} name="magnifyingglass" color={colors.tint} />
             <ThemedText style={styles.actionText}>Find Shifts</ThemedText>
           </TouchableOpacity>
+
+          {/* <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push("/(tabs)/schedule")}
+          >
+            <IconSymbol size={28} name="calendar" color={colors.tint} />
+            <ThemedText style={styles.actionText}>My Schedule</ThemedText>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.actionCard}
@@ -88,18 +114,20 @@ export default function HomeScreen() {
               router.push({
                 pathname: "/report-incident",
                 params: activeCheckIn
-                  ? { shiftId: activeCheckIn.shiftId, eventId: activeCheckIn.eventId }
+                  ? {
+                      shiftId: activeCheckIn.shiftId,
+                      eventId: activeCheckIn.eventId,
+                    }
                   : {},
               })
             }
           >
-            <IconSymbol size={28} name="exclamationmark.triangle.fill" color={colors.danger} />
+            <IconSymbol
+              size={28}
+              name="exclamationmark.triangle.fill"
+              color={colors.danger}
+            />
             <ThemedText style={styles.actionText}>Report Incident</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/schedule")}>
-            <IconSymbol size={28} name="calendar" color={colors.tint} />
-            <ThemedText style={styles.actionText}>My Schedule</ThemedText>
           </TouchableOpacity>
         </View>
       </View>
@@ -118,7 +146,14 @@ export default function HomeScreen() {
             today.map((shift) => {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
-              return <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
             })
           )}
         </View>
@@ -133,7 +168,14 @@ export default function HomeScreen() {
             thisWeek.map((shift) => {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
-              return <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
             })
           )}
         </View>
@@ -144,21 +186,38 @@ export default function HomeScreen() {
             {later.map((shift) => {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
-              return <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} />;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
             })}
           </View>
         )}
       </View>
 
-      {/* Past shifts at the end */}
+      {/* Past shifts at the end — greyed out */}
       {past.length > 0 && (
-        <View style={styles.section}>
+        <View style={[styles.section, styles.pastSection]}>
           <ThemedText type="subtitle">Past Shifts</ThemedText>
-          {past.map((shift) => {
-            const event = eventsMap[shift.eventId];
-            if (!event) return null;
-            return <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} isPast />;
-          })}
+          <View style={styles.pastContent}>
+            {past.map((shift) => {
+              const event = eventsMap[shift.eventId];
+              if (!event) return null;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                  isPast
+                />
+              );
+            })}
+          </View>
         </View>
       )}
     </ScrollView>
@@ -306,6 +365,12 @@ function getStyles(colors: ThemeColors) {
     emptyText: {
       fontSize: 14,
       color: colors.textTertiary,
+    },
+    pastSection: {
+      paddingBottom: 30,
+    },
+    pastContent: {
+      opacity: 0.45,
     },
   });
 }
