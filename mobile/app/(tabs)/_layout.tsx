@@ -46,11 +46,7 @@ export default function TabLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={24}
-                name="house.fill"
-                color={focused ? colors.tabIconSelected : color}
-              />
+              <IconSymbol size={24} name="house.fill" color={focused ? colors.tabIconSelected : color} />
             ),
           }}
         />
@@ -59,11 +55,7 @@ export default function TabLayout() {
           options={{
             title: "Events",
             tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={24}
-                name="calendar.badge.plus"
-                color={focused ? colors.tabIconSelected : color}
-              />
+              <IconSymbol size={24} name="calendar.badge.plus" color={focused ? colors.tabIconSelected : color} />
             ),
           }}
         />
@@ -82,36 +74,26 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="schedule"
-          options={{
-            title: "Schedule",
-            tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={24}
-                name="calendar"
-                color={focused ? colors.tabIconSelected : color}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="alerts"
           options={{
             title: "Alerts",
             tabBarIcon: ({ color, focused }) => (
-              <IconSymbol
-                size={24}
-                name="bell.fill"
-                color={focused ? colors.tabIconSelected : color}
-              />
+              <IconSymbol size={24} name="bell.fill" color={focused ? colors.tabIconSelected : color} />
             ),
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
-            href: null,
+            title: "Profile",
+            tabBarIcon: ({ color, focused }) => (
+              <IconSymbol size={24} name="person.fill" color={focused ? colors.tabIconSelected : color} />
+            ),
           }}
+        />
+        <Tabs.Screen
+          name="schedule"
+          options={{ href: null }}
         />
       </Tabs>
     </View>
@@ -135,10 +117,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#059669",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.7,
     shadowRadius: 4.65,
     elevation: 8,

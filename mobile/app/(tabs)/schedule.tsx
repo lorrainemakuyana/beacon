@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 
-function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
+export function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
   const now = new Date();
   const todayStart = new Date(now);
   todayStart.setHours(0, 0, 0, 0);
@@ -15,18 +15,20 @@ function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
   const weekEnd = new Date(todayEnd);
   weekEnd.setDate(weekEnd.getDate() + 6);
 
+  const past: typeof shifts = [];
   const today: typeof shifts = [];
   const thisWeek: typeof shifts = [];
   const later: typeof shifts = [];
 
   for (const s of shifts) {
     const d = s.timeSlot.start.toDate();
-    if (d < todayStart) continue;
-    if (d <= todayEnd) today.push(s);
+    if (d < todayStart) past.push(s);
+    else if (d <= todayEnd) today.push(s);
     else if (d <= weekEnd) thisWeek.push(s);
     else later.push(s);
   }
-  return { today, thisWeek, later };
+  past.sort((a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis());
+  return { past, today, thisWeek, later };
 }
 
 function EmptySlot({ label, styles }: { label: string; styles: ReturnType<typeof getStyles> }) {
@@ -42,7 +44,7 @@ export default function ScheduleScreen() {
   const { shifts, eventsMap } = useUserShifts(user?.uid);
   const { colors } = useTheme();
 
-  const { today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
+  const { past, today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
   const styles = getStyles(colors);
 
   return (
@@ -91,6 +93,19 @@ export default function ScheduleScreen() {
           })
         )}
       </View>
+
+      {past.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Past Shifts</Text>
+          {past.map((shift) => {
+            const event = eventsMap[shift.eventId];
+            if (!event) return null;
+            return (
+              <ShiftCard key={shift.id} shift={shift} event={event} userId={user?.uid} isPast />
+            );
+          })}
+        </View>
+      )}
     </ScrollView>
   );
 }

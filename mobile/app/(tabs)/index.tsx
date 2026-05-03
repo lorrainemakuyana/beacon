@@ -10,36 +10,77 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
-import { router } from "expo-router";
 import { calculateDayStreak, getGreeting } from "@/utils/date";
 import { ShiftCard } from "@/components/shift/shift-card";
 import { useUserShifts } from "@/hooks/useUserShifts";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
+import { router } from "expo-router";
+import { useCheckIn } from "@/hooks/useCheckIn";
+import { bucket } from "@/app/(tabs)/schedule";
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const { shifts, eventsMap } = useUserShifts(user?.uid);
   const { colors } = useTheme();
+  const { activeCheckIn, activeEvent } = useCheckIn(user?.uid);
 
-  const pastShifts = useMemo(() => {
-    const todayMs = new Date().setHours(0, 0, 0, 0);
-    return shifts
-      .filter((s) => s.timeSlot.start.toMillis() < todayMs)
-      .sort((a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis());
-  }, [shifts]);
-
+  const { past, today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
   const greeting = useMemo(() => getGreeting(new Date()), []);
   const styles = getStyles(colors);
 
   return (
     <ScrollView style={styles.container}>
+      {/* Checked-in event banner */}
+      {activeCheckIn && activeEvent && (
+        <TouchableOpacity
+          style={styles.checkedInBanner}
+          onPress={() => router.push(`/event/${activeEvent.id}`)}
+          activeOpacity={0.8}
+        >
+          <View style={styles.checkedInBannerLeft}>
+            <IconSymbol
+              size={20}
+              name="checkmark.circle.fill"
+              color={colors.tint}
+            />
+            <View>
+              <Text style={styles.checkedInBannerLabel}>
+                Currently Checked In
+              </Text>
+              <Text style={styles.checkedInBannerTitle}>
+                {activeEvent.title}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            style={styles.reportIncidentBtn}
+            onPress={() =>
+              router.push({
+                pathname: "/report-incident",
+                params: {
+                  shiftId: activeCheckIn.shiftId,
+                  eventId: activeCheckIn.eventId,
+                },
+              })
+            }
+          >
+            <IconSymbol
+              size={14}
+              name="exclamationmark.triangle.fill"
+              color="#FFFFFF"
+            />
+            <Text style={styles.reportIncidentBtnText}>Report</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
+
+      {/* Greeting + streak */}
       <View style={styles.streakContainer}>
         <View style={styles.textBlock}>
           <Text style={styles.greeting}>{greeting},</Text>
           <Text style={styles.name}>{user?.displayName}!</Text>
         </View>
-
         <View style={styles.streakPill}>
           <Ionicons name="flame" size={18} color="#EA580C" />
           <Text style={styles.streakText}>
@@ -48,80 +89,137 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* Quick actions — 3 items */}
       <View style={styles.quickActions}>
-        <View style={styles.actionsGrid}>
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/events")}>
-            <IconSymbol size={32} name="calendar.badge.plus" color={colors.tint} />
-            <ThemedText style={styles.actionText}>Find Events</ThemedText>
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push("/(tabs)/events")}
+          >
+            <IconSymbol size={28} name="magnifyingglass" color={colors.tint} />
+            <ThemedText style={styles.actionText}>Find Shifts</ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/check-in")}>
-            <IconSymbol size={32} name="qrcode" color={colors.tint} />
-            <ThemedText style={styles.actionText}>Check-In</ThemedText>
-          </TouchableOpacity>
+          {/* <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push("/(tabs)/schedule")}
+          >
+            <IconSymbol size={28} name="calendar" color={colors.tint} />
+            <ThemedText style={styles.actionText}>My Schedule</ThemedText>
+          </TouchableOpacity> */}
 
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/alerts")}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() =>
+              router.push({
+                pathname: "/report-incident",
+                params: activeCheckIn
+                  ? {
+                      shiftId: activeCheckIn.shiftId,
+                      eventId: activeCheckIn.eventId,
+                    }
+                  : {},
+              })
+            }
+          >
             <IconSymbol
-              size={32}
-              name="exclamationmark.triangle"
-              color={colors.warning}
+              size={28}
+              name="exclamationmark.triangle.fill"
+              color={colors.danger}
             />
-            <ThemedText style={styles.actionText}>Report Issue</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/schedule")}>
-            <IconSymbol size={32} name="clock" color={colors.icon} />
-            <ThemedText style={styles.actionText}>My Hours</ThemedText>
+            <ThemedText style={styles.actionText}>Report Incident</ThemedText>
           </TouchableOpacity>
         </View>
       </View>
 
-      {pastShifts.length > 0 && (
-        <View style={styles.section}>
+      {/* Upcoming schedule */}
+      <View style={styles.section}>
+        <ThemedText type="subtitle">My Schedule</ThemedText>
+
+        <View style={styles.scheduleGroup}>
+          <Text style={styles.sectionLabel}>Today</Text>
+          {today.length === 0 ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>No shifts today</Text>
+            </View>
+          ) : (
+            today.map((shift) => {
+              const event = eventsMap[shift.eventId];
+              if (!event) return null;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
+            })
+          )}
+        </View>
+
+        <View style={styles.scheduleGroup}>
+          <Text style={styles.sectionLabel}>This Week</Text>
+          {thisWeek.length === 0 ? (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>No shifts this week</Text>
+            </View>
+          ) : (
+            thisWeek.map((shift) => {
+              const event = eventsMap[shift.eventId];
+              if (!event) return null;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
+            })
+          )}
+        </View>
+
+        {later.length > 0 && (
+          <View style={styles.scheduleGroup}>
+            <Text style={styles.sectionLabel}>Later</Text>
+            {later.map((shift) => {
+              const event = eventsMap[shift.eventId];
+              if (!event) return null;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                />
+              );
+            })}
+          </View>
+        )}
+      </View>
+
+      {/* Past shifts at the end — greyed out */}
+      {past.length > 0 && (
+        <View style={[styles.section, styles.pastSection]}>
           <ThemedText type="subtitle">Past Shifts</ThemedText>
-          {pastShifts.map((shift) => {
-            const event = eventsMap[shift.eventId];
-            if (!event) return null;
-            return (
-              <ShiftCard
-                event={event}
-                shift={shift}
-                key={shift.id}
-                userId={user?.uid}
-                isPast
-              />
-            );
-          })}
+          <View style={styles.pastContent}>
+            {past.map((shift) => {
+              const event = eventsMap[shift.eventId];
+              if (!event) return null;
+              return (
+                <ShiftCard
+                  key={shift.id}
+                  shift={shift}
+                  event={event}
+                  userId={user?.uid}
+                  isPast
+                />
+              );
+            })}
+          </View>
         </View>
       )}
-
-      {/* <View style={styles.section}>
-        <ThemedText type="subtitle">Recent Activity</ThemedText>
-        <View style={styles.activityList}>
-          <View style={styles.activityItem}>
-            <IconSymbol
-              size={16}
-              name="checkmark.circle.fill"
-              color={colors.tint}
-            />
-            <ThemedText style={styles.activityText}>
-              Completed shift at Animal Shelter
-            </ThemedText>
-          </View>
-          <View style={styles.activityItem}>
-            <IconSymbol size={16} name="calendar.badge.plus" color={colors.info} />
-            <ThemedText style={styles.activityText}>
-              Signed up for Beach Cleanup
-            </ThemedText>
-          </View>
-          <View style={styles.activityItem}>
-            <IconSymbol size={16} name="heart.fill" color={colors.danger} />
-            <ThemedText style={styles.activityText}>
-              Liked Community Garden event
-            </ThemedText>
-          </View>
-        </View>
-      </View> */}
     </ScrollView>
   );
 }
@@ -131,6 +229,49 @@ function getStyles(colors: ThemeColors) {
     container: {
       flex: 1,
       backgroundColor: colors.surfaceBackground,
+    },
+    checkedInBanner: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: colors.primarySubtle,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.primarySubtleBorder,
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+    },
+    checkedInBannerLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      flex: 1,
+    },
+    checkedInBannerLabel: {
+      fontSize: 11,
+      fontWeight: "600",
+      color: colors.tint,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    checkedInBannerTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      marginTop: 1,
+    },
+    reportIncidentBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: colors.danger,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 8,
+    },
+    reportIncidentBtnText: {
+      color: "#FFFFFF",
+      fontSize: 12,
+      fontWeight: "600",
     },
     streakContainer: {
       flexDirection: "row",
@@ -172,22 +313,20 @@ function getStyles(colors: ThemeColors) {
       color: "#EA580C",
     },
     quickActions: {
-      gap: 15,
       paddingHorizontal: 20,
-      paddingVertical: 20,
+      paddingBottom: 20,
     },
-    actionsGrid: {
+    actionsRow: {
       flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 15,
+      gap: 12,
     },
     actionCard: {
-      width: "47%",
-      padding: 20,
+      flex: 1,
+      padding: 16,
       backgroundColor: colors.cardBackground,
       borderRadius: 12,
       alignItems: "center",
-      gap: 10,
+      gap: 8,
       borderWidth: 1,
       borderColor: colors.cardBorder,
       shadowColor: "#000",
@@ -197,28 +336,41 @@ function getStyles(colors: ThemeColors) {
       elevation: 2,
     },
     actionText: {
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: "600",
       textAlign: "center",
     },
     section: {
-      gap: 20,
+      gap: 16,
       padding: 20,
+      paddingTop: 0,
     },
-    activityList: {
-      gap: 12,
-    },
-    activityItem: {
-      flexDirection: "row",
-      alignItems: "center",
+    scheduleGroup: {
       gap: 10,
-      padding: 12,
-      backgroundColor: colors.surfaceBackground,
-      borderRadius: 8,
     },
-    activityText: {
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: colors.textTertiary,
+      textTransform: "uppercase",
+      letterSpacing: 0.8,
+    },
+    empty: {
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      backgroundColor: colors.emptyStateBg,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    emptyText: {
       fontSize: 14,
-      color: colors.textLabel,
+      color: colors.textTertiary,
+    },
+    pastSection: {
+      paddingBottom: 30,
+    },
+    pastContent: {
+      opacity: 0.45,
     },
   });
 }
