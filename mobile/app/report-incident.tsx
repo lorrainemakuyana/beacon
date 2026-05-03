@@ -107,9 +107,7 @@ export default function ReportIncidentScreen() {
           <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Report Incident</Text>
-        <TouchableOpacity style={styles.saveDraftBtn}>
-          <Text style={styles.saveDraftText}>Save Draft</Text>
-        </TouchableOpacity>
+        <View style={styles.saveDraftBtn} />
       </View>
 
       <ScrollView
@@ -338,12 +336,7 @@ function getStyles(colors: ThemeColors) {
       color: colors.textPrimary,
     },
     saveDraftBtn: {
-      paddingHorizontal: 4,
-    },
-    saveDraftText: {
-      fontSize: 15,
-      fontWeight: "500",
-      color: colors.tint,
+      width: 40,
     },
     scroll: {
       flex: 1,
