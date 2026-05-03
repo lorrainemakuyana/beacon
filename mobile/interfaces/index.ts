@@ -96,6 +96,7 @@ export interface Incident {
   reporterId: string;
   title: string;
   description: string;
+  location?: string;
   severity: IncidentSeverity;
   category: IncidentCategory;
   photos?: string[]; // Storage URLs

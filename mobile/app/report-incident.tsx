@@ -19,6 +19,8 @@ import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useUserShifts } from "@/hooks/useUserShifts";
 import { useAuth } from "@/context/AuthContext";
+import { reportIncident } from "@/firebase/services/incidents";
+import { IncidentCategory, IncidentSeverity } from "@/interfaces";
 
 type IncidentType = "Safety Hazard" | "Equipment Issue" | "Behavioral Concern" | "Medical Emergency" | "Other";
 type Severity = "Low" | "Medium" | "High" | "Critical";
@@ -58,15 +60,35 @@ export default function ReportIncidentScreen() {
   const selectedShift = shifts.find((s) => s.id === selectedShiftId);
   const selectedEvent = selectedShift ? eventsMap[selectedShift.eventId] : null;
 
+  const CATEGORY_MAP: Record<IncidentType, IncidentCategory> = {
+    "Safety Hazard": "safety",
+    "Equipment Issue": "equipment",
+    "Behavioral Concern": "volunteer",
+    "Medical Emergency": "safety",
+    "Other": "other",
+  };
+
   const handleSubmit = async () => {
     if (!incidentType) { Alert.alert("Required", "Please select a type of incident."); return; }
     if (!severity) { Alert.alert("Required", "Please select a severity level."); return; }
     if (!description.trim()) { Alert.alert("Required", "Please describe what happened."); return; }
+    if (!user) { Alert.alert("Error", "You must be signed in to report an incident."); return; }
+
+    const resolvedEventId = eventId ?? selectedShift?.eventId ?? "";
+    if (!resolvedEventId) { Alert.alert("Required", "Please select a related shift or open this screen from an event."); return; }
 
     setSubmitting(true);
     try {
-      // Submission logic goes here
-      await new Promise((r) => setTimeout(r, 800));
+      await reportIncident({
+        eventId: resolvedEventId,
+        shiftId: selectedShiftId || undefined,
+        reporterId: user.uid,
+        title: incidentType,
+        description: description.trim(),
+        location: location.trim() || undefined,
+        severity: severity.toLowerCase() as IncidentSeverity,
+        category: CATEGORY_MAP[incidentType],
+      });
       Alert.alert("Report Submitted", "Your incident report has been sent.", [
         { text: "OK", onPress: () => router.back() },
       ]);
