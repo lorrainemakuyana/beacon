@@ -15,6 +15,8 @@ import { Timestamp } from "firebase/firestore";
 import { Shift } from "@/interfaces";
 import { ThemedText } from "@/components/themed-text";
 import { useShiftDetail } from "@/hooks/useShiftDetail";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
 
 const STATUS_CONFIG: Record<
   Shift["status"],
@@ -60,10 +62,7 @@ function formatDetailDate(date: Date): string {
 }
 
 function formatTimeRange(start: Timestamp, end: Timestamp): string {
-  const opts: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
-  };
+  const opts: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit" };
   return `${start.toDate().toLocaleTimeString([], opts)} - ${end.toDate().toLocaleTimeString([], opts)}`;
 }
 
@@ -75,8 +74,10 @@ function getDuration(start: Timestamp, end: Timestamp): string {
 export default function ShiftDetailsScreen() {
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
-
   const { shift, event, teamUsers } = useShiftDetail(id ?? "");
+  const { colors } = useTheme();
+
+  const styles = getStyles(colors);
 
   if (!shift || !event) {
     return (
@@ -109,9 +110,7 @@ export default function ShiftDetailsScreen() {
   const teamCount = teamMembers.length;
 
   function handleGetDirections() {
-    const query = encodeURIComponent(
-      `${event!.location}, ${event!.address ?? ""}`,
-    );
+    const query = encodeURIComponent(`${event!.location}, ${event!.address ?? ""}`);
     Linking.openURL(`https://maps.apple.com/?q=${query}`);
   }
 
@@ -133,28 +132,20 @@ export default function ShiftDetailsScreen() {
       "Are you sure you want to cancel this shift? This action cannot be undone.",
       [
         { text: "Keep Shift", style: "cancel" },
-        {
-          text: "Cancel Shift",
-          style: "destructive",
-          onPress: () => router.back(),
-        },
+        { text: "Cancel Shift", style: "destructive", onPress: () => router.back() },
       ],
     );
   }
 
   return (
     <View style={styles.screen}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 5 }]}>
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <ThemedText type="subtitle">Shift Details</ThemedText>
         <TouchableOpacity style={styles.headerBtn}>
-          <Ionicons name="ellipsis-horizontal" size={22} color="#0F172A" />
+          <Ionicons name="ellipsis-horizontal" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -163,7 +154,6 @@ export default function ShiftDetailsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Event info card */}
         <View style={styles.card}>
           <View style={styles.eventCardHeader}>
             <View>
@@ -175,17 +165,13 @@ export default function ShiftDetailsScreen() {
               </View>
             </View>
             <View style={styles.eventIcon}>
-              <MaterialCommunityIcons
-                name="package-variant-closed"
-                size={22}
-                color="#64748B"
-              />
+              <MaterialCommunityIcons name="package-variant-closed" size={22} color={colors.icon} />
             </View>
           </View>
 
           <View style={styles.infoRow}>
             <View style={styles.squareIcon}>
-              <Ionicons name="calendar-outline" size={24} color="#64748B" />
+              <Ionicons name="calendar-outline" size={24} color={colors.icon} />
             </View>
             <View>
               <Text style={styles.infoLabel}>Date</Text>
@@ -195,9 +181,8 @@ export default function ShiftDetailsScreen() {
 
           <View style={styles.infoRow}>
             <View style={styles.squareIcon}>
-              <Feather name="clock" size={24} color="#64748B" />
+              <Feather name="clock" size={24} color={colors.icon} />
             </View>
-
             <View>
               <Text style={styles.infoLabel}>Time</Text>
               <Text style={styles.infoValue}>{timeRange}</Text>
@@ -205,11 +190,10 @@ export default function ShiftDetailsScreen() {
           </View>
         </View>
 
-        {/* Location */}
         <Text style={styles.sectionTitle}>Location</Text>
         <View style={styles.card}>
           <View style={styles.locationHeader}>
-            <Ionicons name="location" size={30} color="#059669" />
+            <Ionicons name="location" size={30} color={colors.primary} />
             <View style={styles.locationText}>
               <Text style={styles.locationName}>{event.location}</Text>
               {event.address && (
@@ -218,25 +202,20 @@ export default function ShiftDetailsScreen() {
             </View>
           </View>
 
-          {/* Map placeholder */}
           <View style={styles.mapPlaceholder}>
-            <Ionicons name="image-outline" size={36} color="#CBD5E1" />
+            <Ionicons name="image-outline" size={36} color={colors.textTertiary} />
           </View>
 
-          <TouchableOpacity
-            style={styles.directionsBtn}
-            onPress={handleGetDirections}
-          >
-            <Feather name="navigation" size={16} color="#374151" />
+          <TouchableOpacity style={styles.directionsBtn} onPress={handleGetDirections}>
+            <Feather name="navigation" size={16} color={colors.textLabel} />
             <Text style={styles.directionsBtnText}>Get Directions</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Shift Information */}
         <Text style={styles.sectionTitle}>Shift Information</Text>
         <View style={styles.card}>
           <View style={styles.infoRow}>
-            <Ionicons name="person-outline" size={24} color="#64748B" />
+            <Ionicons name="person-outline" size={24} color={colors.icon} />
             <View>
               <Text style={styles.infoLabel}>Your Role</Text>
               <Text style={styles.infoValue}>{roleTitle}</Text>
@@ -245,12 +224,7 @@ export default function ShiftDetailsScreen() {
 
           {tasks.length > 0 && (
             <View style={styles.tasksRow}>
-              <Ionicons
-                name="clipboard-outline"
-                size={24}
-                color="#64748B"
-                style={styles.tasksIcon}
-              />
+              <Ionicons name="clipboard-outline" size={24} color={colors.icon} style={styles.tasksIcon} />
               <View style={styles.tasksContent}>
                 <Text style={styles.infoLabel}>Tasks</Text>
                 {tasks.map((task, i) => (
@@ -264,7 +238,7 @@ export default function ShiftDetailsScreen() {
           )}
 
           <View style={styles.infoRow}>
-            <Ionicons name="hourglass-outline" size={24} color="#64748B" />
+            <Ionicons name="hourglass-outline" size={24} color={colors.icon} />
             <View>
               <Text style={styles.infoLabel}>Duration</Text>
               <Text style={styles.infoValue}>{duration}</Text>
@@ -282,27 +256,17 @@ export default function ShiftDetailsScreen() {
                   </Text>
                 </View>
                 <View style={styles.organizerInfo}>
-                  <Text style={styles.organizerName}>
-                    {event.organizer.name}
-                  </Text>
-                  <Text style={styles.organizerTitle}>
-                    {event.organizer.title}
-                  </Text>
+                  <Text style={styles.organizerName}>{event.organizer.name}</Text>
+                  <Text style={styles.organizerTitle}>{event.organizer.title}</Text>
                 </View>
               </View>
               <View style={styles.contactRow}>
-                <TouchableOpacity
-                  style={styles.contactBtn}
-                  onPress={handleCall}
-                >
-                  <Ionicons name="call" size={16} color="#374151" />
+                <TouchableOpacity style={styles.contactBtn} onPress={handleCall}>
+                  <Ionicons name="call" size={16} color={colors.textLabel} />
                   <Text style={styles.contactBtnText}>Call</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.contactBtn}
-                  onPress={handleEmail}
-                >
-                  <Ionicons name="mail" size={16} color="#374151" />
+                <TouchableOpacity style={styles.contactBtn} onPress={handleEmail}>
+                  <Ionicons name="mail" size={16} color={colors.textLabel} />
                   <Text style={styles.contactBtnText}>Email</Text>
                 </TouchableOpacity>
               </View>
@@ -310,7 +274,6 @@ export default function ShiftDetailsScreen() {
           )}
         </View>
 
-        {/* Your Team */}
         <View style={styles.teamHeader}>
           <Text style={styles.sectionTitle}>Your Team</Text>
           <Text style={styles.teamCount}>{teamCount} volunteers</Text>
@@ -319,9 +282,7 @@ export default function ShiftDetailsScreen() {
           <View style={styles.teamRow}>
             {teamMembers.map((member) => (
               <View key={member.uid} style={styles.teamMember}>
-                <View
-                  style={[styles.teamAvatar, { backgroundColor: member.bg }]}
-                >
+                <View style={[styles.teamAvatar, { backgroundColor: member.bg, borderColor: colors.cardBackground }]}>
                   <Text style={[styles.teamInitial, { color: member.fg }]}>
                     {member.initial}
                   </Text>
@@ -332,7 +293,6 @@ export default function ShiftDetailsScreen() {
           </View>
         </View>
 
-        {/* Actions */}
         {isToday && (
           <TouchableOpacity
             style={styles.checkInBtn}
@@ -351,328 +311,321 @@ export default function ShiftDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  notFoundText: {
-    fontSize: 16,
-    color: "#374151",
-  },
-  backLink: {
-    fontSize: 15,
-    color: "#059669",
-    fontWeight: "600",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  headerBtn: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-    gap: 12,
-  },
-  card: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-    gap: 12,
-  },
-  eventCardHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  eventTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0F172A",
-    flex: 1,
-    marginRight: 12,
-  },
-  eventIcon: {
-    backgroundColor: "#F1F5F9",
-    padding: 10,
-    borderRadius: 12,
-  },
-  badge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginTop: 6,
-  },
-  badgeText: {
-    fontWeight: "600",
-    fontSize: 13,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    marginTop: 5,
-  },
-  squareIcon: {
-    width: 35,
-    height: 35,
-    backgroundColor: "rgba(5, 150, 105, 0.1)",
-    borderRadius: 8,
-    marginTop: 2,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 3,
-  },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#0F172A",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0F172A",
-    marginTop: 8,
-  },
-  locationHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  locationText: {
-    flex: 1,
-  },
-  locationName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-  locationAddress: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  mapPlaceholder: {
-    height: 140,
-    backgroundColor: "#F1F5F9",
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  directionsBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
-  },
-  directionsBtnText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#374151",
-  },
-  tasksRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  tasksIcon: {
-    marginTop: 2,
-  },
-  tasksContent: {
-    flex: 1,
-    gap: 4,
-  },
-  taskItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 6,
-  },
-  taskBullet: {
-    fontSize: 14,
-    color: "#6B7280",
-    lineHeight: 20,
-  },
-  taskText: {
-    fontSize: 14,
-    color: "#374151",
-    flex: 1,
-    lineHeight: 20,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E2E8F0",
-  },
-  organizerLabel: {
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-  organizerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  organizerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#DCFCE7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  organizerInitial: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#166534",
-  },
-  organizerInfo: {
-    flex: 1,
-  },
-  organizerName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0F172A",
-  },
-  organizerTitle: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginTop: 2,
-  },
-  contactRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  contactBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
-  },
-  contactBtnText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#374151",
-  },
-  teamHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 4,
-  },
-  teamCount: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
-  },
-  teamRow: {
-    flexDirection: "row",
-    gap: 16,
-    flexWrap: "wrap",
-  },
-  teamMember: {
-    alignItems: "center",
-    gap: 6,
-  },
-  teamAvatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#F8FAFC",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
-  teamInitial: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  teamName: {
-    fontSize: 11,
-    color: "#374151",
-    textAlign: "center",
-    maxWidth: 60,
-  },
-  checkInBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    backgroundColor: "#059669",
-    paddingVertical: 16,
-    borderRadius: 14,
-    marginTop: 4,
-    shadowColor: "#059669",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  checkInBtnText: {
-    color: "#F8FAFC",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  cancelBtn: {
-    alignItems: "center",
-    paddingVertical: 14,
-  },
-  cancelBtnText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#EF4444",
-  },
-});
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    screen: {
+      flex: 1,
+    },
+    centered: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 12,
+    },
+    notFoundText: {
+      fontSize: 16,
+      color: colors.textLabel,
+    },
+    backLink: {
+      fontSize: 15,
+      color: colors.tint,
+      fontWeight: "600",
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.headerBorder,
+    },
+    headerBtn: {
+      width: 40,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    scroll: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingBottom: 40,
+      gap: 12,
+    },
+    card: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 16,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      shadowColor: "#000",
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+      gap: 12,
+    },
+    eventCardHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      marginBottom: 4,
+    },
+    eventTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      flex: 1,
+      marginRight: 12,
+    },
+    eventIcon: {
+      backgroundColor: colors.emptyStateBg,
+      padding: 10,
+      borderRadius: 12,
+    },
+    badge: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+      marginTop: 6,
+    },
+    badgeText: {
+      fontWeight: "600",
+      fontSize: 13,
+    },
+    infoRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 12,
+      marginTop: 5,
+    },
+    squareIcon: {
+      width: 35,
+      height: 35,
+      backgroundColor: colors.primarySubtle,
+      borderRadius: 8,
+      marginTop: 2,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    infoLabel: {
+      fontSize: 14,
+      color: colors.textTertiary,
+      marginBottom: 3,
+    },
+    infoValue: {
+      fontSize: 15,
+      fontWeight: "500",
+      color: colors.textPrimary,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      marginTop: 8,
+    },
+    locationHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+    },
+    locationText: {
+      flex: 1,
+    },
+    locationName: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    locationAddress: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    mapPlaceholder: {
+      height: 140,
+      backgroundColor: colors.mapPlaceholder,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    directionsBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      paddingVertical: 12,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      backgroundColor: colors.cardBackground,
+    },
+    directionsBtnText: {
+      fontSize: 15,
+      fontWeight: "500",
+      color: colors.textLabel,
+    },
+    tasksRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    tasksIcon: {
+      marginTop: 2,
+    },
+    tasksContent: {
+      flex: 1,
+      gap: 4,
+    },
+    taskItem: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 6,
+    },
+    taskBullet: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+    taskText: {
+      fontSize: 14,
+      color: colors.textLabel,
+      flex: 1,
+      lineHeight: 20,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: colors.cardBorder,
+    },
+    organizerLabel: {
+      fontSize: 14,
+      color: colors.textTertiary,
+    },
+    organizerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    organizerAvatar: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.primarySubtle,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    organizerInitial: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.tint,
+    },
+    organizerInfo: {
+      flex: 1,
+    },
+    organizerName: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.textPrimary,
+    },
+    organizerTitle: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    contactRow: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    contactBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      paddingVertical: 10,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      backgroundColor: colors.cardBackground,
+    },
+    contactBtnText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: colors.textLabel,
+    },
+    teamHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 4,
+    },
+    teamCount: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: "500",
+    },
+    teamRow: {
+      flexDirection: "row",
+      gap: 16,
+      flexWrap: "wrap",
+    },
+    teamMember: {
+      alignItems: "center",
+      gap: 6,
+    },
+    teamAvatar: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 2,
+      shadowColor: "#000",
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 1 },
+      elevation: 1,
+    },
+    teamInitial: {
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    teamName: {
+      fontSize: 11,
+      color: colors.textLabel,
+      textAlign: "center",
+      maxWidth: 60,
+    },
+    checkInBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      backgroundColor: colors.primary,
+      paddingVertical: 16,
+      borderRadius: 14,
+      marginTop: 4,
+      shadowColor: colors.primary,
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+    checkInBtnText: {
+      color: "#FFFFFF",
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    cancelBtn: {
+      alignItems: "center",
+      paddingVertical: 14,
+    },
+    cancelBtnText: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.danger,
+    },
+  });
+}

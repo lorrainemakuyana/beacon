@@ -11,6 +11,8 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import { Shift, Event } from "@/interfaces";
+import { useTheme } from "@/context/ThemeContext";
+import { ThemeColors } from "@/constants/theme";
 
 type Props = {
   shift?: Shift;
@@ -70,6 +72,8 @@ export const ShiftCard = memo(function ShiftCard({
   userId,
   isPast,
 }: Props) {
+  const { colors } = useTheme();
+
   const effectiveStatus = useMemo((): Shift["status"] => {
     if (!shift) return EVENT_STATUS_MAP[event.status] ?? "open";
     if (!isPast) return shift.status;
@@ -103,6 +107,7 @@ export const ShiftCard = memo(function ShiftCard({
 
   const title = shift?.title ?? event.title;
   const roleText = shift?.role?.title ?? null;
+  const styles = getStyles(colors);
 
   return (
     <Pressable
@@ -111,7 +116,6 @@ export const ShiftCard = memo(function ShiftCard({
         shift ? router.push(`/shift/${shift.id}`) : router.push(`/event/${event.id}`)
       }
     >
-      {/* Top row */}
       <View style={styles.headerRow}>
         <View style={[styles.badge, { backgroundColor: statusCfg.bg }]}>
           <Text style={[styles.badgeText, { color: statusCfg.text }]}>
@@ -123,36 +127,31 @@ export const ShiftCard = memo(function ShiftCard({
         <Text style={styles.dateText}>{computedDateLabel}</Text>
 
         <View style={styles.leafIcon}>
-          <Ionicons name="leaf-outline" size={20} color="#64748B" />
+          <Ionicons name="leaf-outline" size={20} color={colors.icon} />
         </View>
       </View>
 
-      {/* Title */}
       <Text style={styles.title}>{title}</Text>
 
-      {/* Time */}
       <View style={styles.row}>
-        <Feather name="clock" size={18} color="#64748B" />
+        <Feather name="clock" size={18} color={colors.icon} />
         <Text style={styles.secondaryText}>{timeRange}</Text>
       </View>
 
-      {/* Location */}
       <View style={styles.row}>
-        <Ionicons name="location-outline" size={18} color="#64748B" />
+        <Ionicons name="location-outline" size={18} color={colors.icon} />
         <Text style={styles.secondaryText}>{event.location}</Text>
       </View>
 
-      {/* Role */}
       {roleText && (
         <View style={styles.row}>
-          <Ionicons name="person-outline" size={18} color="#64748B" />
+          <Ionicons name="person-outline" size={18} color={colors.icon} />
           <Text style={styles.secondaryText}>
             Role: <Text style={styles.roleStrong}>{roleText}</Text>
           </Text>
         </View>
       )}
 
-      {/* Check-In button only for today's shifts */}
       {isToday && (
         <TouchableOpacity style={styles.checkInButton}>
           <Ionicons name="qr-code-outline" size={18} color="#FFFFFF" />
@@ -163,97 +162,84 @@ export const ShiftCard = memo(function ShiftCard({
   );
 });
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#0F172A",
-    marginBottom: 16,
-  },
-  time: {
-    fontSize: 14,
-    color: "#10B981",
-    fontWeight: "500",
-  },
-  location: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  checkInButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#059669",
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 8,
-  },
-  checkInButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 15,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-  },
-  badgeText: {
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  dot: {
-    marginHorizontal: 8,
-    color: "#64748B",
-    fontSize: 18,
-  },
-  dateText: {
-    color: "#64748B",
-    fontSize: 16,
-    flex: 1,
-  },
-  leafIcon: {
-    backgroundColor: "#F1F5F9",
-    padding: 10,
-    borderRadius: 14,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 10,
-  },
-  squareIcon: {
-    width: 18,
-    height: 18,
-    backgroundColor: "#64748B",
-    borderRadius: 3,
-  },
-  secondaryText: {
-    fontSize: 18,
-    color: "#64748B",
-  },
-  roleStrong: {
-    color: "#0F172A",
-    fontWeight: "400",
-  },
-});
+function getStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.cardBackground,
+      borderRadius: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 15,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      shadowColor: "#000",
+      shadowOpacity: 0.06,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.textPrimary,
+      marginBottom: 16,
+    },
+    checkInButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      marginTop: 8,
+    },
+    checkInButtonText: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+      fontSize: 15,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    badge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+    },
+    badgeText: {
+      fontWeight: "600",
+      fontSize: 14,
+    },
+    dot: {
+      marginHorizontal: 8,
+      color: colors.icon,
+      fontSize: 18,
+    },
+    dateText: {
+      color: colors.icon,
+      fontSize: 16,
+      flex: 1,
+    },
+    leafIcon: {
+      backgroundColor: colors.emptyStateBg,
+      padding: 10,
+      borderRadius: 14,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 10,
+    },
+    secondaryText: {
+      fontSize: 18,
+      color: colors.textSecondary,
+    },
+    roleStrong: {
+      color: colors.textPrimary,
+      fontWeight: "400",
+    },
+  });
+}

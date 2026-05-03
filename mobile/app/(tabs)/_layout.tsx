@@ -4,34 +4,36 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AppHeader } from "@/components/app-header";
+import { useTheme } from "@/context/ThemeContext";
 
-const CheckInTabButton = ({ children, onPress }: any) => (
+const CheckInTabButton = ({ children, onPress, colors }: any) => (
   <TouchableOpacity style={styles.checkInButtonContainer} onPress={onPress}>
-    <View style={styles.checkInButton}>{children}</View>
+    <View style={[styles.checkInButton, { backgroundColor: colors.primary, borderColor: colors.background }]}>
+      {children}
+    </View>
   </TouchableOpacity>
 );
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colors } = useTheme();
 
   return (
     <View style={styles.root}>
       <AppHeader />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#059669",
-          tabBarInactiveTintColor: "#6B7280",
+          tabBarActiveTintColor: colors.tabIconSelected,
+          tabBarInactiveTintColor: colors.tabIconDefault,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarStyle: {
             height: 80,
             paddingBottom: 20,
             paddingTop: 10,
-            backgroundColor: colorScheme === "dark" ? "#1F2937" : "#FFFFFF",
+            backgroundColor: colors.tabBarBackground,
             borderTopWidth: 1,
-            borderTopColor: colorScheme === "dark" ? "#374151" : "#E5E7EB",
+            borderTopColor: colors.border,
           },
           tabBarLabelStyle: {
             fontSize: 12,
@@ -47,7 +49,7 @@ export default function TabLayout() {
               <IconSymbol
                 size={24}
                 name="house.fill"
-                color={focused ? "#059669" : color}
+                color={focused ? colors.tabIconSelected : color}
               />
             ),
           }}
@@ -60,7 +62,7 @@ export default function TabLayout() {
               <IconSymbol
                 size={24}
                 name="calendar.badge.plus"
-                color={focused ? "#059669" : color}
+                color={focused ? colors.tabIconSelected : color}
               />
             ),
           }}
@@ -70,7 +72,7 @@ export default function TabLayout() {
           options={{
             title: "Check-In",
             tabBarButton: (props) => (
-              <CheckInTabButton {...props}>
+              <CheckInTabButton {...props} colors={colors}>
                 <IconSymbol size={35} name="qrcode" color="#FFFFFF" />
               </CheckInTabButton>
             ),
@@ -87,7 +89,7 @@ export default function TabLayout() {
               <IconSymbol
                 size={24}
                 name="calendar"
-                color={focused ? "#059669" : color}
+                color={focused ? colors.tabIconSelected : color}
               />
             ),
           }}
@@ -100,7 +102,7 @@ export default function TabLayout() {
               <IconSymbol
                 size={24}
                 name="bell.fill"
-                color={focused ? "#059669" : color}
+                color={focused ? colors.tabIconSelected : color}
               />
             ),
           }}
@@ -130,8 +132,6 @@ const styles = StyleSheet.create({
     height: 65,
     borderRadius: 40,
     borderWidth: 5,
-    borderColor: "#FFFFFF",
-    backgroundColor: "#059669",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#059669",

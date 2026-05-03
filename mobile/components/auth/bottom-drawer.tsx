@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import * as Haptics from "expo-haptics";
+import { useTheme } from "@/context/ThemeContext";
 
 const { height } = Dimensions.get("window");
 const DRAWER_HEIGHT = height * 0.8;
@@ -26,6 +27,7 @@ export function BottomDrawer({
   children,
 }: BottomDrawerProps) {
   const translateY = useRef(new Animated.Value(DRAWER_HEIGHT)).current;
+  const { colors } = useTheme();
 
   const backdropOpacity = translateY.interpolate({
     inputRange: [0, DRAWER_HEIGHT],
@@ -35,7 +37,6 @@ export function BottomDrawer({
 
   const [keyboardOpen, setKeyboardOpen] = useState(false);
 
-  // Keyboard tracking
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>
       setKeyboardOpen(true),
@@ -50,7 +51,6 @@ export function BottomDrawer({
     };
   }, []);
 
-  // Open / close animation + haptics
   useEffect(() => {
     if (visible) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -102,22 +102,23 @@ export function BottomDrawer({
 
   return (
     <View style={StyleSheet.absoluteFill}>
-      {/* Dimmed background */}
       <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
-      {/* Drawer */}
-      <Animated.View style={[styles.drawer, { transform: [{ translateY }] }]}>
-        {/* Drag handle ONLY */}
+      <Animated.View
+        style={[
+          styles.drawer,
+          { backgroundColor: colors.drawerBackground, transform: [{ translateY }] },
+        ]}
+      >
         <Animated.View
           {...(!keyboardOpen ? panResponder.panHandlers : {})}
           style={styles.handleContainer}
         >
-          <View style={styles.handle} />
+          <View style={[styles.handle, { backgroundColor: colors.drawerHandle }]} />
         </Animated.View>
 
-        {/* Scroll-safe content */}
         {children}
       </Animated.View>
     </View>
@@ -134,7 +135,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     height: DRAWER_HEIGHT,
     width: "100%",
-    backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 10,
@@ -145,7 +145,6 @@ const styles = StyleSheet.create({
     width: 60,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#ccc",
     alignSelf: "center",
     marginBottom: 16,
   },
