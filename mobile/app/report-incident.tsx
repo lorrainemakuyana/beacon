@@ -8,6 +8,9 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Modal,
+  FlatList,
+  Pressable,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -44,6 +47,7 @@ export default function ReportIncidentScreen() {
 
   const [incidentType, setIncidentType] = useState<IncidentType | null>(null);
   const [selectedShiftId, setSelectedShiftId] = useState<string>(shiftId ?? "");
+  const [shiftDropdownOpen, setShiftDropdownOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [severity, setSeverity] = useState<Severity | null>(null);
@@ -112,44 +116,81 @@ export default function ReportIncidentScreen() {
           </View>
         </View>
 
-        {/* Related Shift */}
+        {/* Related Shift — dropdown */}
         <View style={styles.field}>
           <Text style={styles.label}>Related Shift</Text>
-          <View style={styles.shiftSelector}>
+          <TouchableOpacity
+            style={styles.dropdownTrigger}
+            onPress={() => setShiftDropdownOpen(true)}
+          >
             {selectedShift && selectedEvent ? (
-              <View style={styles.shiftSelected}>
+              <View style={styles.dropdownSelected}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.shiftSelectedTitle}>{selectedEvent.title}</Text>
-                  <Text style={styles.shiftSelectedSub}>{selectedShift.title}</Text>
+                  <Text style={styles.dropdownSelectedTitle} numberOfLines={1}>
+                    {selectedEvent.title}
+                  </Text>
+                  <Text style={styles.dropdownSelectedSub} numberOfLines={1}>
+                    {selectedShift.title}
+                  </Text>
                 </View>
-                <TouchableOpacity onPress={() => setSelectedShiftId("")}>
+                <TouchableOpacity
+                  hitSlop={8}
+                  onPress={(e) => { e.stopPropagation(); setSelectedShiftId(""); }}
+                >
                   <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
                 </TouchableOpacity>
               </View>
             ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.shiftOptions}>
-                  {shifts.map((s) => {
-                    const ev = eventsMap[s.eventId];
-                    if (!ev) return null;
-                    return (
-                      <TouchableOpacity
-                        key={s.id}
-                        style={styles.shiftOption}
-                        onPress={() => setSelectedShiftId(s.id)}
-                      >
-                        <Text style={styles.shiftOptionTitle} numberOfLines={1}>{ev.title}</Text>
-                        <Text style={styles.shiftOptionSub} numberOfLines={1}>{s.title}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {shifts.length === 0 && (
-                    <Text style={styles.noShiftsText}>No assigned shifts</Text>
-                  )}
-                </View>
-              </ScrollView>
+              <View style={styles.dropdownPlaceholder}>
+                <Text style={styles.dropdownPlaceholderText}>Select a shift</Text>
+                <Ionicons name="chevron-down" size={18} color={colors.textTertiary} />
+              </View>
             )}
-          </View>
+          </TouchableOpacity>
+
+          {/* Dropdown modal */}
+          <Modal
+            visible={shiftDropdownOpen}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShiftDropdownOpen(false)}
+          >
+            <Pressable style={styles.modalBackdrop} onPress={() => setShiftDropdownOpen(false)}>
+              <View style={styles.modalSheet}>
+                <Text style={styles.modalTitle}>Select Related Shift</Text>
+                {shifts.length === 0 ? (
+                  <Text style={styles.noShiftsText}>No assigned shifts</Text>
+                ) : (
+                  <FlatList
+                    data={shifts}
+                    keyExtractor={(s) => s.id}
+                    ItemSeparatorComponent={() => <View style={styles.modalSeparator} />}
+                    renderItem={({ item: s }) => {
+                      const ev = eventsMap[s.eventId];
+                      if (!ev) return null;
+                      const isSelected = s.id === selectedShiftId;
+                      return (
+                        <TouchableOpacity
+                          style={[styles.modalOption, isSelected && styles.modalOptionSelected]}
+                          onPress={() => { setSelectedShiftId(s.id); setShiftDropdownOpen(false); }}
+                        >
+                          <View style={{ flex: 1 }}>
+                            <Text style={[styles.modalOptionTitle, isSelected && styles.modalOptionTitleSelected]}>
+                              {ev.title}
+                            </Text>
+                            <Text style={styles.modalOptionSub}>{s.title}</Text>
+                          </View>
+                          {isSelected && (
+                            <Ionicons name="checkmark" size={18} color={colors.primary} />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
+                )}
+              </View>
+            </Pressable>
+          </Modal>
         </View>
 
         {/* Location */}
@@ -326,7 +367,7 @@ function getStyles(colors: ThemeColors) {
     chipTextActive: {
       color: "#FFFFFF",
     },
-    shiftSelector: {
+    dropdownTrigger: {
       borderWidth: 1,
       borderColor: colors.inputBorder,
       borderRadius: 10,
@@ -334,50 +375,87 @@ function getStyles(colors: ThemeColors) {
       minHeight: 52,
       justifyContent: "center",
     },
-    shiftSelected: {
+    dropdownPlaceholder: {
       flexDirection: "row",
       alignItems: "center",
-      padding: 14,
+      justifyContent: "space-between",
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    dropdownPlaceholderText: {
+      fontSize: 15,
+      color: colors.textTertiary,
+    },
+    dropdownSelected: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 14,
+      paddingVertical: 12,
       gap: 10,
     },
-    shiftSelectedTitle: {
+    dropdownSelectedTitle: {
       fontSize: 14,
       fontWeight: "600",
       color: colors.textPrimary,
     },
-    shiftSelectedSub: {
+    dropdownSelectedSub: {
       fontSize: 12,
       color: colors.textSecondary,
       marginTop: 2,
     },
-    shiftOptions: {
-      flexDirection: "row",
-      gap: 10,
-      padding: 12,
+    modalBackdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      justifyContent: "flex-end",
     },
-    shiftOption: {
+    modalSheet: {
       backgroundColor: colors.cardBackground,
-      borderWidth: 1,
-      borderColor: colors.cardBorder,
-      borderRadius: 8,
-      padding: 10,
-      minWidth: 140,
-      maxWidth: 200,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingTop: 20,
+      paddingBottom: 40,
+      maxHeight: "60%",
     },
-    shiftOptionTitle: {
-      fontSize: 13,
+    modalTitle: {
+      fontSize: 16,
       fontWeight: "600",
       color: colors.textPrimary,
+      paddingHorizontal: 20,
+      marginBottom: 12,
     },
-    shiftOptionSub: {
-      fontSize: 12,
+    modalSeparator: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginHorizontal: 20,
+    },
+    modalOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      gap: 12,
+    },
+    modalOptionSelected: {
+      backgroundColor: colors.primarySubtle,
+    },
+    modalOptionTitle: {
+      fontSize: 15,
+      fontWeight: "500",
+      color: colors.textPrimary,
+    },
+    modalOptionTitleSelected: {
+      color: colors.primary,
+      fontWeight: "600",
+    },
+    modalOptionSub: {
+      fontSize: 13,
       color: colors.textSecondary,
       marginTop: 2,
     },
     noShiftsText: {
       fontSize: 13,
       color: colors.textTertiary,
-      padding: 14,
+      padding: 20,
     },
     input: {
       borderWidth: 1,
