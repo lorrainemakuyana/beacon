@@ -12,7 +12,7 @@ const SUBTITLES: Record<string, string> = {
   events: "Events",
   schedule: "My schedule",
   "check-in": "Check in",
-  alerts: "Updates",
+  incidents: "My incidents",
   profile: "Your account",
 };
 
