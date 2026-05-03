@@ -68,8 +68,21 @@ export interface Event {
   collaborators: string[]; // User UIDs
   organizer?: EventOrganizer;
   status: EventStatus;
+  eventCode: string; // Passphrase for manual check-in
   createdAt: number;
   updatedAt: number;
+}
+
+export type AttendanceStatus = "checked-in" | "checked-out";
+
+export interface Attendance {
+  id: string;
+  volunteerId: string;
+  shiftId: string;
+  eventId: string;
+  status: AttendanceStatus;
+  checkIn: { timestamp: number };
+  checkOut?: { timestamp: number };
 }
 
 export type IncidentSeverity = "low" | "medium" | "high" | "critical";
