@@ -76,9 +76,9 @@ export default function TabLayout() {
         <Tabs.Screen
           name="alerts"
           options={{
-            title: "Alerts",
+            title: "Incidents",
             tabBarIcon: ({ color, focused }) => (
-              <IconSymbol size={24} name="bell.fill" color={focused ? colors.tabIconSelected : color} />
+              <IconSymbol size={24} name="exclamationmark.triangle.fill" color={focused ? colors.tabIconSelected : color} />
             ),
           }}
         />

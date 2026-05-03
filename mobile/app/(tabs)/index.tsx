@@ -55,15 +55,7 @@ export default function HomeScreen() {
           </View>
           <TouchableOpacity
             style={styles.reportIncidentBtn}
-            onPress={() =>
-              router.push({
-                pathname: "/report-incident",
-                params: {
-                  shiftId: activeCheckIn.shiftId,
-                  eventId: activeCheckIn.eventId,
-                },
-              })
-            }
+            onPress={() => router.push("/(tabs)/alerts")}
           >
             <IconSymbol
               size={14}
@@ -110,17 +102,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() =>
-              router.push({
-                pathname: "/report-incident",
-                params: activeCheckIn
-                  ? {
-                      shiftId: activeCheckIn.shiftId,
-                      eventId: activeCheckIn.eventId,
-                    }
-                  : {},
-              })
-            }
+            onPress={() => router.push("/(tabs)/alerts")}
           >
             <IconSymbol
               size={28}
