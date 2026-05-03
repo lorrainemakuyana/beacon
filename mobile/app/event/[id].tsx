@@ -23,6 +23,7 @@ import {
   getUserShiftForEvent,
   cancelVolunteerShift,
 } from "@/firebase/services/shifts";
+import { useCheckIn } from "@/hooks/useCheckIn";
 
 const EVENT_STATUS_CONFIG: Record<
   Event["status"],
@@ -68,8 +69,11 @@ export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { event } = useEventDetail(id ?? "");
   const { user } = useAuth();
-  const { colors } = useTheme();
+  const { colors, effectiveColorScheme } = useTheme();
+  const { activeCheckIn } = useCheckIn(user?.uid);
   const [isSignedUp, setIsSignedUp] = useState(false);
+
+  const isCheckedInToThisEvent = activeCheckIn?.eventId === id;
 
   useEffect(() => {
     if (!event || !user?.uid) return;
@@ -274,9 +278,43 @@ export default function EventDetailsScreen() {
                 You are already volunteering at this event
               </Text>
             </View>
-            <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
-              <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.cancelBtnText}>Cancel Volunteering</Text>
+            {isCheckedInToThisEvent && (
+              <TouchableOpacity
+                style={styles.reportIncidentBtn}
+                onPress={() =>
+                  router.push({
+                    pathname: "/report-incident",
+                    params: {
+                      shiftId: activeCheckIn!.shiftId,
+                      eventId: activeCheckIn!.eventId,
+                    },
+                  })
+                }
+              >
+                <Ionicons name="warning-outline" size={20} color="#FFFFFF" />
+                <Text style={styles.reportIncidentBtnText}>Report Incident</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={[
+                styles.cancelBtn,
+                effectiveColorScheme === "dark" && styles.cancelBtnDark,
+              ]}
+              onPress={handleCancel}
+            >
+              <Ionicons
+                name="close-circle-outline"
+                size={20}
+                color={effectiveColorScheme === "dark" ? colors.danger : "#FFFFFF"}
+              />
+              <Text
+                style={[
+                  styles.cancelBtnText,
+                  effectiveColorScheme === "dark" && styles.cancelBtnTextDark,
+                ]}
+              >
+                Cancel Volunteering
+              </Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -542,6 +580,20 @@ function getStyles(colors: ThemeColors) {
       fontWeight: "500",
       color: colors.tint,
     },
+    reportIncidentBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      backgroundColor: colors.warning,
+      paddingVertical: 14,
+      borderRadius: 14,
+    },
+    reportIncidentBtnText: {
+      color: "#FFFFFF",
+      fontSize: 16,
+      fontWeight: "600",
+    },
     cancelBtn: {
       flexDirection: "row",
       alignItems: "center",
@@ -556,10 +608,20 @@ function getStyles(colors: ThemeColors) {
       shadowOffset: { width: 0, height: 4 },
       elevation: 3,
     },
+    cancelBtnDark: {
+      backgroundColor: "transparent",
+      borderWidth: 2,
+      borderColor: colors.danger,
+      shadowOpacity: 0,
+      elevation: 0,
+    },
     cancelBtnText: {
       color: "#FFFFFF",
       fontSize: 16,
       fontWeight: "600",
+    },
+    cancelBtnTextDark: {
+      color: colors.danger,
     },
   });
 }
