@@ -10,6 +10,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo } from "react";
+import { router } from "expo-router";
 import { calculateDayStreak, getGreeting } from "@/utils/date";
 import { ShiftCard } from "@/components/shift/shift-card";
 import { useUserShifts } from "@/hooks/useUserShifts";
@@ -49,17 +50,17 @@ export default function HomeScreen() {
 
       <View style={styles.quickActions}>
         <View style={styles.actionsGrid}>
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/events")}>
             <IconSymbol size={32} name="calendar.badge.plus" color={colors.tint} />
             <ThemedText style={styles.actionText}>Find Events</ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/check-in")}>
             <IconSymbol size={32} name="qrcode" color={colors.tint} />
             <ThemedText style={styles.actionText}>Check-In</ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/alerts")}>
             <IconSymbol
               size={32}
               name="exclamationmark.triangle"
@@ -68,7 +69,7 @@ export default function HomeScreen() {
             <ThemedText style={styles.actionText}>Report Issue</ThemedText>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(tabs)/schedule")}>
             <IconSymbol size={32} name="clock" color={colors.icon} />
             <ThemedText style={styles.actionText}>My Hours</ThemedText>
           </TouchableOpacity>
@@ -94,7 +95,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      <View style={styles.section}>
+      {/* <View style={styles.section}>
         <ThemedText type="subtitle">Recent Activity</ThemedText>
         <View style={styles.activityList}>
           <View style={styles.activityItem}>
@@ -120,7 +121,7 @@ export default function HomeScreen() {
             </ThemedText>
           </View>
         </View>
-      </View>
+      </View> */}
     </ScrollView>
   );
 }
