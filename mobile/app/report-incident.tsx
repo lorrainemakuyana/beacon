@@ -11,15 +11,17 @@ import {
   Modal,
   FlatList,
   Pressable,
+  Image,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useUserShifts } from "@/hooks/useUserShifts";
 import { useAuth } from "@/context/AuthContext";
-import { reportIncident } from "@/firebase/services/incidents";
+import { reportIncident, uploadIncidentPhoto } from "@/firebase/services/incidents";
 import { IncidentCategory, IncidentSeverity } from "@/interfaces";
 
 type IncidentType = "Safety Hazard" | "Equipment Issue" | "Behavioral Concern" | "Medical Emergency" | "Other";
@@ -53,9 +55,39 @@ export default function ReportIncidentScreen() {
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [severity, setSeverity] = useState<Severity | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [photoModal, setPhotoModal] = useState<{ index: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const styles = getStyles(colors);
+
+  const pickPhoto = async () => {
+    if (photos.length >= 5) {
+      Alert.alert("Limit reached", "You can add up to 5 photos.");
+      return;
+    }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission required", "Allow photo access to attach photos.");
+      return;
+    }
+    const remaining = 5 - photos.length;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images" as const,
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.8,
+    });
+    if (!result.canceled) {
+      const uris = result.assets.map((a) => a.uri).slice(0, remaining);
+      setPhotos((prev) => [...prev, ...uris].slice(0, 5));
+    }
+  };
+
+  const deletePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoModal(null);
+  };
 
   const selectedShift = shifts.find((s) => s.id === selectedShiftId);
   const selectedEvent = selectedShift ? eventsMap[selectedShift.eventId] : null;
@@ -79,6 +111,9 @@ export default function ReportIncidentScreen() {
 
     setSubmitting(true);
     try {
+      const uploadedUrls = await Promise.all(
+        photos.map((uri, i) => uploadIncidentPhoto(user.uid, uri, i))
+      );
       await reportIncident({
         eventId: resolvedEventId,
         shiftId: selectedShiftId || undefined,
@@ -88,6 +123,7 @@ export default function ReportIncidentScreen() {
         location: location.trim() || undefined,
         severity: severity.toLowerCase() as IncidentSeverity,
         category: CATEGORY_MAP[incidentType],
+        photos: uploadedUrls.length > 0 ? uploadedUrls : undefined,
       });
       Alert.alert("Report Submitted", "Your incident report has been sent.", [
         { text: "OK", onPress: () => router.back() },
@@ -276,13 +312,44 @@ export default function ReportIncidentScreen() {
         <View style={styles.field}>
           <Text style={styles.label}>Add Photos (Optional)</Text>
           <View style={styles.photosRow}>
-            <TouchableOpacity style={styles.addPhotoBtn}>
-              <Ionicons name="camera-outline" size={28} color={colors.textTertiary} />
-              <Text style={styles.addPhotoText}>Add Photo</Text>
-            </TouchableOpacity>
+            {photos.map((uri, i) => (
+              <TouchableOpacity key={i} onPress={() => setPhotoModal({ index: i })}>
+                <Image source={{ uri }} style={styles.photoThumb} />
+              </TouchableOpacity>
+            ))}
+            {photos.length < 5 && (
+              <TouchableOpacity style={styles.addPhotoBtn} onPress={pickPhoto}>
+                <Ionicons name="camera-outline" size={28} color={colors.textTertiary} />
+                <Text style={styles.addPhotoText}>Add Photo</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Text style={styles.photoHint}>You can add up to 5 photos</Text>
+          <Text style={styles.photoHint}>{photos.length}/5 photos added</Text>
         </View>
+
+        {/* Photo preview modal (with delete) */}
+        {photoModal && (
+          <Modal visible transparent animationType="fade" onRequestClose={() => setPhotoModal(null)}>
+            <View style={styles.photoModalBg}>
+              <TouchableOpacity style={styles.photoModalClose} onPress={() => setPhotoModal(null)}>
+                <Ionicons name="close" size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Image source={{ uri: photos[photoModal.index] }} style={styles.photoModalImage} resizeMode="contain" />
+              <TouchableOpacity
+                style={styles.photoDeleteBtn}
+                onPress={() => {
+                  Alert.alert("Delete Photo", "Remove this photo?", [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Delete", style: "destructive", onPress: () => deletePhoto(photoModal.index) },
+                  ]);
+                }}
+              >
+                <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+                <Text style={styles.photoDeleteText}>Delete Photo</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        )}
 
         {/* Footer note */}
         <View style={styles.footerNote}>
@@ -537,6 +604,12 @@ function getStyles(colors: ThemeColors) {
       flexDirection: "row",
       gap: 10,
     },
+    photoThumb: {
+      width: 90,
+      height: 90,
+      borderRadius: 10,
+      backgroundColor: colors.emptyStateBg,
+    },
     addPhotoBtn: {
       width: 90,
       height: 90,
@@ -555,6 +628,38 @@ function getStyles(colors: ThemeColors) {
     photoHint: {
       fontSize: 12,
       color: colors.textTertiary,
+    },
+    photoModalBg: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.92)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    photoModalClose: {
+      position: "absolute",
+      top: 56,
+      right: 20,
+      zIndex: 10,
+      padding: 8,
+    },
+    photoModalImage: {
+      width: "100%",
+      height: 400,
+    },
+    photoDeleteBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 24,
+      backgroundColor: "#EF444488",
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 10,
+    },
+    photoDeleteText: {
+      color: "#FFFFFF",
+      fontWeight: "600",
+      fontSize: 15,
     },
     footerNote: {
       flexDirection: "row",
