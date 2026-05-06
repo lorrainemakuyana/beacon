@@ -19,6 +19,7 @@ type Props = {
   event: Event;
   userId?: string;
   isPast?: boolean;
+  attended?: boolean;
 };
 
 const STATUS_CONFIG: Record<
@@ -31,6 +32,7 @@ const STATUS_CONFIG: Record<
   completed: { label: "Completed", bg: "#E5E7EB", text: "#6B7280" },
   closed: { label: "Closed", bg: "#FEF2F2", text: "#991B1B" },
   attended: { label: "Attended", bg: "#F0FDF4", text: "#166534" },
+  missed: { label: "Missed", bg: "#FEF3C7", text: "#92400E" },
 };
 
 const EVENT_STATUS_MAP: Record<string, Shift["status"]> = {
@@ -71,15 +73,19 @@ export const ShiftCard = memo(function ShiftCard({
   event,
   userId,
   isPast,
+  attended,
 }: Props) {
   const { colors } = useTheme();
 
   const effectiveStatus = useMemo((): Shift["status"] => {
     if (!shift) return EVENT_STATUS_MAP[event.status] ?? "open";
     if (!isPast) return shift.status;
+    if (attended === true) return "attended";
+    if (attended === false) return "missed";
+    // Fallback when attendance data hasn't loaded yet
     if (userId && shift.assignedVolunteers?.includes(userId)) return "attended";
     return "closed";
-  }, [shift, event.status, isPast, userId]);
+  }, [shift, event.status, isPast, userId, attended]);
 
   const statusCfg = STATUS_CONFIG[effectiveStatus];
 

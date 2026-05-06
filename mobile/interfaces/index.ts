@@ -19,7 +19,8 @@ export type ShiftStatus =
   | "active"
   | "completed"
   | "closed"
-  | "attended";
+  | "attended"
+  | "missed";
 
 export interface ShiftTimeSlot {
   start: Timestamp;

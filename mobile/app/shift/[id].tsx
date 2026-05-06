@@ -28,6 +28,7 @@ const STATUS_CONFIG: Record<
   completed: { label: "Completed", bg: "#E5E7EB", text: "#6B7280" },
   closed: { label: "Closed", bg: "#FEF2F2", text: "#991B1B" },
   attended: { label: "Attended", bg: "#F0FDF4", text: "#166534" },
+  missed: { label: "Missed", bg: "#FEF3C7", text: "#92400E" },
 };
 
 const AVATAR_PALETTES = [
