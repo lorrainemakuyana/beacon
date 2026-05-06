@@ -262,10 +262,6 @@ export default function ReportIncidentScreen() {
             placeholder={selectedEvent?.location ?? "Enter location"}
             placeholderTextColor={colors.textTertiary}
           />
-          <TouchableOpacity style={styles.locationBtn}>
-            <Ionicons name="location" size={16} color={colors.tint} />
-            <Text style={styles.locationBtnText}>Use My Current Location</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Description */}
@@ -551,16 +547,6 @@ function getStyles(colors: ThemeColors) {
       backgroundColor: colors.inputBackground,
       color: colors.textPrimary,
     },
-    locationBtn: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-    },
-    locationBtnText: {
-      fontSize: 14,
-      fontWeight: "500",
-      color: colors.tint,
-    },
     textarea: {
       borderWidth: 1,
       borderColor: colors.inputBorder,
@@ -605,6 +591,7 @@ function getStyles(colors: ThemeColors) {
     },
     photosRow: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 10,
     },
     photoThumb: {

@@ -253,12 +253,6 @@ function getStyles(colors: ThemeColors) {
       flex: 1,
       justifyContent: "center",
     },
-    pageTitle: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: colors.textPrimary,
-      marginBottom: 4,
-    },
     emptyState: {
       alignItems: "center",
       paddingVertical: 60,

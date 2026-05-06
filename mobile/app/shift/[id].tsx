@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Linking,
   Alert,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -112,7 +113,10 @@ export default function ShiftDetailsScreen() {
 
   function handleGetDirections() {
     const query = encodeURIComponent(`${event!.location}, ${event!.address ?? ""}`);
-    Linking.openURL(`https://maps.apple.com/?q=${query}`);
+    const url = Platform.OS === "ios"
+      ? `https://maps.apple.com/?q=${query}`
+      : `https://maps.google.com/?q=${query}`;
+    Linking.openURL(url);
   }
 
   function handleCall() {
