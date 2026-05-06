@@ -64,7 +64,7 @@ export default function IncidentsScreen() {
     <View style={[styles.root, { paddingBottom: insets.bottom }]}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, incidents.length === 0 && !loading && styles.contentEmpty]}
         showsVerticalScrollIndicator={false}
       >
 
@@ -246,6 +246,10 @@ function getStyles(colors: ThemeColors) {
       padding: 20,
       gap: 14,
     },
+    contentEmpty: {
+      flex: 1,
+      justifyContent: "center",
+    },
     pageTitle: {
       fontSize: 22,
       fontWeight: "700",
@@ -418,7 +422,7 @@ function getStyles(colors: ThemeColors) {
       alignItems: "center",
       justifyContent: "center",
       gap: 8,
-      backgroundColor: colors.danger,
+      backgroundColor: "#F97316",
       paddingVertical: 15,
       borderRadius: 14,
     },

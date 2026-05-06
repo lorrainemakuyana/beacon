@@ -32,9 +32,9 @@ export default function EventsScreen() {
   const styles = getStyles(colors);
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.pageHeader}>
-        <Text style={styles.pageTitle}>Upcoming Events</Text>
+    <View style={styles.container}>
+      {/* Sticky search bar — always visible above scroll */}
+      <View style={styles.searchHeader}>
         <TouchableOpacity
           style={styles.searchBtn}
           onPress={() => {
@@ -48,23 +48,27 @@ export default function EventsScreen() {
             color={colors.tint}
           />
         </TouchableOpacity>
+
+        {searchVisible && (
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={16} color={colors.textTertiary} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search events..."
+              placeholderTextColor={colors.textTertiary}
+              value={query}
+              onChangeText={setQuery}
+              autoFocus
+            />
+          </View>
+        )}
       </View>
 
-      {searchVisible && (
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={16} color={colors.textTertiary} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search events..."
-            placeholderTextColor={colors.textTertiary}
-            value={query}
-            onChangeText={setQuery}
-            autoFocus
-          />
-        </View>
-      )}
-
-      <View style={styles.list}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.list}
+        keyboardShouldPersistTaps="handled"
+      >
         {filtered.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyText}>No events found</Text>
@@ -82,8 +86,8 @@ export default function EventsScreen() {
             );
           })
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -93,18 +97,15 @@ function getStyles(colors: ThemeColors) {
       flex: 1,
       backgroundColor: colors.surfaceBackground,
     },
-    pageHeader: {
+    searchHeader: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
+      gap: 10,
       paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 12,
-    },
-    pageTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: colors.textPrimary,
+      paddingVertical: 12,
+      backgroundColor: colors.surfaceBackground,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
     searchBtn: {
       width: 38,
@@ -117,13 +118,12 @@ function getStyles(colors: ThemeColors) {
       borderColor: colors.primarySubtleBorder,
     },
     searchBar: {
+      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
-      marginHorizontal: 20,
-      marginBottom: 12,
       paddingHorizontal: 12,
-      paddingVertical: 10,
+      paddingVertical: 8,
       backgroundColor: colors.inputBackground,
       borderRadius: 10,
       borderWidth: 1,
@@ -134,8 +134,12 @@ function getStyles(colors: ThemeColors) {
       fontSize: 15,
       color: colors.textPrimary,
     },
+    scroll: {
+      flex: 1,
+    },
     list: {
       paddingHorizontal: 20,
+      paddingTop: 16,
       paddingBottom: 30,
       gap: 12,
     },

@@ -304,6 +304,7 @@ export default function ShiftDetailsScreen() {
         )}
 
         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
+          <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
           <Text style={styles.cancelBtnText}>Cancel Shift</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -619,13 +620,19 @@ function getStyles(colors: ThemeColors) {
       fontWeight: "600",
     },
     cancelBtn: {
+      flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 14,
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: colors.danger,
+      paddingVertical: 15,
+      borderRadius: 14,
+      marginTop: 4,
     },
     cancelBtnText: {
       fontSize: 15,
       fontWeight: "600",
-      color: colors.danger,
+      color: "#FFFFFF",
     },
   });
 }

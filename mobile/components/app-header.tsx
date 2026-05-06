@@ -1,7 +1,6 @@
-import { StyleSheet, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useSegments, router } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useSegments } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useTheme } from "@/context/ThemeContext";
@@ -28,12 +27,6 @@ export function AppHeader() {
     <ThemedView style={[styles.header, { paddingTop: insets.top + 5, borderBottomColor: colors.headerBorder }]}>
       <Image source={Logo} style={[styles.logo, { borderColor: colors.border }]} />
       <ThemedText type="subtitle">{subtitle}</ThemedText>
-      <TouchableOpacity
-        style={styles.profileIcon}
-        onPress={() => router.push("/(tabs)/profile")}
-      >
-        <FontAwesome name="user-circle-o" size={30} color={colors.tint} />
-      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -67,8 +60,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-  },
-  profileIcon: {
-    marginLeft: "auto",
   },
 });

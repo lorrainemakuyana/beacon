@@ -127,7 +127,7 @@ export const ShiftCard = memo(function ShiftCard({
         <Text style={styles.dateText}>{computedDateLabel}</Text>
 
         <View style={styles.leafIcon}>
-          <Ionicons name="leaf-outline" size={20} color={colors.icon} />
+          <Ionicons name="information-circle-outline" size={20} color={colors.icon} />
         </View>
       </View>
 
