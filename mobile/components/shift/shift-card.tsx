@@ -19,6 +19,8 @@ type Props = {
   event: Event;
   userId?: string;
   isPast?: boolean;
+  attended?: boolean;
+  attendanceLoading?: boolean;
 };
 
 const STATUS_CONFIG: Record<
@@ -31,6 +33,7 @@ const STATUS_CONFIG: Record<
   completed: { label: "Completed", bg: "#E5E7EB", text: "#6B7280" },
   closed: { label: "Closed", bg: "#FEF2F2", text: "#991B1B" },
   attended: { label: "Attended", bg: "#F0FDF4", text: "#166534" },
+  missed: { label: "Missed", bg: "#FEF3C7", text: "#92400E" },
 };
 
 const EVENT_STATUS_MAP: Record<string, Shift["status"]> = {
@@ -71,15 +74,20 @@ export const ShiftCard = memo(function ShiftCard({
   event,
   userId,
   isPast,
+  attended,
+  attendanceLoading,
 }: Props) {
   const { colors } = useTheme();
 
   const effectiveStatus = useMemo((): Shift["status"] => {
     if (!shift) return EVENT_STATUS_MAP[event.status] ?? "open";
     if (!isPast) return shift.status;
-    if (userId && shift.assignedVolunteers?.includes(userId)) return "attended";
+    // Show neutral "closed" while attendance is still loading to avoid a false "Attended" flash
+    if (attendanceLoading) return "closed";
+    if (attended === true) return "attended";
+    if (attended === false) return "missed";
     return "closed";
-  }, [shift, event.status, isPast, userId]);
+  }, [shift, event.status, isPast, attended, attendanceLoading]);
 
   const statusCfg = STATUS_CONFIG[effectiveStatus];
 
@@ -127,7 +135,7 @@ export const ShiftCard = memo(function ShiftCard({
         <Text style={styles.dateText}>{computedDateLabel}</Text>
 
         <View style={styles.leafIcon}>
-          <Ionicons name="leaf-outline" size={20} color={colors.icon} />
+          <Ionicons name="information-circle-outline" size={20} color={colors.icon} />
         </View>
       </View>
 
@@ -153,7 +161,13 @@ export const ShiftCard = memo(function ShiftCard({
       )}
 
       {isToday && (
-        <TouchableOpacity style={styles.checkInButton}>
+        <TouchableOpacity
+          style={styles.checkInButton}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            router.push("/(tabs)/check-in");
+          }}
+        >
           <Ionicons name="qr-code-outline" size={18} color="#FFFFFF" />
           <Text style={styles.checkInButtonText}>Check-In Now</Text>
         </TouchableOpacity>

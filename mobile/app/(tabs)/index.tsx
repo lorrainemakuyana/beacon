@@ -17,6 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { router } from "expo-router";
 import { useCheckIn } from "@/hooks/useCheckIn";
+import { useUserAttendance } from "@/hooks/useUserAttendance";
 import { bucket } from "@/app/(tabs)/schedule";
 
 export default function HomeScreen() {
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { activeCheckIn, activeEvent } = useCheckIn(user?.uid);
 
+  const { attendanceByShift, loading: attendanceLoading } = useUserAttendance(user?.uid);
   const { past, today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
   const greeting = useMemo(() => getGreeting(new Date()), []);
   const styles = getStyles(colors);
@@ -89,16 +91,8 @@ export default function HomeScreen() {
             onPress={() => router.push("/(tabs)/events")}
           >
             <IconSymbol size={28} name="magnifyingglass" color={colors.tint} />
-            <ThemedText style={styles.actionText}>Find Shifts</ThemedText>
+            <ThemedText style={styles.actionText}>Volunteer</ThemedText>
           </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => router.push("/(tabs)/schedule")}
-          >
-            <IconSymbol size={28} name="calendar" color={colors.tint} />
-            <ThemedText style={styles.actionText}>My Schedule</ThemedText>
-          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.actionCard}
@@ -107,7 +101,7 @@ export default function HomeScreen() {
             <IconSymbol
               size={28}
               name="exclamationmark.triangle.fill"
-              color={colors.danger}
+              color="#F97316"
             />
             <ThemedText style={styles.actionText}>Report Incident</ThemedText>
           </TouchableOpacity>
@@ -116,8 +110,6 @@ export default function HomeScreen() {
 
       {/* Upcoming schedule */}
       <View style={styles.section}>
-        <ThemedText type="subtitle">My Schedule</ThemedText>
-
         <View style={styles.scheduleGroup}>
           <Text style={styles.sectionLabel}>Today</Text>
           {today.length === 0 ? (
@@ -184,11 +176,13 @@ export default function HomeScreen() {
       {/* Past shifts at the end — greyed out */}
       {past.length > 0 && (
         <View style={[styles.section, styles.pastSection]}>
-          <ThemedText type="subtitle">Past Shifts</ThemedText>
+          <Text style={styles.sectionLabel}>Previous Shifts</Text>
           <View style={styles.pastContent}>
             {past.map((shift) => {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
+              const attendanceRecord = attendanceByShift[shift.id];
+              const attended = attendanceRecord?.status === "checked-out" || attendanceRecord?.status === "checked-in";
               return (
                 <ShiftCard
                   key={shift.id}
@@ -196,6 +190,8 @@ export default function HomeScreen() {
                   event={event}
                   userId={user?.uid}
                   isPast
+                  attended={attendanceLoading ? undefined : (attendanceRecord !== undefined ? attended : false)}
+                  attendanceLoading={attendanceLoading}
                 />
               );
             })}
@@ -328,7 +324,8 @@ function getStyles(colors: ThemeColors) {
       paddingTop: 0,
     },
     scheduleGroup: {
-      gap: 10,
+      paddingTop: 20,
+      gap: 15,
     },
     sectionLabel: {
       fontSize: 13,
@@ -349,10 +346,12 @@ function getStyles(colors: ThemeColors) {
       color: colors.textTertiary,
     },
     pastSection: {
+      paddingTop: 20,
       paddingBottom: 30,
     },
     pastContent: {
       opacity: 0.45,
+      gap: 20
     },
   });
 }

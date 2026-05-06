@@ -12,3 +12,4 @@ shared/src/.DS_Store
 .DS_Store
 
 shared/dist
+.claude/worktrees/*

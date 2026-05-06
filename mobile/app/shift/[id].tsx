@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Linking,
   Alert,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,6 +29,7 @@ const STATUS_CONFIG: Record<
   completed: { label: "Completed", bg: "#E5E7EB", text: "#6B7280" },
   closed: { label: "Closed", bg: "#FEF2F2", text: "#991B1B" },
   attended: { label: "Attended", bg: "#F0FDF4", text: "#166534" },
+  missed: { label: "Missed", bg: "#FEF3C7", text: "#92400E" },
 };
 
 const AVATAR_PALETTES = [
@@ -111,7 +113,10 @@ export default function ShiftDetailsScreen() {
 
   function handleGetDirections() {
     const query = encodeURIComponent(`${event!.location}, ${event!.address ?? ""}`);
-    Linking.openURL(`https://maps.apple.com/?q=${query}`);
+    const url = Platform.OS === "ios"
+      ? `https://maps.apple.com/?q=${query}`
+      : `https://maps.google.com/?q=${query}`;
+    Linking.openURL(url);
   }
 
   function handleCall() {
@@ -304,6 +309,7 @@ export default function ShiftDetailsScreen() {
         )}
 
         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
+          <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
           <Text style={styles.cancelBtnText}>Cancel Shift</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -619,13 +625,19 @@ function getStyles(colors: ThemeColors) {
       fontWeight: "600",
     },
     cancelBtn: {
+      flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 14,
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: colors.danger,
+      paddingVertical: 15,
+      borderRadius: 14,
+      marginTop: 4,
     },
     cancelBtnText: {
       fontSize: 15,
       fontWeight: "600",
-      color: colors.danger,
+      color: "#FFFFFF",
     },
   });
 }

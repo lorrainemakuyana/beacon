@@ -17,6 +17,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useUserShifts } from "@/hooks/useUserShifts";
@@ -40,6 +41,14 @@ const SEVERITY_COLORS: Record<Severity, string> = {
   Medium: "#F59E0B",
   High: "#F97316",
   Critical: "#EF4444",
+};
+
+const CATEGORY_MAP: Record<IncidentType, IncidentCategory> = {
+  "Safety Hazard": "safety",
+  "Equipment Issue": "equipment",
+  "Behavioral Concern": "volunteer",
+  "Medical Emergency": "safety",
+  "Other": "other",
 };
 
 export default function ReportIncidentScreen() {
@@ -92,14 +101,6 @@ export default function ReportIncidentScreen() {
   const selectedShift = shifts.find((s) => s.id === selectedShiftId);
   const selectedEvent = selectedShift ? eventsMap[selectedShift.eventId] : null;
 
-  const CATEGORY_MAP: Record<IncidentType, IncidentCategory> = {
-    "Safety Hazard": "safety",
-    "Equipment Issue": "equipment",
-    "Behavioral Concern": "volunteer",
-    "Medical Emergency": "safety",
-    "Other": "other",
-  };
-
   const handleSubmit = async () => {
     if (!incidentType) { Alert.alert("Required", "Please select a type of incident."); return; }
     if (!severity) { Alert.alert("Required", "Please select a severity level."); return; }
@@ -125,10 +126,12 @@ export default function ReportIncidentScreen() {
         category: CATEGORY_MAP[incidentType],
         photos: uploadedUrls.length > 0 ? uploadedUrls : undefined,
       });
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Report Submitted", "Your incident report has been sent.", [
         { text: "OK", onPress: () => router.back() },
       ]);
-    } catch {
+    } catch (error) {
+      console.error(error);
       Alert.alert("Error", "Failed to submit report. Please try again.");
     } finally {
       setSubmitting(false);
@@ -259,10 +262,6 @@ export default function ReportIncidentScreen() {
             placeholder={selectedEvent?.location ?? "Enter location"}
             placeholderTextColor={colors.textTertiary}
           />
-          <TouchableOpacity style={styles.locationBtn}>
-            <Ionicons name="location" size={16} color={colors.tint} />
-            <Text style={styles.locationBtnText}>Use My Current Location</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Description */}
@@ -548,16 +547,6 @@ function getStyles(colors: ThemeColors) {
       backgroundColor: colors.inputBackground,
       color: colors.textPrimary,
     },
-    locationBtn: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-    },
-    locationBtnText: {
-      fontSize: 14,
-      fontWeight: "500",
-      color: colors.tint,
-    },
     textarea: {
       borderWidth: 1,
       borderColor: colors.inputBorder,
@@ -602,6 +591,7 @@ function getStyles(colors: ThemeColors) {
     },
     photosRow: {
       flexDirection: "row",
+      flexWrap: "wrap",
       gap: 10,
     },
     photoThumb: {

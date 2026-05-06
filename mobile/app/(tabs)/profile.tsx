@@ -1,10 +1,11 @@
-import { StyleSheet, ScrollView, TouchableOpacity, View } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, View, Alert } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useTheme, ThemePreference } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { router } from "expo-router";
 
 const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: "System", value: "system" },
@@ -17,14 +18,23 @@ export default function ProfileScreen() {
   const { logout } = useAuth();
   const styles = getStyles(colors);
 
+  async function handleSignOut() {
+    try {
+      await logout();
+      router.replace("/auth");
+    } catch {
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    }
+  }
+
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
         <View style={styles.profileImageContainer}>
-          <IconSymbol size={60} name="person.fill" color="#FFFFFF" />
+          <IconSymbol size={38} name="person.fill" color="#FFFFFF" />
         </View>
-        <ThemedText type="title">John Volunteer</ThemedText>
-        <ThemedText type="subtitle">Volunteer since 2024</ThemedText>
+        <ThemedText type="title" style={styles.profileName}>John Volunteer</ThemedText>
+        <ThemedText type="subtitle" style={styles.profileSubtitle}>Volunteer since 2024</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.content}>
@@ -110,7 +120,7 @@ export default function ProfileScreen() {
         </ThemedView>
 
         <ThemedView style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <IconSymbol size={20} name="arrow.right.square" color={colors.danger} />
             <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
           </TouchableOpacity>
@@ -132,12 +142,20 @@ function getStyles(colors: ThemeColors) {
       gap: 10,
     },
     profileImageContainer: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
+      width: 72,
+      height: 72,
+      borderRadius: 36,
       backgroundColor: colors.profileAvatar,
       justifyContent: "center",
       alignItems: "center",
+    },
+    profileName: {
+      fontSize: 20,
+      lineHeight: 28,
+    },
+    profileSubtitle: {
+      fontSize: 14,
+      fontWeight: "500",
     },
     content: {
       padding: 20,
