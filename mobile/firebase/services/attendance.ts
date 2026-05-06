@@ -65,3 +65,12 @@ export async function checkOutFromShift(attendanceId: string): Promise<void> {
     checkOut: { timestamp: Date.now() },
   });
 }
+
+export async function getUserAttendanceRecords(userId: string): Promise<Attendance[]> {
+  const q = query(
+    collection(firestore, COLLECTIONS.ATTENDANCE),
+    where("volunteerId", "==", userId),
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Attendance);
+}

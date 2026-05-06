@@ -17,6 +17,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { router } from "expo-router";
 import { useCheckIn } from "@/hooks/useCheckIn";
+import { useUserAttendance } from "@/hooks/useUserAttendance";
 import { bucket } from "@/app/(tabs)/schedule";
 
 export default function HomeScreen() {
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { activeCheckIn, activeEvent } = useCheckIn(user?.uid);
 
+  const { attendanceByShift } = useUserAttendance(user?.uid);
   const { past, today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
   const greeting = useMemo(() => getGreeting(new Date()), []);
   const styles = getStyles(colors);
@@ -189,6 +191,10 @@ export default function HomeScreen() {
             {past.map((shift) => {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
+              const attendanceRecord = attendanceByShift[shift.id];
+              const attended = attendanceRecord !== undefined
+                ? attendanceRecord.status === "checked-out" || attendanceRecord.status === "checked-in"
+                : false;
               return (
                 <ShiftCard
                   key={shift.id}
@@ -196,6 +202,7 @@ export default function HomeScreen() {
                   event={event}
                   userId={user?.uid}
                   isPast
+                  attended={attendanceRecord !== undefined ? attended : undefined}
                 />
               );
             })}
