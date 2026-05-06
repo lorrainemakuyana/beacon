@@ -89,7 +89,7 @@ export default function HomeScreen() {
             onPress={() => router.push("/(tabs)/events")}
           >
             <IconSymbol size={28} name="magnifyingglass" color={colors.tint} />
-            <ThemedText style={styles.actionText}>Find Shifts</ThemedText>
+            <ThemedText style={styles.actionText}>Volunteer</ThemedText>
           </TouchableOpacity>
 
           {/* <TouchableOpacity
@@ -107,7 +107,7 @@ export default function HomeScreen() {
             <IconSymbol
               size={28}
               name="exclamationmark.triangle.fill"
-              color={colors.danger}
+              color="#F97316"
             />
             <ThemedText style={styles.actionText}>Report Incident</ThemedText>
           </TouchableOpacity>

@@ -21,10 +21,10 @@ export default function ProfileScreen() {
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
         <View style={styles.profileImageContainer}>
-          <IconSymbol size={60} name="person.fill" color="#FFFFFF" />
+          <IconSymbol size={38} name="person.fill" color="#FFFFFF" />
         </View>
-        <ThemedText type="title">John Volunteer</ThemedText>
-        <ThemedText type="subtitle">Volunteer since 2024</ThemedText>
+        <ThemedText type="title" style={styles.profileName}>John Volunteer</ThemedText>
+        <ThemedText type="subtitle" style={styles.profileSubtitle}>Volunteer since 2024</ThemedText>
       </ThemedView>
 
       <ThemedView style={styles.content}>
@@ -132,12 +132,20 @@ function getStyles(colors: ThemeColors) {
       gap: 10,
     },
     profileImageContainer: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
+      width: 72,
+      height: 72,
+      borderRadius: 36,
       backgroundColor: colors.profileAvatar,
       justifyContent: "center",
       alignItems: "center",
+    },
+    profileName: {
+      fontSize: 20,
+      lineHeight: 28,
+    },
+    profileSubtitle: {
+      fontSize: 14,
+      fontWeight: "500",
     },
     content: {
       padding: 20,
