@@ -116,7 +116,7 @@ export default function HomeScreen() {
 
       {/* Upcoming schedule */}
       <View style={styles.section}>
-        <ThemedText type="subtitle">My Schedule</ThemedText>
+        {/* <ThemedText type="subtitle">My Schedule</ThemedText> */}
 
         <View style={styles.scheduleGroup}>
           <Text style={styles.sectionLabel}>Today</Text>
@@ -184,7 +184,7 @@ export default function HomeScreen() {
       {/* Past shifts at the end — greyed out */}
       {past.length > 0 && (
         <View style={[styles.section, styles.pastSection]}>
-          <ThemedText type="subtitle">Past Shifts</ThemedText>
+          <Text style={styles.sectionLabel}>Previous Shifts</Text>
           <View style={styles.pastContent}>
             {past.map((shift) => {
               const event = eventsMap[shift.eventId];
@@ -328,7 +328,8 @@ function getStyles(colors: ThemeColors) {
       paddingTop: 0,
     },
     scheduleGroup: {
-      gap: 10,
+      paddingTop: 20,
+      gap: 15,
     },
     sectionLabel: {
       fontSize: 13,
@@ -349,10 +350,12 @@ function getStyles(colors: ThemeColors) {
       color: colors.textTertiary,
     },
     pastSection: {
+      paddingTop: 20,
       paddingBottom: 30,
     },
     pastContent: {
       opacity: 0.45,
+      gap: 20
     },
   });
 }

@@ -128,7 +128,8 @@ export default function ReportIncidentScreen() {
       Alert.alert("Report Submitted", "Your incident report has been sent.", [
         { text: "OK", onPress: () => router.back() },
       ]);
-    } catch {
+    } catch (error) {
+      console.log(error);
       Alert.alert("Error", "Failed to submit report. Please try again.");
     } finally {
       setSubmitting(false);
