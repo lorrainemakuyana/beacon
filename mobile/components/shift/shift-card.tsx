@@ -20,6 +20,7 @@ type Props = {
   userId?: string;
   isPast?: boolean;
   attended?: boolean;
+  attendanceLoading?: boolean;
 };
 
 const STATUS_CONFIG: Record<
@@ -74,18 +75,19 @@ export const ShiftCard = memo(function ShiftCard({
   userId,
   isPast,
   attended,
+  attendanceLoading,
 }: Props) {
   const { colors } = useTheme();
 
   const effectiveStatus = useMemo((): Shift["status"] => {
     if (!shift) return EVENT_STATUS_MAP[event.status] ?? "open";
     if (!isPast) return shift.status;
+    // Show neutral "closed" while attendance is still loading to avoid a false "Attended" flash
+    if (attendanceLoading) return "closed";
     if (attended === true) return "attended";
     if (attended === false) return "missed";
-    // Fallback when attendance data hasn't loaded yet
-    if (userId && shift.assignedVolunteers?.includes(userId)) return "attended";
     return "closed";
-  }, [shift, event.status, isPast, userId, attended]);
+  }, [shift, event.status, isPast, attended, attendanceLoading]);
 
   const statusCfg = STATUS_CONFIG[effectiveStatus];
 
@@ -159,7 +161,13 @@ export const ShiftCard = memo(function ShiftCard({
       )}
 
       {isToday && (
-        <TouchableOpacity style={styles.checkInButton}>
+        <TouchableOpacity
+          style={styles.checkInButton}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            router.push("/(tabs)/check-in");
+          }}
+        >
           <Ionicons name="qr-code-outline" size={18} color="#FFFFFF" />
           <Text style={styles.checkInButtonText}>Check-In Now</Text>
         </TouchableOpacity>

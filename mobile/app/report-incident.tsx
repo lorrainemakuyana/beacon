@@ -43,6 +43,14 @@ const SEVERITY_COLORS: Record<Severity, string> = {
   Critical: "#EF4444",
 };
 
+const CATEGORY_MAP: Record<IncidentType, IncidentCategory> = {
+  "Safety Hazard": "safety",
+  "Equipment Issue": "equipment",
+  "Behavioral Concern": "volunteer",
+  "Medical Emergency": "safety",
+  "Other": "other",
+};
+
 export default function ReportIncidentScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -93,14 +101,6 @@ export default function ReportIncidentScreen() {
   const selectedShift = shifts.find((s) => s.id === selectedShiftId);
   const selectedEvent = selectedShift ? eventsMap[selectedShift.eventId] : null;
 
-  const CATEGORY_MAP: Record<IncidentType, IncidentCategory> = {
-    "Safety Hazard": "safety",
-    "Equipment Issue": "equipment",
-    "Behavioral Concern": "volunteer",
-    "Medical Emergency": "safety",
-    "Other": "other",
-  };
-
   const handleSubmit = async () => {
     if (!incidentType) { Alert.alert("Required", "Please select a type of incident."); return; }
     if (!severity) { Alert.alert("Required", "Please select a severity level."); return; }
@@ -131,7 +131,7 @@ export default function ReportIncidentScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Alert.alert("Error", "Failed to submit report. Please try again.");
     } finally {
       setSubmitting(false);

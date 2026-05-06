@@ -9,7 +9,10 @@ import {
   Pressable,
   ActivityIndicator,
   FlatList,
+  Dimensions,
 } from "react-native";
+
+const SCREEN_W = Dimensions.get("window").width;
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -120,11 +123,11 @@ export default function IncidentsScreen() {
               horizontal
               pagingEnabled
               initialScrollIndex={photoModal.startIndex}
-              getItemLayout={(_, i) => ({ length: 400, offset: 400 * i, index: i })}
+              getItemLayout={(_, i) => ({ length: SCREEN_W, offset: SCREEN_W * i, index: i })}
               keyExtractor={(_, i) => String(i)}
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={(e) => {
-                const idx = Math.round(e.nativeEvent.contentOffset.x / 400);
+                const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
                 setActivePhotoIndex(idx);
               }}
               renderItem={({ item }) => (
@@ -444,13 +447,13 @@ function getStyles(colors: ThemeColors) {
       padding: 8,
     },
     photoModalSlide: {
-      width: 400,
+      width: SCREEN_W,
       justifyContent: "center",
       alignItems: "center",
     },
     photoModalImage: {
-      width: "100%",
-      height: 400,
+      width: SCREEN_W,
+      height: SCREEN_W,
     },
     photoCounter: {
       position: "absolute",

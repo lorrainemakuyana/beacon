@@ -26,7 +26,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { activeCheckIn, activeEvent } = useCheckIn(user?.uid);
 
-  const { attendanceByShift } = useUserAttendance(user?.uid);
+  const { attendanceByShift, loading: attendanceLoading } = useUserAttendance(user?.uid);
   const { past, today, thisWeek, later } = useMemo(() => bucket(shifts), [shifts]);
   const greeting = useMemo(() => getGreeting(new Date()), []);
   const styles = getStyles(colors);
@@ -94,14 +94,6 @@ export default function HomeScreen() {
             <ThemedText style={styles.actionText}>Volunteer</ThemedText>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => router.push("/(tabs)/schedule")}
-          >
-            <IconSymbol size={28} name="calendar" color={colors.tint} />
-            <ThemedText style={styles.actionText}>My Schedule</ThemedText>
-          </TouchableOpacity> */}
-
           <TouchableOpacity
             style={styles.actionCard}
             onPress={() => router.push("/(tabs)/incidents")}
@@ -118,8 +110,6 @@ export default function HomeScreen() {
 
       {/* Upcoming schedule */}
       <View style={styles.section}>
-        {/* <ThemedText type="subtitle">My Schedule</ThemedText> */}
-
         <View style={styles.scheduleGroup}>
           <Text style={styles.sectionLabel}>Today</Text>
           {today.length === 0 ? (
@@ -192,9 +182,7 @@ export default function HomeScreen() {
               const event = eventsMap[shift.eventId];
               if (!event) return null;
               const attendanceRecord = attendanceByShift[shift.id];
-              const attended = attendanceRecord !== undefined
-                ? attendanceRecord.status === "checked-out" || attendanceRecord.status === "checked-in"
-                : false;
+              const attended = attendanceRecord?.status === "checked-out" || attendanceRecord?.status === "checked-in";
               return (
                 <ShiftCard
                   key={shift.id}
@@ -202,7 +190,8 @@ export default function HomeScreen() {
                   event={event}
                   userId={user?.uid}
                   isPast
-                  attended={attendanceRecord !== undefined ? attended : undefined}
+                  attended={attendanceLoading ? undefined : (attendanceRecord !== undefined ? attended : false)}
+                  attendanceLoading={attendanceLoading}
                 />
               );
             })}
