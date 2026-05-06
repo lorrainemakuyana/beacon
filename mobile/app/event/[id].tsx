@@ -11,6 +11,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
+import * as Haptics from "expo-haptics";
 
 import { Event } from "@/interfaces";
 import { ThemedText } from "@/components/themed-text";
@@ -152,6 +153,7 @@ export default function EventDetailsScreen() {
             if (!user?.uid) return;
             try {
               await signUpForEventShift(event!.id, user.uid);
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               router.push("/(tabs)/schedule");
             } catch (err: any) {
               Alert.alert("Sign Up Failed", err.message ?? "Something went wrong");
