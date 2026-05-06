@@ -17,6 +17,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useUserShifts } from "@/hooks/useUserShifts";
@@ -125,6 +126,7 @@ export default function ReportIncidentScreen() {
         category: CATEGORY_MAP[incidentType],
         photos: uploadedUrls.length > 0 ? uploadedUrls : undefined,
       });
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Report Submitted", "Your incident report has been sent.", [
         { text: "OK", onPress: () => router.back() },
       ]);
