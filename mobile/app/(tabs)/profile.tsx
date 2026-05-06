@@ -1,10 +1,11 @@
-import { StyleSheet, ScrollView, TouchableOpacity, View } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, View, Alert } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useTheme, ThemePreference } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
+import { router } from "expo-router";
 
 const THEME_OPTIONS: { label: string; value: ThemePreference }[] = [
   { label: "System", value: "system" },
@@ -16,6 +17,15 @@ export default function ProfileScreen() {
   const { colors, themePreference, setThemePreference } = useTheme();
   const { logout } = useAuth();
   const styles = getStyles(colors);
+
+  async function handleSignOut() {
+    try {
+      await logout();
+      router.replace("/auth");
+    } catch {
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    }
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -110,7 +120,7 @@ export default function ProfileScreen() {
         </ThemedView>
 
         <ThemedView style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleSignOut}>
             <IconSymbol size={20} name="arrow.right.square" color={colors.danger} />
             <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
           </TouchableOpacity>
