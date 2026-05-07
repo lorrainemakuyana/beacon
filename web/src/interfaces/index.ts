@@ -11,6 +11,7 @@ export interface User {
   createdAt: number;
   lastActive: number;
   skills: string[];
+  events?: string[];
 }
 
 export type ShiftStatus =
@@ -45,7 +46,8 @@ export type EventStatus =
   | "published"
   | "active"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "archived";
 
 export interface EventOrganizer {
   name: string;

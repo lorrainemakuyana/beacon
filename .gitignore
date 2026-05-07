@@ -4,6 +4,8 @@ shared/.env
 mobile/.env
 web/.env
 
+web/.next
+
 shared/node_modules
 mobile/node_modules
 web/node_modules

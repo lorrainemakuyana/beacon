@@ -1,8 +1,12 @@
 import {
+  Timestamp,
+  addDoc,
+  arrayUnion,
   collection,
   doc,
   getDoc,
   getDocs,
+  limit,
   orderBy,
   query,
   updateDoc,
@@ -44,4 +48,70 @@ export async function updateEventStatus(
     status,
     updatedAt: Date.now(),
   });
+}
+
+export async function createEvent(
+  data: Omit<Event, "id" | "createdAt" | "updatedAt" | "shifts">,
+  shiftDefs: Array<{ title: string; requiredVolunteers: number }>
+): Promise<string> {
+  const eventRef = await addDoc(collection(firestore, COLLECTIONS.EVENTS), {
+    ...data,
+    shifts: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
+
+  const startDateTime = new Date(`${data.date}T${data.startTime}`);
+  const endDateTime = new Date(`${data.date}T${data.endTime}`);
+
+  const shiftIds: string[] = [];
+  for (const shiftDef of shiftDefs) {
+    const shiftRef = await addDoc(collection(firestore, COLLECTIONS.SHIFTS), {
+      eventId: eventRef.id,
+      title: shiftDef.title,
+      description: "",
+      role: { title: shiftDef.title },
+      timeSlot: {
+        start: Timestamp.fromDate(startDateTime),
+        end: Timestamp.fromDate(endDateTime),
+      },
+      requiredVolunteers: shiftDef.requiredVolunteers,
+      assignedVolunteers: [],
+      status: "open",
+    });
+    shiftIds.push(shiftRef.id);
+  }
+
+  await updateDoc(eventRef, { shifts: shiftIds });
+  return eventRef.id;
+}
+
+export async function archiveEvent(id: string): Promise<void> {
+  await updateDoc(doc(firestore, COLLECTIONS.EVENTS, id), {
+    status: "archived",
+    updatedAt: Date.now(),
+  });
+}
+
+export async function addCollaboratorToEvent(
+  eventId: string,
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  const q = query(
+    collection(firestore, COLLECTIONS.USERS),
+    where("email", "==", email),
+    limit(1)
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) {
+    return { success: false, message: "No user found with that email" };
+  }
+  const userDoc = snap.docs[0];
+  await updateDoc(doc(firestore, COLLECTIONS.EVENTS, eventId), {
+    collaborators: arrayUnion(userDoc.id),
+  });
+  await updateDoc(doc(firestore, COLLECTIONS.USERS, userDoc.id), {
+    events: arrayUnion(eventId),
+  });
+  return { success: true, message: "Collaborator added" };
 }

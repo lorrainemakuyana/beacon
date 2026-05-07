@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { useAuth } from "@/context/auth";
 import { getEventById } from "@/firebase/services/events";
 import { getShiftsByEventId } from "@/firebase/services/shifts";
+import { getIncidentsByEventId } from "@/firebase/services/incidents";
 import { getUsersByIds } from "@/firebase/services/users";
-import { Event, User } from "@/interfaces";
+import { Event, Shift, User } from "@/interfaces";
 import Breadcrumb from "@/components/breadcrumb";
 import EmptyState from "@/components/empty-state";
+import EventTabs from "@/components/event-tabs";
 
 export default function EventVolunteersPage() {
   const { user, loading } = useAuth();
@@ -16,7 +19,9 @@ export default function EventVolunteersPage() {
   const { id } = useParams<{ id: string }>();
 
   const [event, setEvent] = useState<Event | null>(null);
+  const [shifts, setShifts] = useState<Shift[]>([]);
   const [volunteers, setVolunteers] = useState<User[]>([]);
+  const [incidentCount, setIncidentCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
@@ -27,15 +32,17 @@ export default function EventVolunteersPage() {
     if (!user || !id) return;
     async function load() {
       try {
-        const [evt, shifts] = await Promise.all([
+        const [evt, shfts, incidents] = await Promise.all([
           getEventById(id),
           getShiftsByEventId(id),
+          getIncidentsByEventId(id),
         ]);
         setEvent(evt);
+        setShifts(shfts);
+        setIncidentCount(incidents.length);
 
-        // Collect all unique volunteer IDs across all shifts
         const volunteerIds = Array.from(
-          new Set(shifts.flatMap((s) => s.assignedVolunteers ?? []))
+          new Set(shfts.flatMap((s) => s.assignedVolunteers ?? []))
         );
         const vols = await getUsersByIds(volunteerIds);
         setVolunteers(vols);
@@ -46,6 +53,8 @@ export default function EventVolunteersPage() {
     load();
   }, [user, id]);
 
+  const volunteerIds = Array.from(new Set(shifts.flatMap((s) => s.assignedVolunteers ?? [])));
+
   if (loading || (!user && !loading)) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -55,29 +64,33 @@ export default function EventVolunteersPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="flex flex-col gap-6"
+    >
       <Breadcrumb
         items={[
           { label: "Events", href: "/events" },
-          {
-            label: dataLoading ? "..." : (event?.title ?? "Event"),
-            href: `/events/${id}`,
-          },
+          { label: dataLoading ? "..." : (event?.title ?? "Event"), href: `/events/${id}` },
           { label: "Volunteers" },
         ]}
       />
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Volunteers</h1>
-        {event && (
-          <p className="text-gray-500 text-sm mt-1">{event.title}</p>
-        )}
+        {event && <p className="text-gray-500 text-sm mt-1">{event.title}</p>}
       </div>
 
+      <EventTabs
+        eventId={id}
+        active="volunteers"
+        counts={{ shifts: shifts.length, volunteers: volunteerIds.length, incidents: incidentCount }}
+      />
+
       {dataLoading ? (
-        <div className="py-12 text-center text-gray-400 text-sm">
-          Loading volunteers...
-        </div>
+        <div className="py-12 text-center text-gray-400 text-sm">Loading volunteers...</div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
           {volunteers.length === 0 ? (
@@ -87,40 +100,27 @@ export default function EventVolunteersPage() {
             />
           ) : (
             volunteers.map((vol) => (
-              <div
-                key={vol.uid}
-                className="px-5 py-4 flex items-center justify-between"
-              >
+              <div key={vol.uid} className="px-5 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  {/* Avatar */}
                   <div className="w-9 h-9 rounded-full bg-primary-subtle border border-primary-subtle-border flex items-center justify-center shrink-0">
                     <span className="text-primary text-sm font-semibold">
                       {vol.displayName?.[0]?.toUpperCase() ?? "?"}
                     </span>
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-medium text-gray-900 truncate">
-                      {vol.displayName}
-                    </span>
-                    <span className="text-xs text-gray-400 truncate">
-                      {vol.email}
-                    </span>
+                    <span className="text-sm font-medium text-gray-900 truncate">{vol.displayName}</span>
+                    <span className="text-xs text-gray-400 truncate">{vol.email}</span>
                   </div>
                 </div>
                 {vol.skills && vol.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1 justify-end ml-4 max-w-xs">
                     {vol.skills.slice(0, 3).map((skill) => (
-                      <span
-                        key={skill}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                      >
+                      <span key={skill} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                         {skill}
                       </span>
                     ))}
                     {vol.skills.length > 3 && (
-                      <span className="text-xs text-gray-400">
-                        +{vol.skills.length - 3} more
-                      </span>
+                      <span className="text-xs text-gray-400">+{vol.skills.length - 3} more</span>
                     )}
                   </div>
                 )}
@@ -129,6 +129,6 @@ export default function EventVolunteersPage() {
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

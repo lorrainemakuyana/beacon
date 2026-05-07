@@ -19,8 +19,8 @@ export default function RootLayout({
       <body className="bg-gray-50 text-gray-900 antialiased">
         <AuthProvider>
           <Nav />
-          <main className="min-h-screen py-8">
-            <div className="max-w-lg mx-auto px-4">{children}</div>
+          <main className="min-h-screen w-screen py-8">
+            <div className="max-w-5xl w-full mx-auto px-4">{children}</div>
           </main>
           <Footer />
         </AuthProvider>

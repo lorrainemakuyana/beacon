@@ -3,6 +3,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   query,
   where,
   documentId,
@@ -18,6 +19,18 @@ export async function getAllUsers(): Promise<User[]> {
 export async function getUser(uid: string): Promise<User | null> {
   const snap = await getDoc(doc(firestore, COLLECTIONS.USERS, uid));
   return snap.exists() ? ({ uid: snap.id, ...snap.data() } as User) : null;
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const q = query(
+    collection(firestore, COLLECTIONS.USERS),
+    where("email", "==", email),
+    limit(1)
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { uid: d.id, ...d.data() } as User;
 }
 
 export async function getUsersByIds(ids: string[]): Promise<User[]> {

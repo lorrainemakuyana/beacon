@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { AlertTriangle, CalendarDays, Clock, Users } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { getAllEvents } from "@/firebase/services/events";
 import { getAllIncidents } from "@/firebase/services/incidents";
@@ -67,7 +69,12 @@ export default function DashboardPage() {
   const recentIncidents = incidents.slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-8">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="h-[calc(100vh-56px-64px)] overflow-hidden flex flex-col gap-6"
+    >
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">
@@ -80,120 +87,123 @@ export default function DashboardPage() {
         <StatCard
           label="Total Events"
           value={dataLoading ? "—" : events.length}
-          icon="📅"
+          icon={<CalendarDays className="w-5 h-5" />}
         />
         <StatCard
           label="Active Incidents"
           value={dataLoading ? "—" : activeIncidents.length}
-          icon="⚠️"
+          icon={<AlertTriangle className="w-5 h-5" />}
         />
         <StatCard
           label="Total Volunteers"
           value={dataLoading ? "—" : volunteerCount}
-          icon="👥"
+          icon={<Users className="w-5 h-5" />}
         />
         <StatCard
           label="Total Shifts"
           value={dataLoading ? "—" : shiftCount}
-          icon="🗓️"
+          icon={<Clock className="w-5 h-5" />}
         />
       </div>
 
-      {/* Recent Events */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-gray-900">
-            Recent Events
-          </h2>
-          <Link
-            href="/events"
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            View all
-          </Link>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-          {dataLoading ? (
-            <div className="py-10 text-center text-gray-400 text-sm">
-              Loading...
-            </div>
-          ) : recentEvents.length === 0 ? (
-            <EmptyState message="No events yet" />
-          ) : (
-            recentEvents.map((event) => (
-              <Link
-                key={event.id}
-                href={`/events/${event.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-sm font-medium text-gray-900 truncate">
-                    {event.title}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {formatDate(event.date)} · {event.location}
-                  </span>
-                </div>
-                <Badge
-                  label={event.status}
-                  variant={getStatusVariant(event.status)}
-                />
-              </Link>
-            ))
-          )}
-        </div>
-      </section>
+      {/* Bottom two sections */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 gap-6 sm:grid-cols-2 overflow-hidden">
+        {/* Recent Events */}
+        <section className="flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              Recent Events
+            </h2>
+            <Link
+              href="/events"
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-y-auto max-h-48">
+            {dataLoading ? (
+              <div className="py-10 text-center text-gray-400 text-sm">
+                Loading...
+              </div>
+            ) : recentEvents.length === 0 ? (
+              <EmptyState message="No events yet" />
+            ) : (
+              recentEvents.map((event) => (
+                <Link
+                  key={event.id}
+                  href={`/events/${event.id}`}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {event.title}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {formatDate(event.date)} · {event.location}
+                    </span>
+                  </div>
+                  <Badge
+                    label={event.status}
+                    variant={getStatusVariant(event.status)}
+                  />
+                </Link>
+              ))
+            )}
+          </div>
+        </section>
 
-      {/* Recent Incidents */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-gray-900">
-            Recent Incidents
-          </h2>
-          <Link
-            href="/incidents"
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            View all
-          </Link>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-          {dataLoading ? (
-            <div className="py-10 text-center text-gray-400 text-sm">
-              Loading...
-            </div>
-          ) : recentIncidents.length === 0 ? (
-            <EmptyState message="No incidents reported" />
-          ) : (
-            recentIncidents.map((incident) => (
-              <Link
-                key={incident.id}
-                href={`/incidents/${incident.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-sm font-medium text-gray-900 truncate">
-                    {incident.title}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {formatDate(incident.createdAt)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge
-                    label={incident.severity}
-                    variant={getSeverityVariant(incident.severity)}
-                  />
-                  <Badge
-                    label={incident.status}
-                    variant={getStatusVariant(incident.status)}
-                  />
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
-      </section>
-    </div>
+        {/* Recent Incidents */}
+        <section className="flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              Recent Incidents
+            </h2>
+            <Link
+              href="/incidents"
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-y-auto max-h-48">
+            {dataLoading ? (
+              <div className="py-10 text-center text-gray-400 text-sm">
+                Loading...
+              </div>
+            ) : recentIncidents.length === 0 ? (
+              <EmptyState message="No incidents reported" />
+            ) : (
+              recentIncidents.map((incident) => (
+                <Link
+                  key={incident.id}
+                  href={`/incidents/${incident.id}`}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {incident.title}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {formatDate(incident.createdAt)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge
+                      label={incident.severity}
+                      variant={getSeverityVariant(incident.severity)}
+                    />
+                    <Badge
+                      label={incident.status}
+                      variant={getStatusVariant(incident.status)}
+                    />
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+    </motion.div>
   );
 }
