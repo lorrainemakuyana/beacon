@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 import { AlertTriangle, CalendarDays, Clock, Users } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { getAllEvents } from "@/firebase/services/events";
@@ -69,10 +69,7 @@ export default function DashboardPage() {
   const recentIncidents = incidents.slice(0, 5);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className="h-[calc(100vh-56px-64px)] overflow-hidden flex flex-col gap-6"
     >
       <div>
@@ -204,6 +201,6 @@ export default function DashboardPage() {
           </div>
         </section>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 import { Archive } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { getEventById, archiveEvent, addCollaboratorToEvent } from "@/firebase/services/events";
@@ -126,10 +126,7 @@ export default function EventDetailPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <div
       className="flex flex-col gap-6"
     >
       <Breadcrumb
@@ -306,6 +303,6 @@ export default function EventDetailPage() {
           </section>
         </>
       ) : null}
-    </motion.div>
+    </div>
   );
 }

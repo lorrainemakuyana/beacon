@@ -48,10 +48,7 @@ export default function EventsPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <div
       className="flex flex-col gap-6"
     >
       <div className="flex items-center justify-between">
@@ -123,6 +120,6 @@ export default function EventsPage() {
           </motion.div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+
 import { Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { createEvent } from "@/firebase/services/events";
@@ -119,10 +119,7 @@ export default function NewEventPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <div
       className="flex flex-col gap-6"
     >
       <Breadcrumb
@@ -370,6 +367,6 @@ export default function NewEventPage() {
           </button>
         </div>
       </form>
-    </motion.div>
+    </div>
   );
 }

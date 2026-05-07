@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
+
 import { useAuth } from "@/context/auth";
 import { signUp } from "@/firebase/services/auth-service";
 
@@ -65,10 +65,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+        <div
           className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm"
         >
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -150,7 +147,7 @@ export default function SignUpPage() {
               {submitting ? "Creating account..." : "Create account"}
             </button>
           </form>
-        </motion.div>
+        </div>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}

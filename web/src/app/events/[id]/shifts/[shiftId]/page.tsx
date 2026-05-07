@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { motion } from "framer-motion";
+
 import { useAuth } from "@/context/auth";
 import { getEventById } from "@/firebase/services/events";
 import { getShiftById } from "@/firebase/services/shifts";
@@ -65,10 +65,7 @@ export default function ShiftDetailPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <div
       className="flex flex-col gap-6"
     >
       <Breadcrumb
@@ -148,6 +145,6 @@ export default function ShiftDetailPage() {
       ) : (
         <div className="py-12 text-center text-gray-400 text-sm">Shift not found.</div>
       )}
-    </motion.div>
+    </div>
   );
 }
