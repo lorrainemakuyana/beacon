@@ -307,47 +307,50 @@ export default function ReportIncidentScreen() {
           </View>
         </View>
 
-        {/* Add Photos */}
-        <View style={styles.field}>
-          <Text style={styles.label}>Add Photos (Optional)</Text>
-          <View style={styles.photosRow}>
-            {photos.map((uri, i) => (
-              <TouchableOpacity key={i} onPress={() => setPhotoModal({ index: i })}>
-                <Image source={{ uri }} style={styles.photoThumb} />
-              </TouchableOpacity>
-            ))}
-            {photos.length < 5 && (
-              <TouchableOpacity style={styles.addPhotoBtn} onPress={pickPhoto}>
-                <Ionicons name="camera-outline" size={28} color={colors.textTertiary} />
-                <Text style={styles.addPhotoText}>Add Photo</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          <Text style={styles.photoHint}>{photos.length}/5 photos added</Text>
-        </View>
-
-        {/* Photo preview modal (with delete) */}
-        {photoModal && (
-          <Modal visible transparent animationType="fade" onRequestClose={() => setPhotoModal(null)}>
-            <View style={styles.photoModalBg}>
-              <TouchableOpacity style={styles.photoModalClose} onPress={() => setPhotoModal(null)}>
-                <Ionicons name="close" size={28} color="#FFFFFF" />
-              </TouchableOpacity>
-              <Image source={{ uri: photos[photoModal.index] }} style={styles.photoModalImage} resizeMode="contain" />
-              <TouchableOpacity
-                style={styles.photoDeleteBtn}
-                onPress={() => {
-                  Alert.alert("Delete Photo", "Remove this photo?", [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Delete", style: "destructive", onPress: () => deletePhoto(photoModal.index) },
-                  ]);
-                }}
-              >
-                <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
-                <Text style={styles.photoDeleteText}>Delete Photo</Text>
-              </TouchableOpacity>
+        {/* Add Photos — hidden until image storage is configured */}
+        {false && (
+          <>
+            <View style={styles.field}>
+              <Text style={styles.label}>Add Photos (Optional)</Text>
+              <View style={styles.photosRow}>
+                {photos.map((uri, i) => (
+                  <TouchableOpacity key={i} onPress={() => setPhotoModal({ index: i })}>
+                    <Image source={{ uri }} style={styles.photoThumb} />
+                  </TouchableOpacity>
+                ))}
+                {photos.length < 5 && (
+                  <TouchableOpacity style={styles.addPhotoBtn} onPress={pickPhoto}>
+                    <Ionicons name="camera-outline" size={28} color={colors.textTertiary} />
+                    <Text style={styles.addPhotoText}>Add Photo</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <Text style={styles.photoHint}>{photos.length}/5 photos added</Text>
             </View>
-          </Modal>
+
+            {photoModal && (
+              <Modal visible transparent animationType="fade" onRequestClose={() => setPhotoModal(null)}>
+                <View style={styles.photoModalBg}>
+                  <TouchableOpacity style={styles.photoModalClose} onPress={() => setPhotoModal(null)}>
+                    <Ionicons name="close" size={28} color="#FFFFFF" />
+                  </TouchableOpacity>
+                  <Image source={{ uri: photos[photoModal.index] }} style={styles.photoModalImage} resizeMode="contain" />
+                  <TouchableOpacity
+                    style={styles.photoDeleteBtn}
+                    onPress={() => {
+                      Alert.alert("Delete Photo", "Remove this photo?", [
+                        { text: "Cancel", style: "cancel" },
+                        { text: "Delete", style: "destructive", onPress: () => deletePhoto(photoModal.index) },
+                      ]);
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+                    <Text style={styles.photoDeleteText}>Delete Photo</Text>
+                  </TouchableOpacity>
+                </View>
+              </Modal>
+            )}
+          </>
         )}
 
         {/* Footer note */}
