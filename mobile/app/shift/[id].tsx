@@ -102,6 +102,7 @@ export default function ShiftDetailsScreen() {
   const isToday =
     shift.timeSlot.start.toDate().toDateString() === now.toDateString()
     && now < shift.timeSlot.end.toDate();
+  const isPast = now > shift.timeSlot.end.toDate();
   const teamMembers = teamUsers.map((user) => {
     const palette = randomPalette();
     return {
@@ -310,10 +311,12 @@ export default function ShiftDetailsScreen() {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
-          <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.cancelBtnText}>Cancel Shift</Text>
-        </TouchableOpacity>
+        {!isPast && (
+          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
+            <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.cancelBtnText}>Cancel Shift</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
