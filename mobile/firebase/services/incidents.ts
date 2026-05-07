@@ -6,12 +6,11 @@ import { Incident, COLLECTIONS } from "@/interfaces";
 export async function reportIncident(
   data: Omit<Incident, "id" | "status" | "createdAt" | "updatedAt">
 ): Promise<string> {
-  const docRef = await addDoc(collection(firestore, COLLECTIONS.INCIDENTS), {
-    ...data,
-    status: "open",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  });
+  const payload = Object.fromEntries(
+    Object.entries({ ...data, status: "open", createdAt: Date.now(), updatedAt: Date.now() })
+      .filter(([, v]) => v !== undefined)
+  );
+  const docRef = await addDoc(collection(firestore, COLLECTIONS.INCIDENTS), payload);
   return docRef.id;
 }
 

@@ -107,10 +107,16 @@ export const ShiftCard = memo(function ShiftCard({
   }, [shift, event.date]);
 
   const isToday = useMemo(() => {
-    const date = shift
-      ? shift.timeSlot.start.toDate()
-      : new Date(event.date + "T00:00:00");
-    return date.toDateString() === new Date().toDateString();
+    const now = new Date();
+    if (shift) {
+      const start = shift.timeSlot.start.toDate();
+      const end = shift.timeSlot.end.toDate();
+      const oneHourBefore = new Date(start.getTime() - 60 * 60 * 1000);
+      return start.toDateString() === now.toDateString()
+        && now >= oneHourBefore
+        && now < end;
+    }
+    return new Date(event.date + "T00:00:00").toDateString() === now.toDateString();
   }, [shift, event.date]);
 
   const title = shift?.title ?? event.title;
@@ -160,7 +166,7 @@ export const ShiftCard = memo(function ShiftCard({
         </View>
       )}
 
-      {isToday && (
+      {isToday && shift && (
         <TouchableOpacity
           style={styles.checkInButton}
           onPress={(e) => {

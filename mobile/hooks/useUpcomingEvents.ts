@@ -19,7 +19,17 @@ export function useUpcomingEvents(): UseUpcomingEventsResult {
     setError(null);
 
     getUpcomingEvents()
-      .then((data) => { if (!cancelled) setEvents(data); })
+      .then((data) => {
+        if (cancelled) return;
+        const now = new Date();
+        const future = data.filter((event) => {
+          const [h, m] = event.startTime.split(":").map(Number);
+          const start = new Date(event.date + "T00:00:00");
+          start.setHours(h, m, 0, 0);
+          return start > now;
+        });
+        setEvents(future);
+      })
       .catch((err) => { if (!cancelled) setError(err.message ?? "Failed to load events"); })
       .finally(() => { if (!cancelled) setLoading(false); });
 

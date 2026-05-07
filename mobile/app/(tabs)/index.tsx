@@ -241,7 +241,7 @@ function getStyles(colors: ThemeColors) {
       flexDirection: "row",
       alignItems: "center",
       gap: 5,
-      backgroundColor: colors.danger,
+      backgroundColor: "#F97316",
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 8,

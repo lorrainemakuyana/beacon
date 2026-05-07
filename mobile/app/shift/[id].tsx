@@ -18,6 +18,8 @@ import { ThemedText } from "@/components/themed-text";
 import { useShiftDetail } from "@/hooks/useShiftDetail";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { useCheckIn } from "@/hooks/useCheckIn";
 
 const STATUS_CONFIG: Record<
   Shift["status"],
@@ -78,6 +80,8 @@ export default function ShiftDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { shift, event, teamUsers } = useShiftDetail(id ?? "");
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const { activeCheckIn } = useCheckIn(user?.uid);
 
   const styles = getStyles(colors);
 
@@ -98,8 +102,15 @@ export default function ShiftDetailsScreen() {
   const dateLabel = formatDetailDate(shift.timeSlot.start.toDate());
   const roleTitle = shift.role?.title ?? "Volunteer";
   const tasks = shift.tasks ?? [];
-  const isToday =
-    shift.timeSlot.start.toDate().toDateString() === new Date().toDateString();
+  const now = new Date();
+  const shiftStart = shift.timeSlot.start.toDate();
+  const shiftEnd = shift.timeSlot.end.toDate();
+  const oneHourBefore = new Date(shiftStart.getTime() - 60 * 60 * 1000);
+  const isToday = shiftStart.toDateString() === now.toDateString()
+    && now >= oneHourBefore
+    && now < shiftEnd;
+  const isPast = now > shiftEnd;
+  const hasStarted = now >= shiftStart;
   const teamMembers = teamUsers.map((user) => {
     const palette = randomPalette();
     return {
@@ -308,10 +319,12 @@ export default function ShiftDetailsScreen() {
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
-          <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.cancelBtnText}>Cancel Shift</Text>
-        </TouchableOpacity>
+        {!isPast && !hasStarted && activeCheckIn?.eventId !== event.id && (
+          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
+            <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
+            <Text style={styles.cancelBtnText}>Cancel Shift</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );

@@ -21,10 +21,11 @@ export function bucket(shifts: ReturnType<typeof useUserShifts>["shifts"]) {
   const later: typeof shifts = [];
 
   for (const s of shifts) {
-    const d = s.timeSlot.start.toDate();
-    if (d < todayStart) past.push(s);
-    else if (d <= todayEnd) today.push(s);
-    else if (d <= weekEnd) thisWeek.push(s);
+    const end = s.timeSlot.end.toDate();
+    const start = s.timeSlot.start.toDate();
+    if (end < now) past.push(s);
+    else if (start <= todayEnd) today.push(s);
+    else if (start <= weekEnd) thisWeek.push(s);
     else later.push(s);
   }
   past.sort((a, b) => b.timeSlot.start.toMillis() - a.timeSlot.start.toMillis());
