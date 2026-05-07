@@ -334,13 +334,13 @@ export default function ReportIncidentScreen() {
                   <TouchableOpacity style={styles.photoModalClose} onPress={() => setPhotoModal(null)}>
                     <Ionicons name="close" size={28} color="#FFFFFF" />
                   </TouchableOpacity>
-                  <Image source={{ uri: photos[photoModal.index] }} style={styles.photoModalImage} resizeMode="contain" />
+                  <Image source={{ uri: photos[photoModal!.index] }} style={styles.photoModalImage} resizeMode="contain" />
                   <TouchableOpacity
                     style={styles.photoDeleteBtn}
                     onPress={() => {
                       Alert.alert("Delete Photo", "Remove this photo?", [
                         { text: "Cancel", style: "cancel" },
-                        { text: "Delete", style: "destructive", onPress: () => deletePhoto(photoModal.index) },
+                        { text: "Delete", style: "destructive", onPress: () => deletePhoto(photoModal!.index) },
                       ]);
                     }}
                   >
