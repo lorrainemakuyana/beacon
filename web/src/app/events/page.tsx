@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/auth";
-import { getAllEvents } from "@/firebase/services/events";
+import { getManagerEvents } from "@/firebase/services/events";
 import { Event } from "@/interfaces";
 import Badge from "@/components/badge";
 import EmptyState from "@/components/empty-state";
@@ -34,7 +34,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     if (!user) return;
-    getAllEvents()
+    getManagerEvents(user.uid)
       .then(setEvents)
       .finally(() => setDataLoading(false));
   }, [user]);

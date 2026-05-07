@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { firestore } from "@/firebase/config";
 import { User, COLLECTIONS } from "@/interfaces";
+import { getManagerEvents } from "./events";
+import { getShiftsByEventId } from "./shifts";
 
 export async function getAllUsers(): Promise<User[]> {
   const snap = await getDocs(collection(firestore, COLLECTIONS.USERS));
@@ -46,4 +48,22 @@ export async function getUsersByIds(ids: string[]): Promise<User[]> {
     snap.docs.forEach((d) => results.push({ uid: d.id, ...d.data() } as User));
   }
   return results;
+}
+
+export async function getVolunteersForManager(userId: string): Promise<User[]> {
+  // 1. Get all events managed by this user
+  const events = await getManagerEvents(userId);
+  // 2. Get all shifts for those events
+  const shiftArrays = await Promise.all(events.map((e) => getShiftsByEventId(e.id)));
+  // 3. Collect unique volunteer UIDs
+  const uids = new Set<string>();
+  for (const shifts of shiftArrays) {
+    for (const shift of shifts) {
+      for (const uid of shift.assignedVolunteers ?? []) {
+        uids.add(uid);
+      }
+    }
+  }
+  // 4. Fetch those users
+  return getUsersByIds(Array.from(uids));
 }

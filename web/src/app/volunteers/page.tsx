@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth";
-import { getAllUsers } from "@/firebase/services/users";
+import { getVolunteersForManager } from "@/firebase/services/users";
 import { User } from "@/interfaces";
 import EmptyState from "@/components/empty-state";
 
@@ -20,8 +20,8 @@ export default function VolunteersPage() {
 
   useEffect(() => {
     if (!user) return;
-    getAllUsers()
-      .then((users) => setVolunteers(users.filter((u) => u.role === "volunteer")))
+    getVolunteersForManager(user.uid)
+      .then(setVolunteers)
       .finally(() => setDataLoading(false));
   }, [user]);
 

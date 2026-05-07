@@ -74,8 +74,8 @@ export default function Nav() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Beacon" className="w-7 h-7 object-contain" />
-          <span className="text-gray-900 font-semibold text-base tracking-tight">
+          <img src="/logo.png" alt="Beacon" className="w-9 h-9 object-contain" />
+          <span className="text-gray-900 font-semibold text-xl tracking-tight">
             Beacon
           </span>
         </Link>
@@ -114,7 +114,7 @@ export default function Nav() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 z-50 bg-white border border-gray-200 rounded-xl shadow-lg w-64"
+                className="absolute right-full top-0 mr-3 z-50 bg-white border border-gray-200 rounded-xl shadow-lg w-64"
               >
                 {/* Header */}
                 <div className="flex items-center gap-3 px-4 py-4">

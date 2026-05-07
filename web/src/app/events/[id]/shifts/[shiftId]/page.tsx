@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 import { useAuth } from "@/context/auth";
-import { getEventById } from "@/firebase/services/events";
+import { useEvent } from "@/context/event-context";
 import { getShiftById } from "@/firebase/services/shifts";
 import { getUsersByIds } from "@/firebase/services/users";
-import { Event, Shift, User } from "@/interfaces";
+import { Shift, User } from "@/interfaces";
 import Breadcrumb from "@/components/breadcrumb";
 import Badge from "@/components/badge";
 import EmptyState from "@/components/empty-state";
@@ -24,25 +24,24 @@ function formatTimestamp(ts: { toDate?: () => Date; seconds?: number } | undefin
 }
 
 export default function ShiftDetailPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { id, shiftId } = useParams<{ id: string; shiftId: string }>();
+  const { event, loading: eventLoading } = useEvent();
 
-  const [event, setEvent] = useState<Event | null>(null);
   const [shift, setShift] = useState<Shift | null>(null);
   const [volunteers, setVolunteers] = useState<User[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) router.push("/login");
-  }, [user, loading, router]);
+    if (!authLoading && !user) router.push("/login");
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!user || !id || !shiftId) return;
     async function load() {
       try {
-        const [evt, shft] = await Promise.all([getEventById(id), getShiftById(shiftId)]);
-        setEvent(evt);
+        const shft = await getShiftById(shiftId);
         setShift(shft);
 
         if (shft?.assignedVolunteers?.length) {
@@ -56,7 +55,7 @@ export default function ShiftDetailPage() {
     load();
   }, [user, id, shiftId]);
 
-  if (loading || (!user && !loading)) {
+  if (authLoading || (!user && !authLoading)) {
     return (
       <div className="flex items-center justify-center py-32">
         <span className="text-gray-400 text-sm">Loading...</span>
@@ -65,13 +64,11 @@ export default function ShiftDetailPage() {
   }
 
   return (
-    <div
-      className="flex flex-col gap-6"
-    >
+    <div className="flex flex-col gap-6">
       <Breadcrumb
         items={[
           { label: "Events", href: "/events" },
-          { label: dataLoading ? "..." : (event?.title ?? "Event"), href: `/events/${id}` },
+          { label: eventLoading ? "..." : (event?.title ?? "Event"), href: `/events/${id}` },
           { label: "Shifts", href: `/events/${id}/shifts` },
           { label: dataLoading ? "..." : (shift?.title ?? "Shift") },
         ]}

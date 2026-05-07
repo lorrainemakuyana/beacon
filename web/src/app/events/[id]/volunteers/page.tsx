@@ -2,60 +2,34 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-
 import { useAuth } from "@/context/auth";
-import { getEventById } from "@/firebase/services/events";
-import { getShiftsByEventId } from "@/firebase/services/shifts";
-import { getIncidentsByEventId } from "@/firebase/services/incidents";
+import { useEvent } from "@/context/event-context";
 import { getUsersByIds } from "@/firebase/services/users";
-import { Event, Shift, User } from "@/interfaces";
-import Breadcrumb from "@/components/breadcrumb";
+import { User } from "@/interfaces";
 import EmptyState from "@/components/empty-state";
-import EventTabs from "@/components/event-tabs";
 
 export default function EventVolunteersPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { shifts, loading: eventLoading } = useEvent();
 
-  const [event, setEvent] = useState<Event | null>(null);
-  const [shifts, setShifts] = useState<Shift[]>([]);
   const [volunteers, setVolunteers] = useState<User[]>([]);
-  const [incidentCount, setIncidentCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) router.push("/login");
-  }, [user, loading, router]);
+    if (!authLoading && !user) router.push("/login");
+  }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (!user || !id) return;
-    async function load() {
-      try {
-        const [evt, shfts, incidents] = await Promise.all([
-          getEventById(id),
-          getShiftsByEventId(id),
-          getIncidentsByEventId(id),
-        ]);
-        setEvent(evt);
-        setShifts(shfts);
-        setIncidentCount(incidents.length);
+    if (eventLoading || !user) return;
+    const volunteerIds = Array.from(new Set(shifts.flatMap((s) => s.assignedVolunteers ?? [])));
+    getUsersByIds(volunteerIds)
+      .then(setVolunteers)
+      .finally(() => setDataLoading(false));
+  }, [user, shifts, eventLoading]);
 
-        const volunteerIds = Array.from(
-          new Set(shfts.flatMap((s) => s.assignedVolunteers ?? []))
-        );
-        const vols = await getUsersByIds(volunteerIds);
-        setVolunteers(vols);
-      } finally {
-        setDataLoading(false);
-      }
-    }
-    load();
-  }, [user, id]);
-
-  const volunteerIds = Array.from(new Set(shifts.flatMap((s) => s.assignedVolunteers ?? [])));
-
-  if (loading || (!user && !loading)) {
+  if (authLoading || (!user && !authLoading)) {
     return (
       <div className="flex items-center justify-center py-32">
         <span className="text-gray-400 text-sm">Loading...</span>
@@ -63,69 +37,51 @@ export default function EventVolunteersPage() {
     );
   }
 
+  if (eventLoading || dataLoading) {
+    return (
+      <div className="py-12 text-center text-gray-400 text-sm">Loading volunteers...</div>
+    );
+  }
+
   return (
-    <div
-      className="flex flex-col gap-6"
-    >
-      <Breadcrumb
-        items={[
-          { label: "Events", href: "/events" },
-          { label: dataLoading ? "..." : (event?.title ?? "Event"), href: `/events/${id}` },
-          { label: "Volunteers" },
-        ]}
-      />
-
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Volunteers</h1>
-        {event && <p className="text-gray-500 text-sm mt-1">{event.title}</p>}
-      </div>
-
-      <EventTabs
-        eventId={id}
-        active="volunteers"
-        counts={{ shifts: shifts.length, volunteers: volunteerIds.length, incidents: incidentCount }}
-      />
-
-      {dataLoading ? (
-        <div className="py-12 text-center text-gray-400 text-sm">Loading volunteers...</div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
-          {volunteers.length === 0 ? (
-            <EmptyState
-              message="No volunteers assigned"
-              description="Volunteers will appear here once they sign up for shifts."
-            />
-          ) : (
-            volunteers.map((vol) => (
-              <div key={vol.uid} className="px-5 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-primary-subtle border border-primary-subtle-border flex items-center justify-center shrink-0">
-                    <span className="text-primary text-sm font-semibold">
-                      {vol.displayName?.[0]?.toUpperCase() ?? "?"}
-                    </span>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm font-medium text-gray-900 truncate">{vol.displayName}</span>
-                    <span className="text-xs text-gray-400 truncate">{vol.email}</span>
-                  </div>
+    <div className="flex flex-col gap-4">
+      <h2 className="text-base font-semibold text-gray-900">Volunteers</h2>
+      <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100">
+        {volunteers.length === 0 ? (
+          <EmptyState
+            message="No volunteers assigned"
+            description="Volunteers will appear here once they sign up for shifts."
+          />
+        ) : (
+          volunteers.map((vol) => (
+            <div key={vol.uid} className="px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-primary-subtle border border-primary-subtle-border flex items-center justify-center shrink-0">
+                  <span className="text-primary text-sm font-semibold">
+                    {vol.displayName?.[0]?.toUpperCase() ?? "?"}
+                  </span>
                 </div>
-                {vol.skills && vol.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1 justify-end ml-4 max-w-xs">
-                    {vol.skills.slice(0, 3).map((skill) => (
-                      <span key={skill} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                        {skill}
-                      </span>
-                    ))}
-                    {vol.skills.length > 3 && (
-                      <span className="text-xs text-gray-400">+{vol.skills.length - 3} more</span>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-medium text-gray-900 truncate">{vol.displayName}</span>
+                  <span className="text-xs text-gray-400 truncate">{vol.email}</span>
+                </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
+              {vol.skills && vol.skills.length > 0 && (
+                <div className="flex flex-wrap gap-1 justify-end ml-4 max-w-xs">
+                  {vol.skills.slice(0, 3).map((skill) => (
+                    <span key={skill} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      {skill}
+                    </span>
+                  ))}
+                  {vol.skills.length > 3 && (
+                    <span className="text-xs text-gray-400">+{vol.skills.length - 3} more</span>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

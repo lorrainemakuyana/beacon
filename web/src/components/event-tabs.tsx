@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface Props {
   eventId: string;
-  active: "shifts" | "volunteers" | "incidents";
   counts: { shifts: number; volunteers: number; incidents: number };
 }
 
@@ -14,7 +14,17 @@ const tabs = [
   { key: "incidents", label: "Incidents", path: "incidents" },
 ] as const;
 
-export default function EventTabs({ eventId, active, counts }: Props) {
+export default function EventTabs({ eventId, counts }: Props) {
+  const pathname = usePathname();
+
+  function getActiveTab(): "shifts" | "volunteers" | "incidents" {
+    if (pathname.includes("/volunteers")) return "volunteers";
+    if (pathname.includes("/incidents")) return "incidents";
+    return "shifts";
+  }
+
+  const active = getActiveTab();
+
   return (
     <div className="flex items-center gap-6 border-b border-gray-200">
       {tabs.map((tab) => {

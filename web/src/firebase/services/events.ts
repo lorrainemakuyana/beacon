@@ -93,6 +93,34 @@ export async function archiveEvent(id: string): Promise<void> {
   });
 }
 
+export async function getManagerEvents(userId: string): Promise<Event[]> {
+  // Query events where user is coordinator OR collaborator
+  // Firestore doesn't support OR across fields, so run two queries and merge
+  const [coordSnap, collabSnap] = await Promise.all([
+    getDocs(query(
+      collection(firestore, COLLECTIONS.EVENTS),
+      where("coordinators", "array-contains", userId),
+      orderBy("date", "desc")
+    )),
+    getDocs(query(
+      collection(firestore, COLLECTIONS.EVENTS),
+      where("collaborators", "array-contains", userId),
+      orderBy("date", "desc")
+    )),
+  ]);
+  const seen = new Set<string>();
+  const results: Event[] = [];
+  for (const snap of [coordSnap, collabSnap]) {
+    for (const d of snap.docs) {
+      if (!seen.has(d.id)) {
+        seen.add(d.id);
+        results.push({ id: d.id, ...d.data() } as Event);
+      }
+    }
+  }
+  return results.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
 export async function addCollaboratorToEvent(
   eventId: string,
   email: string
