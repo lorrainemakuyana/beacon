@@ -75,6 +75,13 @@ export default function EventDetailsScreen() {
   const [isSignedUp, setIsSignedUp] = useState(false);
 
   const isCheckedInToThisEvent = activeCheckIn?.eventId === id;
+  const eventHasStarted = (() => {
+    if (!event) return false;
+    const [h, m] = event.startTime.split(":").map(Number);
+    const start = new Date(event.date + "T00:00:00");
+    start.setHours(h, m, 0, 0);
+    return new Date() >= start;
+  })();
 
   useEffect(() => {
     if (!event || !user?.uid) return;
@@ -297,27 +304,29 @@ export default function EventDetailsScreen() {
                 <Text style={styles.reportIncidentBtnText}>Report Incident</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={[
-                styles.cancelBtn,
-                effectiveColorScheme === "dark" && styles.cancelBtnDark,
-              ]}
-              onPress={handleCancel}
-            >
-              <Ionicons
-                name="close-circle-outline"
-                size={20}
-                color={effectiveColorScheme === "dark" ? colors.danger : "#FFFFFF"}
-              />
-              <Text
+            {!isCheckedInToThisEvent && !eventHasStarted && (
+              <TouchableOpacity
                 style={[
-                  styles.cancelBtnText,
-                  effectiveColorScheme === "dark" && styles.cancelBtnTextDark,
+                  styles.cancelBtn,
+                  effectiveColorScheme === "dark" && styles.cancelBtnDark,
                 ]}
+                onPress={handleCancel}
               >
-                Cancel Volunteering
-              </Text>
-            </TouchableOpacity>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={20}
+                  color={effectiveColorScheme === "dark" ? colors.danger : "#FFFFFF"}
+                />
+                <Text
+                  style={[
+                    styles.cancelBtnText,
+                    effectiveColorScheme === "dark" && styles.cancelBtnTextDark,
+                  ]}
+                >
+                  Cancel Volunteering
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         ) : (
           <TouchableOpacity style={styles.signUpBtn} onPress={handleSignUp}>
