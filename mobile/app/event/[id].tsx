@@ -130,7 +130,7 @@ export default function EventDetailsScreen() {
             if (!user?.uid) return;
             try {
               await cancelVolunteerShift(event!.id, user.uid);
-              router.replace("/(tabs)");
+              router.replace("/(tabs)/events");
             } catch (err: any) {
               Alert.alert("Error", err.message ?? "Something went wrong");
             }
@@ -154,7 +154,7 @@ export default function EventDetailsScreen() {
             try {
               await signUpForEventShift(event!.id, user.uid);
               await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              router.replace("/(tabs)");
+              router.replace("/(tabs)/events");
             } catch (err: any) {
               Alert.alert("Sign Up Failed", err.message ?? "Something went wrong");
             }
