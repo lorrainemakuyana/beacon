@@ -23,10 +23,10 @@ export function useUpcomingEvents(): UseUpcomingEventsResult {
         if (cancelled) return;
         const now = new Date();
         const future = data.filter((event) => {
-          const [h, m] = event.endTime.split(":").map(Number);
-          const end = new Date(event.date + "T00:00:00");
-          end.setHours(h, m, 0, 0);
-          return end > now;
+          const [h, m] = event.startTime.split(":").map(Number);
+          const start = new Date(event.date + "T00:00:00");
+          start.setHours(h, m, 0, 0);
+          return start > now;
         });
         setEvents(future);
       })
