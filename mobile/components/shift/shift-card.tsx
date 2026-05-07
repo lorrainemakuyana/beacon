@@ -160,7 +160,7 @@ export const ShiftCard = memo(function ShiftCard({
         </View>
       )}
 
-      {isToday && (
+      {isToday && shift && (
         <TouchableOpacity
           style={styles.checkInButton}
           onPress={(e) => {
