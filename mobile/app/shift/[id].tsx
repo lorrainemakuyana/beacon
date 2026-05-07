@@ -103,11 +103,14 @@ export default function ShiftDetailsScreen() {
   const roleTitle = shift.role?.title ?? "Volunteer";
   const tasks = shift.tasks ?? [];
   const now = new Date();
-  const isToday =
-    shift.timeSlot.start.toDate().toDateString() === now.toDateString()
-    && now < shift.timeSlot.end.toDate();
-  const isPast = now > shift.timeSlot.end.toDate();
-  const hasStarted = now >= shift.timeSlot.start.toDate();
+  const shiftStart = shift.timeSlot.start.toDate();
+  const shiftEnd = shift.timeSlot.end.toDate();
+  const oneHourBefore = new Date(shiftStart.getTime() - 60 * 60 * 1000);
+  const isToday = shiftStart.toDateString() === now.toDateString()
+    && now >= oneHourBefore
+    && now < shiftEnd;
+  const isPast = now > shiftEnd;
+  const hasStarted = now >= shiftStart;
   const teamMembers = teamUsers.map((user) => {
     const palette = randomPalette();
     return {

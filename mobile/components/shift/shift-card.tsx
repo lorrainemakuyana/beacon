@@ -109,8 +109,12 @@ export const ShiftCard = memo(function ShiftCard({
   const isToday = useMemo(() => {
     const now = new Date();
     if (shift) {
-      return shift.timeSlot.start.toDate().toDateString() === now.toDateString()
-        && now < shift.timeSlot.end.toDate();
+      const start = shift.timeSlot.start.toDate();
+      const end = shift.timeSlot.end.toDate();
+      const oneHourBefore = new Date(start.getTime() - 60 * 60 * 1000);
+      return start.toDateString() === now.toDateString()
+        && now >= oneHourBefore
+        && now < end;
     }
     return new Date(event.date + "T00:00:00").toDateString() === now.toDateString();
   }, [shift, event.date]);
