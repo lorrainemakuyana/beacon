@@ -107,10 +107,12 @@ export const ShiftCard = memo(function ShiftCard({
   }, [shift, event.date]);
 
   const isToday = useMemo(() => {
-    const date = shift
-      ? shift.timeSlot.start.toDate()
-      : new Date(event.date + "T00:00:00");
-    return date.toDateString() === new Date().toDateString();
+    const now = new Date();
+    if (shift) {
+      return shift.timeSlot.start.toDate().toDateString() === now.toDateString()
+        && now < shift.timeSlot.end.toDate();
+    }
+    return new Date(event.date + "T00:00:00").toDateString() === now.toDateString();
   }, [shift, event.date]);
 
   const title = shift?.title ?? event.title;
