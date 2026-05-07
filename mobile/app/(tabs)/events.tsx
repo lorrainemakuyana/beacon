@@ -19,7 +19,6 @@ export default function EventsScreen() {
   const { user } = useAuth();
   const { events } = useUpcomingEvents();
   const { shifts } = useUserShifts(user?.uid);
-  const [searchVisible, setSearchVisible] = useState(false);
   const [query, setQuery] = useState("");
   const { colors } = useTheme();
 
@@ -33,35 +32,23 @@ export default function EventsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Sticky search bar — always visible above scroll */}
+      {/* Sticky search bar — always open */}
       <View style={styles.searchHeader}>
-        <TouchableOpacity
-          style={styles.searchBtn}
-          onPress={() => {
-            setSearchVisible((v) => !v);
-            if (searchVisible) setQuery("");
-          }}
-        >
-          <Ionicons
-            name={searchVisible ? "close" : "search"}
-            size={22}
-            color={colors.tint}
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={16} color={colors.textTertiary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search events..."
+            placeholderTextColor={colors.textTertiary}
+            value={query}
+            onChangeText={setQuery}
           />
-        </TouchableOpacity>
-
-        {searchVisible && (
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={16} color={colors.textTertiary} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search events..."
-              placeholderTextColor={colors.textTertiary}
-              value={query}
-              onChangeText={setQuery}
-              autoFocus
-            />
-          </View>
-        )}
+          {query.length > 0 && (
+            <TouchableOpacity onPress={() => setQuery("")} hitSlop={8}>
+              <Ionicons name="close-circle" size={18} color={colors.textTertiary} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <ScrollView
@@ -98,27 +85,13 @@ function getStyles(colors: ThemeColors) {
       backgroundColor: colors.surfaceBackground,
     },
     searchHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
       paddingHorizontal: 20,
       paddingVertical: 12,
       backgroundColor: colors.surfaceBackground,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    searchBtn: {
-      width: 38,
-      height: 38,
-      borderRadius: 10,
-      backgroundColor: colors.primarySubtle,
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: colors.primarySubtleBorder,
-    },
     searchBar: {
-      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       gap: 8,
