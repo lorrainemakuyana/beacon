@@ -21,8 +21,8 @@ export default function LoginDrawer({
 }: {
   onRegister: () => void;
 }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(process.env.EXPO_PUBLIC_USEREMAIL || "");
+  const [password, setPassword] = useState(process.env.EXPO_PUBLIC_USERPASSWORD || "");
   const { login, loginWithGoogle, resetPassword, loading } = useAuth();
   const { colors } = useTheme();
 

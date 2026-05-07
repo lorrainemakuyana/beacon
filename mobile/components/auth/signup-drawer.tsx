@@ -49,8 +49,8 @@ export default function SignupDrawer({ onLogin }: { onLogin: () => void }) {
 
       Alert.alert(
         "Success",
-        "Account created successfully! Please check your email to verify your account.",
-        [{ text: "OK", onPress: () => router.replace("/(tabs)") }],
+        "Registration successful! Please log in to continue.",
+        [{ text: "OK", onPress: onLogin }],
       );
     } catch (error: any) {
       Alert.alert("Registration Failed", error.message);
