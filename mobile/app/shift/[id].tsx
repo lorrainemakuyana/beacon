@@ -18,6 +18,8 @@ import { ThemedText } from "@/components/themed-text";
 import { useShiftDetail } from "@/hooks/useShiftDetail";
 import { useTheme } from "@/context/ThemeContext";
 import { ThemeColors } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import { useCheckIn } from "@/hooks/useCheckIn";
 
 const STATUS_CONFIG: Record<
   Shift["status"],
@@ -78,6 +80,8 @@ export default function ShiftDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { shift, event, teamUsers } = useShiftDetail(id ?? "");
   const { colors } = useTheme();
+  const { user } = useAuth();
+  const { activeCheckIn } = useCheckIn(user?.uid);
 
   const styles = getStyles(colors);
 
@@ -311,7 +315,7 @@ export default function ShiftDetailsScreen() {
           </TouchableOpacity>
         )}
 
-        {!isPast && (
+        {!isPast && activeCheckIn?.eventId !== event.id && (
           <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelShift}>
             <Ionicons name="close-circle-outline" size={20} color="#FFFFFF" />
             <Text style={styles.cancelBtnText}>Cancel Shift</Text>
