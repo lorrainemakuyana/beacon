@@ -98,8 +98,10 @@ export default function ShiftDetailsScreen() {
   const dateLabel = formatDetailDate(shift.timeSlot.start.toDate());
   const roleTitle = shift.role?.title ?? "Volunteer";
   const tasks = shift.tasks ?? [];
+  const now = new Date();
   const isToday =
-    shift.timeSlot.start.toDate().toDateString() === new Date().toDateString();
+    shift.timeSlot.start.toDate().toDateString() === now.toDateString()
+    && now < shift.timeSlot.end.toDate();
   const teamMembers = teamUsers.map((user) => {
     const palette = randomPalette();
     return {
