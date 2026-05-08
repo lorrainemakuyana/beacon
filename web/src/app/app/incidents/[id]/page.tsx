@@ -81,7 +81,7 @@ export default function IncidentDetailPage() {
     <div className="flex flex-col gap-6">
       <Breadcrumb
         items={[
-          { label: "Incidents", href: "/incidents" },
+          { label: "Incidents", href: "/app/incidents" },
           { label: dataLoading ? "..." : (incident?.title ?? "Incident") },
         ]}
       />

@@ -135,7 +135,7 @@ export default function EventLayout({ children }: { children: ReactNode }) {
         {/* Breadcrumb */}
         <Breadcrumb
           items={[
-            { label: "Events", href: "/events" },
+            { label: "Events", href: "/app/events" },
             { label: loading ? "..." : (event?.title ?? "Event") },
           ]}
         />

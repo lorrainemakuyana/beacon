@@ -67,9 +67,9 @@ export default function ShiftDetailPage() {
     <div className="flex flex-col gap-6">
       <Breadcrumb
         items={[
-          { label: "Events", href: "/events" },
-          { label: eventLoading ? "..." : (event?.title ?? "Event"), href: `/events/${id}` },
-          { label: "Shifts", href: `/events/${id}/shifts` },
+          { label: "Events", href: "/app/events" },
+          { label: eventLoading ? "..." : (event?.title ?? "Event"), href: `/app/events/${id}` },
+          { label: "Shifts", href: `/app/events/${id}/shifts` },
           { label: dataLoading ? "..." : (shift?.title ?? "Shift") },
         ]}
       />

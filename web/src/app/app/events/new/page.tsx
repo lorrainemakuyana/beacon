@@ -132,7 +132,7 @@ export default function NewEventPage() {
     >
       <Breadcrumb
         items={[
-          { label: "Events", href: "/events" },
+          { label: "Events", href: "/app/events" },
           { label: "New Event" },
         ]}
       />
