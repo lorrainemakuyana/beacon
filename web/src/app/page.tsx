@@ -1,206 +1,133 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarDays, Users, AlertTriangle, ClipboardList, ArrowRight, ShieldCheck } from "lucide-react";
 
-import { AlertTriangle, CalendarDays, Clock, Users } from "lucide-react";
-import { useAuth } from "@/context/auth";
-import { getAllEvents } from "@/firebase/services/events";
-import { getAllIncidents } from "@/firebase/services/incidents";
-import { getAllShifts } from "@/firebase/services/shifts";
-import { getAllUsers } from "@/firebase/services/users";
-import { Event, Incident } from "@/interfaces";
-import StatCard from "@/components/stat-card";
-import Badge from "@/components/badge";
-import EmptyState from "@/components/empty-state";
-import { formatDate, getStatusVariant, getSeverityVariant } from "@/lib/utils";
+const features = [
+  {
+    icon: CalendarDays,
+    title: "Event Management",
+    description: "Create and manage events, track status, and keep everything organised in one place.",
+  },
+  {
+    icon: Users,
+    title: "Volunteer Coordination",
+    description: "Assign volunteers to shifts, track attendance, and manage your team with ease.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Incident Reporting",
+    description: "Log and track incidents in real time. Stay on top of safety across all your events.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Shift Scheduling",
+    description: "Define roles and shift slots, set volunteer quotas, and monitor fill rates instantly.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Access Control",
+    description: "Add collaborators by email and scope access so each manager sees only their events.",
+  },
+];
 
-export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  const [events, setEvents] = useState<Event[]>([]);
-  const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [volunteerCount, setVolunteerCount] = useState(0);
-  const [shiftCount, setShiftCount] = useState(0);
-  const [dataLoading, setDataLoading] = useState(true);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
-
-  useEffect(() => {
-    if (!user) return;
-    async function load() {
-      try {
-        const [evts, incs, shifts, users] = await Promise.all([
-          getAllEvents(),
-          getAllIncidents(),
-          getAllShifts(),
-          getAllUsers(),
-        ]);
-        setEvents(evts);
-        setIncidents(incs);
-        setShiftCount(shifts.length);
-        setVolunteerCount(users.filter((u) => u.role === "volunteer").length);
-      } finally {
-        setDataLoading(false);
-      }
-    }
-    load();
-  }, [user]);
-
-  if (loading || (!user && !loading)) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <span className="text-gray-400 text-sm">Loading...</span>
-      </div>
-    );
-  }
-
-  const activeIncidents = incidents.filter(
-    (i) => i.status === "open" || i.status === "investigating"
-  );
-
-  const recentEvents = events.slice(0, 5);
-  const recentIncidents = incidents.slice(0, 5);
-
+export default function LandingPage() {
   return (
-    <div
-      className="h-[calc(100vh-56px-64px)] overflow-hidden flex flex-col gap-6"
-    >
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Overview of events, volunteers, and incidents.
-        </p>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard
-          label="Total Events"
-          value={dataLoading ? "—" : events.length}
-          icon={<CalendarDays className="w-5 h-5" />}
-        />
-        <StatCard
-          label="Active Incidents"
-          value={dataLoading ? "—" : activeIncidents.length}
-          icon={<AlertTriangle className="w-5 h-5" />}
-        />
-        <StatCard
-          label="Total Volunteers"
-          value={dataLoading ? "—" : volunteerCount}
-          icon={<Users className="w-5 h-5" />}
-        />
-        <StatCard
-          label="Total Shifts"
-          value={dataLoading ? "—" : shiftCount}
-          icon={<Clock className="w-5 h-5" />}
-        />
-      </div>
-
-      {/* Bottom two sections */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 gap-6 sm:grid-cols-2 overflow-hidden">
-        {/* Recent Events */}
-        <section className="flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-gray-900">
-              Recent Events
-            </h2>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Nav */}
+      <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="Beacon" className="w-9 h-9 object-contain" />
+            <span className="text-gray-900 font-semibold text-xl tracking-tight">Beacon</span>
+          </Link>
+          <div className="flex items-center gap-3">
             <Link
-              href="/events"
-              className="text-sm text-primary hover:underline font-medium"
+              href="/login"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
-              View all
+              Sign in
+            </Link>
+            <Link
+              href="/register"
+              className="text-sm font-semibold bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
+            >
+              Get started
             </Link>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-y-auto max-h-48">
-            {dataLoading ? (
-              <div className="py-10 text-center text-gray-400 text-sm">
-                Loading...
-              </div>
-            ) : recentEvents.length === 0 ? (
-              <EmptyState message="No events yet" />
-            ) : (
-              recentEvents.map((event) => (
-                <Link
-                  key={event.id}
-                  href={`/events/${event.id}`}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-sm font-medium text-gray-900 truncate">
-                      {event.title}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {formatDate(event.date)} · {event.location}
-                    </span>
-                  </div>
-                  <Badge
-                    label={event.status}
-                    variant={getStatusVariant(event.status)}
-                  />
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
+        </div>
+      </header>
 
-        {/* Recent Incidents */}
-        <section className="flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-gray-900">
-              Recent Incidents
-            </h2>
+      {/* Hero */}
+      <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-24">
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
+          <img src="/logo.png" alt="Beacon" className="w-16 h-16 object-contain" />
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight tracking-tight">
+            Run better events,<br className="hidden sm:block" /> from start to finish.
+          </h1>
+          <p className="text-lg text-gray-500 max-w-xl">
+            Beacon gives event managers a single dashboard to coordinate volunteers, schedule shifts, and respond to incidents — all in real time.
+          </p>
+          <div className="flex items-center gap-3 mt-2">
             <Link
-              href="/incidents"
-              className="text-sm text-primary hover:underline font-medium"
+              href="/register"
+              className="flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-primary-light transition-colors"
             >
-              View all
+              Get started free
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/login"
+              className="text-sm font-medium text-gray-600 border border-gray-200 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Sign in
             </Link>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 overflow-y-auto max-h-48">
-            {dataLoading ? (
-              <div className="py-10 text-center text-gray-400 text-sm">
-                Loading...
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-gray-50 border-t border-gray-100 py-20 px-4">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
+            Everything you need to run the day
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map(({ icon: Icon, title, description }) => (
+              <div
+                key={title}
+                className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-3"
+              >
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
               </div>
-            ) : recentIncidents.length === 0 ? (
-              <EmptyState message="No incidents reported" />
-            ) : (
-              recentIncidents.map((incident) => (
-                <Link
-                  key={incident.id}
-                  href={`/incidents/${incident.id}`}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-sm font-medium text-gray-900 truncate">
-                      {incident.title}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {formatDate(incident.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Badge
-                      label={incident.severity}
-                      variant={getSeverityVariant(incident.severity)}
-                    />
-                    <Badge
-                      label={incident.status}
-                      variant={getStatusVariant(incident.status)}
-                    />
-                  </div>
-                </Link>
-              ))
-            )}
+            ))}
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-4 text-center">
+        <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">Ready to get started?</h2>
+          <p className="text-gray-500 text-sm">
+            Create your coordinator account and have your first event live in minutes.
+          </p>
+          <Link
+            href="/register"
+            className="flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-primary-light transition-colors mt-2"
+          >
+            Create a free account
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-100 py-6 text-center text-sm text-gray-400">
+        © {new Date().getFullYear()} Beacon. All rights reserved.
+      </footer>
     </div>
   );
 }

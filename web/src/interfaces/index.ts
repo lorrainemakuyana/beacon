@@ -21,7 +21,8 @@ export type ShiftStatus =
   | "completed"
   | "closed"
   | "attended"
-  | "missed";
+  | "missed"
+  | "archived";
 
 export interface ShiftTimeSlot {
   start: Timestamp;
@@ -90,7 +91,7 @@ export interface Attendance {
 
 export type IncidentSeverity = "low" | "medium" | "high" | "critical";
 export type IncidentCategory = "safety" | "equipment" | "volunteer" | "other";
-export type IncidentStatus = "open" | "investigating" | "resolved" | "closed";
+export type IncidentStatus = "open" | "investigating" | "resolved" | "closed" | "archived";
 
 export interface Incident {
   id: string;

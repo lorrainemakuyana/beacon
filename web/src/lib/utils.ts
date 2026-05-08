@@ -49,6 +49,7 @@ export function getStatusVariant(
     case "completed":
     case "closed":
     case "checked-out":
+    case "archived":
       return "neutral";
     default:
       return "neutral";

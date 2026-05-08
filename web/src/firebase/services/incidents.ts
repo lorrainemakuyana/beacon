@@ -37,6 +37,22 @@ export async function getIncidentsByEventId(
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Incident);
 }
 
+export async function getIncidentsByEventIds(eventIds: string[]): Promise<Incident[]> {
+  if (eventIds.length === 0) return [];
+  const results: Incident[] = [];
+  for (let i = 0; i < eventIds.length; i += 30) {
+    const chunk = eventIds.slice(i, i + 30);
+    const q = query(
+      collection(firestore, COLLECTIONS.INCIDENTS),
+      where("eventId", "in", chunk),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+    snap.docs.forEach((d) => results.push({ id: d.id, ...d.data() } as Incident));
+  }
+  return results.sort((a, b) => b.createdAt - a.createdAt);
+}
+
 export async function updateIncidentStatus(
   id: string,
   status: IncidentStatus

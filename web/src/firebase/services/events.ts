@@ -1,6 +1,7 @@
 import {
   Timestamp,
   addDoc,
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -11,6 +12,7 @@ import {
   query,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { firestore } from "@/firebase/config";
 import { Event, EventStatus, COLLECTIONS } from "@/interfaces";
@@ -86,11 +88,56 @@ export async function createEvent(
   return eventRef.id;
 }
 
-export async function archiveEvent(id: string): Promise<void> {
-  await updateDoc(doc(firestore, COLLECTIONS.EVENTS, id), {
-    status: "archived",
-    updatedAt: Date.now(),
+export async function deleteEvent(id: string): Promise<void> {
+  const eventSnap = await getDoc(doc(firestore, COLLECTIONS.EVENTS, id));
+  if (!eventSnap.exists()) return;
+  const eventData = eventSnap.data() as Event;
+
+  const [shiftsSnap, incidentsSnap] = await Promise.all([
+    getDocs(query(collection(firestore, COLLECTIONS.SHIFTS), where("eventId", "==", id))),
+    getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id))),
+  ]);
+
+  const batch = writeBatch(firestore);
+  batch.delete(doc(firestore, COLLECTIONS.EVENTS, id));
+  shiftsSnap.docs.forEach((d) => batch.delete(d.ref));
+  incidentsSnap.docs.forEach((d) => batch.delete(d.ref));
+
+  // Remove this event from each collaborator's user doc
+  const collaborators: string[] = eventData.collaborators ?? [];
+  collaborators.forEach((uid) => {
+    batch.update(doc(firestore, COLLECTIONS.USERS, uid), {
+      events: arrayRemove(id),
+    });
   });
+
+  await batch.commit();
+}
+
+export async function archiveEvent(id: string): Promise<void> {
+  const [shiftsSnap, incidentsSnap] = await Promise.all([
+    getDocs(query(collection(firestore, COLLECTIONS.SHIFTS), where("eventId", "==", id))),
+    getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id))),
+  ]);
+
+  const batch = writeBatch(firestore);
+  batch.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "archived", updatedAt: Date.now() });
+  shiftsSnap.docs.forEach((d) => batch.update(d.ref, { status: "archived" }));
+  incidentsSnap.docs.forEach((d) => batch.update(d.ref, { status: "archived", updatedAt: Date.now() }));
+  await batch.commit();
+}
+
+export async function unarchiveEvent(id: string): Promise<void> {
+  const [shiftsSnap, incidentsSnap] = await Promise.all([
+    getDocs(query(collection(firestore, COLLECTIONS.SHIFTS), where("eventId", "==", id), where("status", "==", "archived"))),
+    getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id), where("status", "==", "archived"))),
+  ]);
+
+  const batch = writeBatch(firestore);
+  batch.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "published", updatedAt: Date.now() });
+  shiftsSnap.docs.forEach((d) => batch.update(d.ref, { status: "open" }));
+  incidentsSnap.docs.forEach((d) => batch.update(d.ref, { status: "open", updatedAt: Date.now() }));
+  await batch.commit();
 }
 
 export async function getManagerEvents(userId: string): Promise<Event[]> {

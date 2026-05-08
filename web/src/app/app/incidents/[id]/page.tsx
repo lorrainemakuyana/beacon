@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useAuth } from "@/context/auth";
 import {
   getIncidentById,
@@ -28,7 +29,6 @@ export default function IncidentDetailPage() {
   const [incident, setIncident] = useState<Incident | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -44,12 +44,12 @@ export default function IncidentDetailPage() {
   async function handleStatusUpdate(newStatus: IncidentStatus) {
     if (!incident || updating) return;
     setUpdating(true);
-    setUpdateError(null);
     try {
       await updateIncidentStatus(id, newStatus);
       setIncident((prev) => prev ? { ...prev, status: newStatus, updatedAt: Date.now() } : prev);
+      toast.success(`Status updated to ${newStatus}.`);
     } catch (err) {
-      setUpdateError(err instanceof Error ? err.message : "Failed to update status");
+      toast.error(err instanceof Error ? err.message : "Failed to update status.");
     } finally {
       setUpdating(false);
     }
@@ -68,7 +68,7 @@ export default function IncidentDetailPage() {
       <div className="flex flex-col items-center justify-center py-32 gap-3">
         <p className="text-gray-500 text-sm">Incident not found.</p>
         <Link
-          href="/incidents"
+          href="/app/incidents"
           className="text-primary text-sm hover:underline"
         >
           Back to Incidents
@@ -159,7 +159,7 @@ export default function IncidentDetailPage() {
                     Event
                   </span>
                   <Link
-                    href={`/events/${incident.eventId}`}
+                    href={`/app/events/${incident.eventId}`}
                     className="text-primary text-sm hover:underline"
                   >
                     View Event
@@ -233,12 +233,6 @@ export default function IncidentDetailPage() {
                 );
               })}
             </div>
-            {updateError && (
-              <p className="text-danger text-xs mt-3">{updateError}</p>
-            )}
-            {updating && (
-              <p className="text-gray-400 text-xs mt-3">Updating status...</p>
-            )}
           </div>
         </>
       ) : null}

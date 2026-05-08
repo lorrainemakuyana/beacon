@@ -6,5 +6,5 @@ export default async function EventPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  redirect(`/events/${id}/shifts`);
+  redirect(`/app/events/${id}/shifts`);
 }

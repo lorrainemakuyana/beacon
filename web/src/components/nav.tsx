@@ -18,10 +18,10 @@ import { auth } from "@/firebase/config";
 import { useAuth } from "@/context/auth";
 
 const navLinks = [
-  { href: "/", label: "Dashboard" },
-  { href: "/events", label: "Events" },
-  { href: "/volunteers", label: "Volunteers" },
-  { href: "/incidents", label: "Incidents" },
+  { href: "/app", label: "Dashboard" },
+  { href: "/app/events", label: "Events" },
+  { href: "/app/volunteers", label: "Volunteers" },
+  { href: "/app/incidents", label: "Incidents" },
 ];
 
 const profileMenuItems = [
@@ -50,7 +50,7 @@ export default function Nav() {
   const popupRef = useRef<HTMLDivElement>(null);
 
   function isActive(href: string): boolean {
-    if (href === "/") return pathname === "/";
+    if (href === "/app") return pathname === "/app";
     return pathname.startsWith(href);
   }
 

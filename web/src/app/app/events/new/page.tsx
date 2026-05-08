@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/context/auth";
 import { createEvent } from "@/firebase/services/events";
 import Breadcrumb from "@/components/breadcrumb";
@@ -37,11 +38,18 @@ export default function NewEventPage() {
   const [shifts, setShifts] = useState<ShiftRow[]>([{ title: "", requiredVolunteers: 1 }]);
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user) {
+      setOrgName(user.displayName ?? "");
+      setOrgEmail(user.email ?? "");
+      setShowOrganizer(true);
+    }
+  }, [user]);
 
   function addShift() {
     setShifts((prev) => [...prev, { title: "", requiredVolunteers: 1 }]);
@@ -59,16 +67,15 @@ export default function NewEventPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
 
     if (shifts.length === 0) {
-      setError("At least one shift is required.");
+      toast.error("At least one shift is required.");
       return;
     }
 
     for (const s of shifts) {
       if (!s.title.trim()) {
-        setError("All shift roles must have a title.");
+        toast.error("All shift roles must have a title.");
         return;
       }
     }
@@ -102,9 +109,10 @@ export default function NewEventPage() {
       };
 
       const id = await createEvent(eventData, shifts);
-      router.push(`/events/${id}`);
+      toast.success("Event created successfully.");
+      router.push(`/app/events/${id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create event.");
+      toast.error(err instanceof Error ? err.message : "Failed to create event.");
     } finally {
       setSubmitting(false);
     }
@@ -344,16 +352,10 @@ export default function NewEventPage() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-danger-subtle border border-red-200 rounded-lg px-4 py-3 text-sm text-danger">
-            {error}
-          </div>
-        )}
-
         <div className="flex items-center justify-end gap-3">
           <button
             type="button"
-            onClick={() => router.push("/events")}
+            onClick={() => router.push("/app/events")}
             className="px-4 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel

@@ -76,7 +76,7 @@ export default function EventShiftsPage() {
             {shifts.map((shift) => (
               <motion.div key={shift.id} variants={itemVariants} transition={{ duration: 0.2 }}>
                 <Link
-                  href={`/events/${id}/shifts/${shift.id}`}
+                  href={`/app/events/${id}/shifts/${shift.id}`}
                   className="block px-5 py-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4">

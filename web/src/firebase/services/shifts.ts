@@ -27,3 +27,18 @@ export async function getShiftsByEventId(eventId: string): Promise<Shift[]> {
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Shift);
 }
+
+export async function getShiftsByEventIds(eventIds: string[]): Promise<Shift[]> {
+  if (eventIds.length === 0) return [];
+  const results: Shift[] = [];
+  for (let i = 0; i < eventIds.length; i += 30) {
+    const chunk = eventIds.slice(i, i + 30);
+    const q = query(
+      collection(firestore, COLLECTIONS.SHIFTS),
+      where("eventId", "in", chunk)
+    );
+    const snap = await getDocs(q);
+    snap.docs.forEach((d) => results.push({ id: d.id, ...d.data() } as Shift));
+  }
+  return results;
+}

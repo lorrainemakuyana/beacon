@@ -77,7 +77,7 @@ export default function IncidentsPage() {
             incidents.map((incident) => (
               <Link
                 key={incident.id}
-                href={`/incidents/${incident.id}`}
+                href={`/app/incidents/${incident.id}`}
                 className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex flex-col gap-1 min-w-0">

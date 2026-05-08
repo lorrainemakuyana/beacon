@@ -32,7 +32,7 @@ export default function EventTabs({ eventId, counts }: Props) {
         return (
           <Link
             key={tab.key}
-            href={`/events/${eventId}/${tab.path}`}
+            href={`/app/events/${eventId}/${tab.path}`}
             className={[
               "pb-2 text-sm font-medium border-b-2 transition-colors",
               isActive

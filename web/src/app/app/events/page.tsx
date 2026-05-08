@@ -59,7 +59,7 @@ export default function EventsPage() {
           </p>
         </div>
         <Link
-          href="/events/new"
+          href="/app/events/new"
           className="flex items-center gap-2 bg-primary text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-primary-light transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -82,7 +82,7 @@ export default function EventsPage() {
             {events.map((event) => (
               <motion.div key={event.id} variants={itemVariants} transition={{ duration: 0.2 }}>
                 <Link
-                  href={`/events/${event.id}`}
+                  href={`/app/events/${event.id}`}
                   className="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex flex-col gap-1 min-w-0">

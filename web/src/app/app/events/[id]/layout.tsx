@@ -3,10 +3,11 @@
 import { useEffect, useState, useCallback, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Archive, CheckCircle } from "lucide-react";
+import { Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { EventContext } from "@/context/event-context";
-import { getEventById, archiveEvent, addCollaboratorToEvent } from "@/firebase/services/events";
+import { toast } from "sonner";
+import { getEventById, archiveEvent, unarchiveEvent, deleteEvent, addCollaboratorToEvent } from "@/firebase/services/events";
 import { getShiftsByEventId } from "@/firebase/services/shifts";
 import { getIncidentsByEventId } from "@/firebase/services/incidents";
 import { Event, Incident, Shift } from "@/interfaces";
@@ -25,13 +26,17 @@ export default function EventLayout({ children }: { children: ReactNode }) {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // archive confirm state
+  // archive / unarchive confirm state
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [unarchiving, setUnarchiving] = useState(false);
+
+  // delete confirm state
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // collaborator state
   const [collabEmail, setCollabEmail] = useState("");
-  const [collabMsg, setCollabMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [collabLoading, setCollabLoading] = useState(false);
 
   useEffect(() => {
@@ -56,23 +61,59 @@ export default function EventLayout({ children }: { children: ReactNode }) {
     if (user && id) load();
   }, [user, id, load]);
 
+  async function handleUnarchive() {
+    if (!id) return;
+    setUnarchiving(true);
+    try {
+      await unarchiveEvent(id);
+      toast.success("Event restored to published.");
+      load();
+    } catch {
+      toast.error("Failed to unarchive event.");
+    } finally {
+      setUnarchiving(false);
+    }
+  }
+
   async function handleArchive() {
     if (!id) return;
     setArchiving(true);
-    await archiveEvent(id);
-    router.push("/events");
+    try {
+      await archiveEvent(id);
+      toast.success("Event archived.");
+    } catch {
+      toast.error("Failed to archive event.");
+      setArchiving(false);
+      return;
+    }
+    router.push("/app/events");
+  }
+
+  async function handleDelete() {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await deleteEvent(id);
+      toast.success("Event deleted.");
+    } catch {
+      toast.error("Failed to delete event.");
+      setDeleting(false);
+      return;
+    }
+    router.push("/app/events");
   }
 
   async function handleAddCollaborator(e: React.FormEvent) {
     e.preventDefault();
     if (!collabEmail.trim() || !id) return;
     setCollabLoading(true);
-    setCollabMsg(null);
     const result = await addCollaboratorToEvent(id, collabEmail.trim());
-    setCollabMsg({ text: result.message, ok: result.success });
     if (result.success) {
+      toast.success(result.message);
       setCollabEmail("");
       load();
+    } else {
+      toast.error(result.message);
     }
     setCollabLoading(false);
   }
@@ -104,7 +145,7 @@ export default function EventLayout({ children }: { children: ReactNode }) {
         ) : !event ? (
           <div className="flex flex-col items-center gap-3 py-32">
             <p className="text-gray-500 text-sm">Event not found.</p>
-            <Link href="/events" className="text-primary text-sm hover:underline">Back to Events</Link>
+            <Link href="/app/events" className="text-primary text-sm hover:underline">Back to Events</Link>
           </div>
         ) : (
           <>
@@ -114,33 +155,50 @@ export default function EventLayout({ children }: { children: ReactNode }) {
                 <h1 className="text-xl font-bold text-gray-900">{event.title}</h1>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge label={event.status} variant={getStatusVariant(event.status)} />
-                  {event.status !== "archived" && (
+
+                  {/* Archive / Unarchive */}
+                  {event.status === "archived" ? (
+                    <button
+                      onClick={handleUnarchive}
+                      disabled={unarchiving}
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 border border-gray-200 rounded-md hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
+                    >
+                      <ArchiveRestore className="w-3.5 h-3.5" />
+                      {unarchiving ? "Restoring…" : "Unarchive"}
+                    </button>
+                  ) : (
                     confirmArchive ? (
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs text-gray-500">Archive?</span>
-                        <button
-                          onClick={handleArchive}
-                          disabled={archiving}
-                          className="text-xs text-red-600 font-medium hover:underline disabled:opacity-50"
-                        >
-                          Yes
-                        </button>
-                        <button
-                          onClick={() => setConfirmArchive(false)}
-                          className="text-xs text-gray-500 hover:underline"
-                        >
-                          No
-                        </button>
+                        <button onClick={handleArchive} disabled={archiving} className="text-xs text-orange-600 font-medium hover:underline disabled:opacity-50">Yes</button>
+                        <button onClick={() => setConfirmArchive(false)} className="text-xs text-gray-500 hover:underline">No</button>
                       </div>
                     ) : (
                       <button
-                        onClick={() => setConfirmArchive(true)}
-                        className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 border border-gray-200 rounded-md hover:border-red-300 hover:text-red-500 transition-colors"
+                        onClick={() => { setConfirmArchive(true); setConfirmDelete(false); }}
+                        className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 border border-gray-200 rounded-md hover:border-orange-300 hover:text-orange-500 transition-colors"
                       >
                         <Archive className="w-3.5 h-3.5" />
                         Archive
                       </button>
                     )
+                  )}
+
+                  {/* Delete — permanently removes event + shifts + incidents */}
+                  {confirmDelete ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-gray-500">Delete permanently?</span>
+                      <button onClick={handleDelete} disabled={deleting} className="text-xs text-red-600 font-medium hover:underline disabled:opacity-50">Yes</button>
+                      <button onClick={() => setConfirmDelete(false)} className="text-xs text-gray-500 hover:underline">No</button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setConfirmDelete(true); setConfirmArchive(false); }}
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-gray-500 border border-gray-200 rounded-md hover:border-red-300 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
                   )}
                 </div>
               </div>
@@ -207,12 +265,6 @@ export default function EventLayout({ children }: { children: ReactNode }) {
                   Add
                 </button>
               </form>
-              {collabMsg && (
-                <p className={`text-xs flex items-center gap-1.5 ${collabMsg.ok ? "text-primary" : "text-red-500"}`}>
-                  {collabMsg.ok && <CheckCircle className="w-3.5 h-3.5" />}
-                  {collabMsg.text}
-                </p>
-              )}
               {event.collaborators && event.collaborators.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {event.collaborators.map((uid) => (
