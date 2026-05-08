@@ -1,6 +1,15 @@
 export function formatDate(ts: number | string): string {
   if (!ts) return "—";
-  const date = typeof ts === "number" ? new Date(ts) : new Date(ts);
+  let date: Date;
+  if (typeof ts === "number") {
+    date = new Date(ts);
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(ts)) {
+    // Parse date-only strings as local time to avoid UTC offset shifting the day
+    const [y, m, d] = ts.split("-").map(Number);
+    date = new Date(y, m - 1, d);
+  } else {
+    date = new Date(ts);
+  }
   if (isNaN(date.getTime())) return String(ts);
   return date.toLocaleDateString("en-US", {
     year: "numeric",

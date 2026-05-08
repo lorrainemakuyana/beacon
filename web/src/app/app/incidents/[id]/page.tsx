@@ -14,11 +14,12 @@ import Breadcrumb from "@/components/breadcrumb";
 import Badge from "@/components/badge";
 import { formatDate, getStatusVariant, getSeverityVariant } from "@/lib/utils";
 
-const STATUS_FLOW: { status: IncidentStatus; label: string }[] = [
+const STATUS_FLOW: { status: IncidentStatus; label: string; readOnly?: boolean }[] = [
   { status: "open", label: "Open" },
   { status: "investigating", label: "Investigating" },
   { status: "resolved", label: "Resolved" },
   { status: "closed", label: "Closed" },
+  { status: "archived", label: "Archived", readOnly: true },
 ];
 
 export default function IncidentDetailPage() {
@@ -211,23 +212,25 @@ export default function IncidentDetailPage() {
               Update Status
             </h2>
             <div className="flex flex-wrap gap-2">
-              {STATUS_FLOW.map(({ status, label }) => {
+              {STATUS_FLOW.filter(({ status, readOnly }) =>
+                !readOnly || incident.status === status
+              ).map(({ status, label, readOnly }) => {
                 const isCurrent = incident.status === status;
                 return (
                   <button
                     key={status}
-                    onClick={() => handleStatusUpdate(status)}
-                    disabled={isCurrent || updating}
+                    onClick={() => !readOnly && handleStatusUpdate(status)}
+                    disabled={isCurrent || updating || readOnly}
                     className={[
                       "px-4 py-2 rounded-lg text-sm font-medium border transition-colors",
                       isCurrent
                         ? "bg-primary text-white border-primary cursor-default"
+                        : readOnly
+                        ? "bg-gray-50 text-gray-400 border-gray-200 cursor-default"
                         : "bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed",
                     ].join(" ")}
                   >
-                    {isCurrent && (
-                      <span className="mr-1.5 text-xs">✓</span>
-                    )}
+                    {isCurrent && <span className="mr-1.5 text-xs">✓</span>}
                     {label}
                   </button>
                 );

@@ -95,7 +95,7 @@ export default function NewEventPage() {
         coordinators: [user!.uid],
         collaborators: [],
         organizationId: "",
-        eventCode: Math.random().toString(36).slice(2, 8).toUpperCase(),
+        eventCode: crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase(),
         ...(showOrganizer && orgName
           ? {
               organizer: {

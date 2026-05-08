@@ -1,9 +1,11 @@
 import {
   Timestamp,
+  WriteBatch,
   addDoc,
   arrayRemove,
   arrayUnion,
   collection,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -16,6 +18,18 @@ import {
 } from "firebase/firestore";
 import { firestore } from "@/firebase/config";
 import { Event, EventStatus, COLLECTIONS } from "@/interfaces";
+
+// Commit an arbitrary list of batch operations in chunks of ≤499 (Firestore limit is 500)
+async function runInBatches(
+  ops: Array<(b: WriteBatch) => void>
+): Promise<void> {
+  const LIMIT = 499;
+  for (let i = 0; i < ops.length; i += LIMIT) {
+    const b = writeBatch(firestore);
+    ops.slice(i, i + LIMIT).forEach((op) => op(b));
+    await b.commit();
+  }
+}
 
 export async function getAllEvents(): Promise<Event[]> {
   const q = query(
@@ -66,25 +80,26 @@ export async function createEvent(
   const startDateTime = new Date(`${data.date}T${data.startTime}`);
   const endDateTime = new Date(`${data.date}T${data.endTime}`);
 
-  const shiftIds: string[] = [];
-  for (const shiftDef of shiftDefs) {
-    const shiftRef = await addDoc(collection(firestore, COLLECTIONS.SHIFTS), {
-      eventId: eventRef.id,
-      title: shiftDef.title,
-      description: "",
-      role: { title: shiftDef.title },
-      timeSlot: {
-        start: Timestamp.fromDate(startDateTime),
-        end: Timestamp.fromDate(endDateTime),
-      },
-      requiredVolunteers: shiftDef.requiredVolunteers,
-      assignedVolunteers: [],
-      status: "open",
-    });
-    shiftIds.push(shiftRef.id);
-  }
+  // Create all shifts in parallel
+  const shiftRefs = await Promise.all(
+    shiftDefs.map((shiftDef) =>
+      addDoc(collection(firestore, COLLECTIONS.SHIFTS), {
+        eventId: eventRef.id,
+        title: shiftDef.title,
+        description: "",
+        role: { title: shiftDef.title },
+        timeSlot: {
+          start: Timestamp.fromDate(startDateTime),
+          end: Timestamp.fromDate(endDateTime),
+        },
+        requiredVolunteers: shiftDef.requiredVolunteers,
+        assignedVolunteers: [],
+        status: "open",
+      })
+    )
+  );
 
-  await updateDoc(eventRef, { shifts: shiftIds });
+  await updateDoc(eventRef, { shifts: shiftRefs.map((r) => r.id) });
   return eventRef.id;
 }
 
@@ -98,20 +113,19 @@ export async function deleteEvent(id: string): Promise<void> {
     getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id))),
   ]);
 
-  const batch = writeBatch(firestore);
-  batch.delete(doc(firestore, COLLECTIONS.EVENTS, id));
-  shiftsSnap.docs.forEach((d) => batch.delete(d.ref));
-  incidentsSnap.docs.forEach((d) => batch.delete(d.ref));
-
-  // Remove this event from each collaborator's user doc
   const collaborators: string[] = eventData.collaborators ?? [];
-  collaborators.forEach((uid) => {
-    batch.update(doc(firestore, COLLECTIONS.USERS, uid), {
-      events: arrayRemove(id),
-    });
-  });
 
-  await batch.commit();
+  const ops: Array<(b: WriteBatch) => void> = [
+    (b) => b.delete(doc(firestore, COLLECTIONS.EVENTS, id)),
+    ...shiftsSnap.docs.map((d) => (b: WriteBatch) => b.delete(d.ref)),
+    ...incidentsSnap.docs.map((d) => (b: WriteBatch) => b.delete(d.ref)),
+    ...collaborators.map(
+      (uid) => (b: WriteBatch) =>
+        b.update(doc(firestore, COLLECTIONS.USERS, uid), { events: arrayRemove(id) })
+    ),
+  ];
+
+  await runInBatches(ops);
 }
 
 export async function archiveEvent(id: string): Promise<void> {
@@ -120,11 +134,17 @@ export async function archiveEvent(id: string): Promise<void> {
     getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id))),
   ]);
 
-  const batch = writeBatch(firestore);
-  batch.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "archived", updatedAt: Date.now() });
-  shiftsSnap.docs.forEach((d) => batch.update(d.ref, { status: "archived" }));
-  incidentsSnap.docs.forEach((d) => batch.update(d.ref, { status: "archived", updatedAt: Date.now() }));
-  await batch.commit();
+  const ops: Array<(b: WriteBatch) => void> = [
+    (b) => b.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "archived", updatedAt: Date.now() }),
+    ...shiftsSnap.docs.map((d) => (b: WriteBatch) =>
+      b.update(d.ref, { previousStatus: d.data().status, status: "archived" })
+    ),
+    ...incidentsSnap.docs.map((d) => (b: WriteBatch) =>
+      b.update(d.ref, { previousStatus: d.data().status, status: "archived", updatedAt: Date.now() })
+    ),
+  ];
+
+  await runInBatches(ops);
 }
 
 export async function unarchiveEvent(id: string): Promise<void> {
@@ -133,16 +153,20 @@ export async function unarchiveEvent(id: string): Promise<void> {
     getDocs(query(collection(firestore, COLLECTIONS.INCIDENTS), where("eventId", "==", id), where("status", "==", "archived"))),
   ]);
 
-  const batch = writeBatch(firestore);
-  batch.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "published", updatedAt: Date.now() });
-  shiftsSnap.docs.forEach((d) => batch.update(d.ref, { status: "open" }));
-  incidentsSnap.docs.forEach((d) => batch.update(d.ref, { status: "open", updatedAt: Date.now() }));
-  await batch.commit();
+  const ops: Array<(b: WriteBatch) => void> = [
+    (b) => b.update(doc(firestore, COLLECTIONS.EVENTS, id), { status: "published", updatedAt: Date.now() }),
+    ...shiftsSnap.docs.map((d) => (b: WriteBatch) =>
+      b.update(d.ref, { status: d.data().previousStatus ?? "open", previousStatus: deleteField() })
+    ),
+    ...incidentsSnap.docs.map((d) => (b: WriteBatch) =>
+      b.update(d.ref, { status: d.data().previousStatus ?? "open", previousStatus: deleteField(), updatedAt: Date.now() })
+    ),
+  ];
+
+  await runInBatches(ops);
 }
 
 export async function getManagerEvents(userId: string): Promise<Event[]> {
-  // Query events where user is coordinator OR collaborator
-  // Firestore doesn't support OR across fields, so run two queries and merge
   const [coordSnap, collabSnap] = await Promise.all([
     getDocs(query(
       collection(firestore, COLLECTIONS.EVENTS),

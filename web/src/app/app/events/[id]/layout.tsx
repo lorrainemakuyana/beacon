@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { getEventById, archiveEvent, unarchiveEvent, deleteEvent, addCollaboratorToEvent } from "@/firebase/services/events";
 import { getShiftsByEventId } from "@/firebase/services/shifts";
 import { getIncidentsByEventId } from "@/firebase/services/incidents";
-import { Event, Incident, Shift } from "@/interfaces";
+import { getUsersByIds } from "@/firebase/services/users";
+import { Event, Incident, Shift, User } from "@/interfaces";
 import Breadcrumb from "@/components/breadcrumb";
 import Badge from "@/components/badge";
 import EventTabs from "@/components/event-tabs";
@@ -38,6 +39,7 @@ export default function EventLayout({ children }: { children: ReactNode }) {
   // collaborator state
   const [collabEmail, setCollabEmail] = useState("");
   const [collabLoading, setCollabLoading] = useState(false);
+  const [collabUsers, setCollabUsers] = useState<User[]>([]);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -54,6 +56,11 @@ export default function EventLayout({ children }: { children: ReactNode }) {
     setEvent(evt);
     setShifts(shfts);
     setIncidents(incs);
+    if (evt?.collaborators?.length) {
+      getUsersByIds(evt.collaborators).then(setCollabUsers);
+    } else {
+      setCollabUsers([]);
+    }
     setLoading(false);
   }, [id]);
 
@@ -81,12 +88,12 @@ export default function EventLayout({ children }: { children: ReactNode }) {
     try {
       await archiveEvent(id);
       toast.success("Event archived.");
+      setArchiving(false);
+      router.push("/app/events");
     } catch {
       toast.error("Failed to archive event.");
       setArchiving(false);
-      return;
     }
-    router.push("/app/events");
   }
 
   async function handleDelete() {
@@ -265,10 +272,12 @@ export default function EventLayout({ children }: { children: ReactNode }) {
                   Add
                 </button>
               </form>
-              {event.collaborators && event.collaborators.length > 0 && (
+              {collabUsers.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {event.collaborators.map((uid) => (
-                    <span key={uid} className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{uid}</span>
+                  {collabUsers.map((u) => (
+                    <span key={u.uid} className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
+                      {u.displayName || u.email}
+                    </span>
                   ))}
                 </div>
               )}
