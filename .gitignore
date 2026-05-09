@@ -6,6 +6,7 @@ web/.env
 
 web/.next
 web/tsconfig.tsbuildinfo
+web/.tsbuildinfo
 
 shared/node_modules
 mobile/node_modules
