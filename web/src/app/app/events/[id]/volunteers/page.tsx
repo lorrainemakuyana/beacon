@@ -54,7 +54,7 @@ export default function EventVolunteersPage() {
           />
         ) : (
           volunteers.map((vol) => (
-            <div key={vol.uid} className="px-5 py-4 flex items-center justify-between">
+            <div key={vol.uid} className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-full bg-primary-subtle border border-primary-subtle-border flex items-center justify-center shrink-0">
                   <span className="text-primary text-sm font-semibold">
@@ -67,7 +67,7 @@ export default function EventVolunteersPage() {
                 </div>
               </div>
               {vol.skills && vol.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1 justify-end ml-4 max-w-xs">
+                <div className="flex flex-wrap gap-1 max-w-xs">
                   {vol.skills.slice(0, 3).map((skill) => (
                     <span key={skill} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                       {skill}

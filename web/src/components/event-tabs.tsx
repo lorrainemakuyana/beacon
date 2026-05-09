@@ -26,7 +26,8 @@ export default function EventTabs({ eventId, counts }: Props) {
   const active = getActiveTab();
 
   return (
-    <div className="flex items-center gap-6 border-b border-gray-200">
+    <div className="overflow-x-auto border-b border-gray-200">
+      <div className="flex items-center gap-4 sm:gap-6 min-w-max">
       {tabs.map((tab) => {
         const isActive = active === tab.key;
         return (
@@ -47,6 +48,7 @@ export default function EventTabs({ eventId, counts }: Props) {
           </Link>
         );
       })}
+      </div>
     </div>
   );
 }

@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="h-[calc(100vh-56px-64px)] overflow-hidden flex flex-col gap-6"
+      className="flex flex-col gap-6"
     >
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>

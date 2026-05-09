@@ -89,7 +89,7 @@ export default function ShiftDetailPage() {
               <p className="text-sm text-gray-600">{shift.description}</p>
             )}
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-sm">
               {shift.role?.title && (
                 <div>
                   <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Role</span>

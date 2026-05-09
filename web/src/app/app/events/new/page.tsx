@@ -323,7 +323,7 @@ export default function NewEventPage() {
 
           <div className="flex flex-col gap-3">
             {shifts.map((shift, index) => (
-              <div key={index} className="flex items-center gap-3">
+              <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <input
                   type="text"
                   value={shift.title}
@@ -336,7 +336,7 @@ export default function NewEventPage() {
                   min={1}
                   value={shift.requiredVolunteers}
                   onChange={(e) => updateShift(index, "requiredVolunteers", parseInt(e.target.value, 10) || 1)}
-                  className="w-24 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
+                  className="w-full sm:w-24 border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
                   placeholder="Volunteers"
                 />
                 <button

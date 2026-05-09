@@ -95,7 +95,7 @@ export default function IncidentDetailPage() {
         <>
           {/* Header */}
           <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col gap-5">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h1 className="text-xl font-bold text-gray-900">
                 {incident.title}
               </h1>
@@ -113,7 +113,7 @@ export default function IncidentDetailPage() {
 
             <p className="text-sm text-gray-600">{incident.description}</p>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-sm">
               <div>
                 <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">
                   Category
@@ -211,7 +211,7 @@ export default function IncidentDetailPage() {
             <h2 className="text-base font-semibold text-gray-900 mb-4">
               Update Status
             </h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {STATUS_FLOW.filter(({ status, readOnly }) =>
                 !readOnly || incident.status === status
               ).map(({ status, label, readOnly }) => {
