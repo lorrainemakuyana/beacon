@@ -31,31 +31,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Nav */}
-      <header className="border-b border-gray-100 bg-white sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Beacon" className="w-9 h-9 object-contain" />
-            <span className="text-gray-900 font-semibold text-xl tracking-tight">Beacon</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="text-sm font-semibold bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-light transition-colors"
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <div className="bg-white flex flex-col flex-1">
       {/* Hero */}
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-24">
         <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
@@ -124,10 +100,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-6 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Beacon. All rights reserved.
-      </footer>
     </div>
   );
 }
