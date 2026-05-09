@@ -51,7 +51,7 @@ export default function IncidentsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-1">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Incidents</h1>
           <p className="text-gray-500 text-sm mt-1">
@@ -90,7 +90,7 @@ export default function IncidentsPage() {
                     <span className="capitalize">{incident.category}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 ml-4">
+                <div className="flex items-center gap-2 shrink-0 ml-2 sm:ml-4">
                   <Badge
                     label={incident.severity}
                     variant={getSeverityVariant(incident.severity)}

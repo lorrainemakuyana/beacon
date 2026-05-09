@@ -158,7 +158,7 @@ export default function EventLayout({ children }: { children: ReactNode }) {
           <>
             {/* Event info card */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col gap-4">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <h1 className="text-xl font-bold text-gray-900">{event.title}</h1>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge label={event.status} variant={getStatusVariant(event.status)} />
@@ -214,7 +214,7 @@ export default function EventLayout({ children }: { children: ReactNode }) {
                 <p className="text-sm text-gray-600">{event.description}</p>
               )}
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 text-sm">
                 <div>
                   <span className="text-gray-400 block text-xs uppercase tracking-wide mb-0.5">Date</span>
                   <span className="text-gray-900">{formatDate(event.date)}</span>

@@ -66,7 +66,7 @@ export default function LandingPage() {
           <p className="text-lg text-gray-500 max-w-xl">
             Beacon gives event managers a single dashboard to coordinate volunteers, schedule shifts, and respond to incidents — all in real time.
           </p>
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-2">
             <Link
               href="/register"
               className="flex items-center gap-2 bg-primary text-white text-sm font-semibold px-6 py-3 rounded-lg hover:bg-primary-light transition-colors"

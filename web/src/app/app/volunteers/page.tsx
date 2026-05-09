@@ -57,7 +57,7 @@ export default function VolunteersPage() {
             volunteers.map((vol) => (
               <div
                 key={vol.uid}
-                className="px-5 py-4 flex items-center justify-between"
+                className="px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   {/* Avatar */}
@@ -75,12 +75,12 @@ export default function VolunteersPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5 ml-4 shrink-0">
+                <div className="flex flex-col items-start sm:items-end gap-1.5">
                   <span className="text-xs text-gray-400 capitalize bg-gray-100 px-2 py-0.5 rounded-full">
                     {vol.role}
                   </span>
                   {vol.skills && vol.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-1 justify-end max-w-xs">
+                    <div className="flex flex-wrap gap-1 max-w-xs">
                       {vol.skills.slice(0, 3).map((skill) => (
                         <span
                           key={skill}

@@ -13,7 +13,7 @@ export default function StatCard({ label, value, icon }: StatCardProps) {
         <span className="text-sm text-gray-500 font-medium">{label}</span>
         {icon && <span className="text-gray-400">{icon}</span>}
       </div>
-      <span className="text-3xl font-bold text-gray-900">{value}</span>
+      <span className="text-2xl sm:text-3xl font-bold text-gray-900">{value}</span>
     </div>
   );
 }
