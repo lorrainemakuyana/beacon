@@ -24,10 +24,17 @@ export function useCheckIn(userId: string | undefined) {
 
     getActiveCheckIn(userId).then(async (record) => {
       if (cancelled) return;
-      setActiveCheckIn(record);
       if (record) {
         const event = await getEventById(record.eventId);
-        if (!cancelled) setActiveEvent(event);
+        if (cancelled) return;
+        const eventEnded =
+          event && new Date(`${event.date}T${event.endTime}`) < new Date();
+        if (eventEnded) {
+          await checkOutFromShift(record.id);
+        } else {
+          setActiveCheckIn(record);
+          setActiveEvent(event);
+        }
       }
       setLoading(false);
     });
